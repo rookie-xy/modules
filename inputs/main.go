@@ -1,40 +1,51 @@
 package inputs
 
 import (
-    "hubble/src/command"
-    "hubble/src/configure"
-    "hubble/src/module"
-    "hubble/src/prototype"
+    "github.com/rookie-xy/worker/src/command"
+//    "github.com/rookie-xy/worker/src/configure"
+    "github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/prototype"
+    "github.com/rookie-xy/worker/src/cycle"
+    "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/register"
 )
 
 const Name  = "inputs"
 
 type Input struct {
-    options  map[string]prototype.Object
-    children []module.Module
+    children  map[module.Module]prototype.Object
+    //children []module.Module
     cycle    cycle.Cycle
+    log.Log
 }
 
-func New() *Input {
+func New(log log.Log) *Input {
     return &Input{}
 }
 
 var (
-    inputs = command.Name{ "", Name, nil, "inputs may be many" }
+    inputs = command.Meta{ "", Name, nil, "inputs may be many" }
 )
 
-var inputCommands = []command.Command{
+var inputCommands = []command.Item{
 
-    { inputs,
-      configure.COMMAND,
+    { &inputs,
+      command.LINE,
+      module.GLOBEL,
       nil,
-      nil,
+      0,
       nil },
 }
 
 func (r *Input) Init() {
     // 渲染inputs组件命令, 需要原生配置支持
-    for key, value := range r.options {
+    for key, value := range r.children {
+        /*
+        reg := register.GetInstance().Module(key, nil, nil)
+        r.Load(reg.GetModule(), nil)
+        */
+
+        /*
         if child := module.Template(key); child != nil {
             r.Load(child, value)
 
@@ -44,6 +55,7 @@ func (r *Input) Init() {
                 }
             }
         }
+        */
     }
 
     return
@@ -53,24 +65,29 @@ func (r *Input) Main() {
     cycle := cycle.New()
 
     // 启动各个组件
-    for child := range r.children {
+    for _, child := range r.children {
+        /*
         if child.Init() == Error {
             return
         }
+        */
 
-        cycle.Start(child.Main(), nil)
+        child.Init()
+
+        //cycle.Start(child.Main(), nil)
     }
 
     for ;; {
         //发送消息到channel
 
         select {
-
+/*
         case <-r.cycle.Stop():
         //child.Exit()
             cycle.Stop()
 
         default:
+        */
 
         }
     }
@@ -79,7 +96,7 @@ func (r *Input) Main() {
 }
 
 func (r *Input) Exit() {
-    for module := range r.children {
+    for _, module := range r.children {
         module.Exit()
     }
 
@@ -87,7 +104,7 @@ func (r *Input) Exit() {
     return
 }
 
-func (r *Input) Load(child module.Module, value map[string]prototype.Object) {
-    r.options[child] = value
-    r.children = append(r.children, child)
+func (r *Input) Load(key module.Module, value map[prototype.Object]prototype.Object) {
+    r.children[key] = value
+    //r.children = append(r.children, child)
 }
