@@ -2,8 +2,10 @@ package file
 
 import (
     "unsafe"
-    "github.com/rookie-xy/worker/src/cycle"
     "github.com/rookie-xy/worker/src/instance"
+"github.com/rookie-xy/worker/src/command"
+"github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/log"
 )
 
 const Name  = "file"
@@ -18,14 +20,14 @@ var commands = []command.Item{
     { resource,
       command.LINE,
       module.GLOBEL,
-      configure.SetString,
+      command.SetObject,
       unsafe.Offsetof(resource.Value),
       nil },
 
     { format,
       command.LINE,
       module.GLOBEL,
-      configure.SetString,
+      command.SetObject,
       unsafe.Offsetof(format.Value),
       nil },
 }
@@ -54,10 +56,6 @@ func (r *File) Main() {
 }
 
 func (r *File) Exit() {
-    for _, module := range r.children {
-        module.Exit()
-    }
-
     //r.cycle.Quit()
     return
 }
