@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/configure/main.go" afterPath="$PROJECT_DIR$/configure/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/configure/src/file/main.go" afterPath="$PROJECT_DIR$/configure/src/file/main.go" />
-    </list>
+    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="" />
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -79,6 +75,8 @@
               <caret line="22" column="21" selection-start-line="22" selection-start-column="21" selection-end-line="22" selection-end-column="21" />
               <folding>
                 <element signature="e#19#232#0" expanded="true" />
+                <marker date="1498803289954" expanded="true" signature="295:352" ph="{...}" />
+                <marker date="1498803289954" expanded="true" signature="643:785" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -629,7 +627,7 @@
       <workItem from="1498704159275" duration="6669000" />
       <workItem from="1498717498240" duration="739000" />
       <workItem from="1498735568907" duration="61000" />
-      <workItem from="1498791982012" duration="6045000" />
+      <workItem from="1498791982012" duration="6644000" />
     </task>
     <task id="LOCAL-00001" summary="update">
       <created>1498727174377</created>
@@ -649,7 +647,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21246000" />
+    <option name="totallyTimeSpent" value="21845000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
@@ -919,6 +917,8 @@
           <caret line="22" column="21" selection-start-line="22" selection-start-column="21" selection-end-line="22" selection-end-column="21" />
           <folding>
             <element signature="e#19#232#0" expanded="true" />
+            <marker date="1498803289954" expanded="true" signature="295:352" ph="{...}" />
+            <marker date="1498803289954" expanded="true" signature="643:785" ph="{...}" />
           </folding>
         </state>
       </provider>
