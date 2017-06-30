@@ -1,4 +1,4 @@
-package file
+package zookeeper
 
 import (
     "unsafe"
@@ -9,10 +9,10 @@ import (
     "fmt"
 )
 
-const Name  = "file"
+const Name  = "zookeeper"
 
 var (
-    resource = &command.Meta{ "-r", "resource", "./usr/local/conf/worker.yaml", "Resource type" }
+    resource = &command.Meta{ "-r", "resource", "192.168.1.1:2181", "Resource type" }
 )
 
 var commands = []command.Item{
@@ -26,16 +26,16 @@ var commands = []command.Item{
 
 }
 
-type file struct {
+type zookeeper struct {
     log.Log
 }
 
-func New() *file {
-    return &file{}
+func New() *zookeeper {
+    return &zookeeper{}
 }
 
-func (r *file) Init() {
-fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
+func (r *zookeeper) Init() {
+fmt.Println("zookeeperffffffffffffffff inittttttttttttt", resource.Value.(string))
     // 初始化文件监视器，监控配置文件
     // 初始化文件解析器解析文件
 
@@ -43,14 +43,14 @@ fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
     return
 }
 
-func (r *file) Main() {
-fmt.Println("fileffffffffffffffff mainnnnnnnnnnnnnnnnn")
+func (r *zookeeper) Main() {
+fmt.Println("zookeeperffffffffffffffff mainnnnnnnnnnnnnnnnn")
     // 发现文件变更，通知给其他模块
 
     return
 }
 
-func (r *file) Exit() {
+func (r *zookeeper) Exit() {
     //r.cycle.Quit()
     return
 }

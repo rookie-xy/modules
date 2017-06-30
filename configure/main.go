@@ -1,22 +1,22 @@
 package configure
 
 import (
+    "fmt"
     "unsafe"
 
-    "github.com/rookie-xy/worker/src/cycle"
+    "github.com/rookie-xy/worker/src/command"
+    "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/instance"
 
-    "github.com/rookie-xy/worker/src/command"
-        "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/log"
-
   _ "github.com/rookie-xy/modules/configure/src/file"
+  _ "github.com/rookie-xy/modules/configure/src/zookeeper"
 )
 
 const Name  = "configure"
 
 var (
-    config = command.Meta{ "-c", "config", "file", "This configure file path", }
+    config = &command.Meta{ "-c", "config", "file", "This configure file path" }
 )
 
 var commands = []command.Item{
@@ -24,7 +24,7 @@ var commands = []command.Item{
     { config,
       command.LINE,
       module.GLOBEL,
-      configure.SetString,
+      command.SetObject,
       unsafe.Offsetof(config.Value),
       nil },
 
@@ -44,11 +44,13 @@ func New(log log.Log) *Configure {
 func (r *Configure) Init() {
     // 根据指令加载所需模块
     name := Name
-    if v := config.Meta.Value; v != nil {
+    if v := config.Value; v != nil {
         name = v.(string)
     } else {
         return
     }
+
+    fmt.Println(name)
 
     if m, ok := module.Pool[name]; ok {
         r.Load(m)
@@ -65,24 +67,24 @@ func (r *Configure) Main() {
             return
         }
         */
+        fmt.Println("qqqqqqqqqqqqqqqq")
 
         child.Init()
-        go child.Main()
+        child.Main()
     }
-
+/*
     for ;; {
         // TODO 监听外部启停指令
         select {
-/*
         case <-r.cycle.Stop():
         //child.Exit()
             cycle.Stop()
 
         default:
-        */
 
         }
     }
+    */
 
     return
 }
@@ -97,5 +99,9 @@ func (r *Configure) Exit() {
 }
 
 func (r *Configure) Load(m module.ModuleTemplate) {
-    r.childen = append(r.childen, m)
+    r.children = append(r.children, m)
+}
+
+func init() {
+    instance.Register(Name, commands, nil)
 }
