@@ -11,6 +11,8 @@ import (
 
 const Name  = "file"
 
+var Event chan string = make(chan string)
+
 var (
     resource = &command.Meta{ "-r", "resource", "./usr/local/conf/worker.yaml", "Resource type" }
 )
@@ -34,11 +36,17 @@ func New() *file {
     return &file{}
 }
 
-func (r *file) Init() {
-fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
-    // 初始化文件监视器，监控配置文件
-    // 初始化文件解析器解析文件
+func (r *file) Init(name string) module.Template {
+    if name != Name {
+        return nil
+    }
 
+    file := New()
+
+    return file
+
+//fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
+    // 初始化文件监视器，监控配置文件
 
     return
 }

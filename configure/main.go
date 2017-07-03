@@ -5,9 +5,9 @@ import (
     "unsafe"
 
     "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/instance"
+    "github.com/rookie-xy/worker/src/configure"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -31,13 +31,13 @@ var commands = []command.Item{
 }
 
 type Configure struct {
-    log.Log
-    children []module.ModuleTemplate
+    *configure.Configure
+    children []module.Template
 }
 
-func New(log log.Log) *Configure {
+func New(c *configure.Configure) *Configure {
     return &Configure{
-        Log: log,
+        Configure: c,
     }
 }
 
@@ -49,8 +49,6 @@ func (r *Configure) Init() {
     } else {
         return
     }
-
-    fmt.Println(name)
 
     if m, ok := module.Pool[name]; ok {
         r.Load(m)
@@ -73,10 +71,12 @@ func (r *Configure) Main() {
         child.Main()
     }
 
-    // 渲染所有配置指令
+    r.Notify()
 
+    // 渲染所有配置指令
 /*
     for ;; {
+        // TODO 解析配置，通知加载三大模块
         // TODO 监听外部启停指令
         select {
         case <-r.cycle.Stop():
@@ -101,7 +101,7 @@ func (r *Configure) Exit() {
     return
 }
 
-func (r *Configure) Load(m module.ModuleTemplate) {
+func (r *Configure) Load(m module.Template) {
     r.children = append(r.children, m)
 }
 

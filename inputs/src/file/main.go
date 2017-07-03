@@ -2,11 +2,9 @@ package file
 
 import (
     "unsafe"
-    //"hubble/modules/inputs/src/file/src"
-    "hubble/src/command"
-    "hubble/src/configure"
-    "hubble/src/module"
-"hubble/src/register"
+    "github.com/rookie-xy/worker/src/command"
+    "github.com/rookie-xy/worker/src/instance"
+"github.com/rookie-xy/worker/src/module"
 )
 
 const Name  = "file"
@@ -19,47 +17,47 @@ func New() *fileInput {
 }
 
 var (
-    group   = command.Name{ "", "group",   "nginx",     "This option use to group" }
-    types   = command.Name{ "", "type",    "log",       "file type, this is use to find some question" }
-    paths   = command.Name{ "", "paths",   array.New(), "File path, its is manny option" }
-    publish = command.Name{ "", "publish", array.New(), "publish topic" }
-    codec   = command.Name{ "", "codec",   codec.New(), "codec method" }
+    group   = command.Meta{ "", "group",   "nginx",     "This option use to group" }
+    types   = command.Meta{ "", "type",    "log",       "file type, this is use to find some question" }
+    paths   = command.Meta{ "", "paths",   nil, "File path, its is manny option" }
+    publish = command.Meta{ "", "publish", nil, "publish topic" }
+    codec   = command.Meta{ "", "codec",   nil, "codec method" }
 )
 
-var fileInputCommands = []command.Command{
+var commands = []command.Item{
 
     { group,
       command.FILE,
       module.LOCAL,
-      configure.SetString,
+      command.SetObject,
       unsafe.Offsetof(group.Value),
       nil },
 
     { types,
       command.FILE,
       module.LOCAL,
-      configure.SetString,
+      command.SetObject,
       unsafe.Offsetof(types.Value),
       nil },
 
     { paths,
       command.FILE,
       module.LOCAL,
-      configure.SetArray,
+      command.SetObject,
       unsafe.Offsetof(paths.Value),
       nil },
 
     { publish,
       command.FILE,
       module.LOCAL,
-      configure.SetArray,
+      command.SetObject,
       unsafe.Offsetof(publish.Value),
       nil },
 
     { codec,
       command.FILE,
       module.LOCAL,
-      configure.SetCodec,
+      command.SetObject,
       unsafe.Offsetof(codec.Value),
       nil },
 }
@@ -75,11 +73,10 @@ func (r *fileInput) Main() {
 }
 
 func (r *fileInput) Exit() {
-    r.cycle.Stop()
     // 退出
 }
 
 func init() {
-    register.GetInstance().Module(Name, New(), fileInputCommands)
+    instance.Register(Name, commands, New)
 }
 

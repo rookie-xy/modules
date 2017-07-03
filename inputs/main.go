@@ -1,6 +1,7 @@
 package inputs
 
 import (
+    "fmt"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/log"
@@ -12,7 +13,7 @@ const Name  = "inputs"
 
 type Input struct {
     log.Log
-    children []module.ModuleTemplate
+    children []module.Template
 }
 
 func New(log log.Log) *Input {
@@ -40,22 +41,21 @@ func (r *Input) Init() {
 
     // TODO load 各个组件
     if v := inputs.Value; v != nil {
-        // 获取inputs配置
-        configures := v.(map[string]prototype.Object)
-
         // key为各个模块名字，value为各个模块配置
-        for name, configure := range configures {
-
+        for name, configure := range v.(map[string]prototype.Object) {
             // 渲染模块命令
-            for key, value := range configure {
-
+            for key, value := range configure.(map[string]prototype.Object) {
+                fmt.Println(key, value)
             }
 
             if m, ok := module.Pool[name]; ok {
-		m.Init()
+		              m.Init()
                 r.Load(m)
             }
         }
+
+    } else {
+        fmt.Println("input value is nil")
     }
 
     return
@@ -92,7 +92,7 @@ func (r *Input) Exit() {
     return
 }
 
-func (r *Input) Load(m module.ModuleTemplate) {
+func (r *Input) Load(m module.Template) {
     r.children = append(r.children, m)
 }
 
