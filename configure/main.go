@@ -72,6 +72,9 @@ func (r *Configure) Main() {
         child.Init()
         child.Main()
     }
+
+    // 渲染所有配置指令
+
 /*
     for ;; {
         // TODO 监听外部启停指令

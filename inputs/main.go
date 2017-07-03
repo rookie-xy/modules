@@ -1,32 +1,31 @@
 package inputs
-/*
+
 import (
-    "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/prototype"
-    "github.com/rookie-xy/worker/src/cycle"
+    "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/instance"
+    "github.com/rookie-xy/worker/src/prototype"
 )
-*/
 
 const Name  = "inputs"
-/*
+
 type Input struct {
-    children  map[module.Module]prototype.Object
-    //children []module.Module
-    cycle    cycle.Cycle
     log.Log
+    children []module.ModuleTemplate
 }
 
 func New(log log.Log) *Input {
-    return &Input{}
+    return &Input{
+        Log: log,
+    }
 }
 
 var (
     inputs = command.Meta{ "", Name, nil, "inputs may be many" }
 )
 
-var inputCommands = []command.Item{
+var commands = []command.Item{
 
     { &inputs,
       command.LINE,
@@ -34,21 +33,27 @@ var inputCommands = []command.Item{
       nil,
       0,
       nil },
+
 }
 
 func (r *Input) Init() {
-    // 渲染inputs组件命令, 需要原生配置支持
-    for key, value := range r.children {
-        reg := register.GetInstance().Module(key, nil, nil)
-        r.Load(reg.GetModule(), nil)
 
-        if child := module.Template(key); child != nil {
-            r.Load(child, value)
+    // TODO load 各个组件
+    if v := inputs.Value; v != nil {
+        // 获取inputs配置
+        configures := v.(map[string]prototype.Object)
 
-            if commands := command.Commands(child); commands != nil {
-                for cmd := range commands {
-                    cmd.SetFunc(cmd.Offset, value[cmd.Name.Key])
-                }
+        // key为各个模块名字，value为各个模块配置
+        for name, configure := range configures {
+
+            // 渲染模块命令
+            for key, value := range configure {
+
+            }
+
+            if m, ok := module.Pool[name]; ok {
+		m.Init()
+                r.Load(m)
             }
         }
     }
@@ -57,19 +62,11 @@ func (r *Input) Init() {
 }
 
 func (r *Input) Main() {
-    cycle := cycle.New()
-
     // 启动各个组件
     for _, child := range r.children {
-        if child.Init() == Error {
-            return
-        }
-
-        child.Init()
-
-        //cycle.Start(child.Main(), nil)
+        child.Main()
     }
-
+/*
     for ;; {
         //发送消息到channel
 
@@ -81,6 +78,7 @@ func (r *Input) Main() {
         default:
         }
     }
+    */
 
     return
 }
@@ -94,8 +92,10 @@ func (r *Input) Exit() {
     return
 }
 
-func (r *Input) Load(key module.Module, value map[prototype.Object]prototype.Object) {
-    r.children[key] = value
-    //r.children = append(r.children, child)
+func (r *Input) Load(m module.ModuleTemplate) {
+    r.children = append(r.children, m)
 }
-*/
+
+func init() {
+    instance.Register(Name, commands, nil)
+}
