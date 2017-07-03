@@ -12,10 +12,18 @@ import (
 const Name  = "zookeeper"
 
 var (
+    format   = &command.Meta{ "-f", "format", "json", "Configure file format" }
     resource = &command.Meta{ "-r", "resource", "192.168.1.1:2181", "Resource type" }
 )
 
 var commands = []command.Item{
+
+    { format,
+      command.LINE,
+      module.GLOBEL,
+      command.SetObject,
+      unsafe.Offsetof(format.Value),
+      nil },
 
     { resource,
       command.LINE,
@@ -34,18 +42,22 @@ func New() *zookeeper {
     return &zookeeper{}
 }
 
-func (r *zookeeper) Init() {
+func (r *zookeeper) Init(name string) module.Template {
 fmt.Println("zookeeperffffffffffffffff inittttttttttttt", resource.Value.(string))
-    // 初始化文件监视器，监控配置文件
+    // 初始化zkClient
     // 初始化文件解析器解析文件
 
+    zk := New()
 
-    return
+
+    return zk
 }
 
 func (r *zookeeper) Main() {
 fmt.Println("zookeeperffffffffffffffff mainnnnnnnnnnnnnnnnn")
-    // 发现文件变更，通知给其他模块
+    // 从zk拉取配置
+    // 解析配置
+    // 吐出数据
 
     return
 }
@@ -56,5 +68,5 @@ func (r *zookeeper) Exit() {
 }
 
 func init() {
-    instance.Register(Name, commands, New())
+    instance.Register(Name, Name, commands, New())
 }

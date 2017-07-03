@@ -6,7 +6,7 @@ import (
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/log"
-    "fmt"
+        "fmt"
 )
 
 const Name  = "file"
@@ -14,10 +14,18 @@ const Name  = "file"
 var Event chan string = make(chan string)
 
 var (
+    format   = &command.Meta{ "-f", "format", "yaml", "Configure file format" }
     resource = &command.Meta{ "-r", "resource", "./usr/local/conf/worker.yaml", "Resource type" }
 )
 
 var commands = []command.Item{
+
+    { format,
+      command.LINE,
+      module.GLOBEL,
+      command.SetObject,
+      unsafe.Offsetof(format.Value),
+      nil },
 
     { resource,
       command.LINE,
@@ -43,12 +51,13 @@ func (r *file) Init(name string) module.Template {
 
     file := New()
 
-    return file
+
 
 //fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
     // 初始化文件监视器，监控配置文件
+    // 初始化解析器
 
-    return
+    return file
 }
 
 func (r *file) Main() {
@@ -64,5 +73,5 @@ func (r *file) Exit() {
 }
 
 func init() {
-    instance.Register(Name, commands, New())
+    instance.Register(Name, Name, commands, New())
 }
