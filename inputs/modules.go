@@ -1,16 +1,22 @@
 package inputs
 
 import (
+    /*
     "fmt"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/prototype"
+    */
+  _ "github.com/rookie-xy/modules/inputs/src/file"
 )
 
 const Name  = "inputs"
 
+
+
+/*
 type Input struct {
     log.Log
     children []module.Template
@@ -66,7 +72,6 @@ func (r *Input) Main() {
     for _, child := range r.children {
         child.Main()
     }
-/*
     for ;; {
         //发送消息到channel
 
@@ -78,7 +83,6 @@ func (r *Input) Main() {
         default:
         }
     }
-    */
 
     return
 }
@@ -99,3 +103,4 @@ func (r *Input) Load(m module.Template) {
 func init() {
     instance.Register(Name, commands, nil)
 }
+*/

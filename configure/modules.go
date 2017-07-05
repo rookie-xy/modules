@@ -1,6 +1,7 @@
 package configure
 
 import (
+    /*
     "fmt"
     "unsafe"
 
@@ -8,11 +9,12 @@ import (
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/configure"
+    */
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
 )
-
+/*
 const Name  = "configure"
 
 var (
@@ -60,11 +62,9 @@ func (r *Configure) Init() {
 func (r *Configure) Main() {
     // 启动各个子模块组件
     for _, child := range r.children {
-        /*
         if child.Init() == Error {
             return
         }
-        */
         fmt.Println("qqqqqqqqqqqqqqqq")
 
         child.Init()
@@ -74,7 +74,6 @@ func (r *Configure) Main() {
     r.Notify()
 
     // 渲染所有配置指令
-/*
     for ;; {
         // TODO 解析配置，通知加载三大模块
         // TODO 监听外部启停指令
@@ -87,7 +86,6 @@ func (r *Configure) Main() {
 
         }
     }
-    */
 
     return
 }
@@ -108,3 +106,4 @@ func (r *Configure) Load(m module.Template) {
 func init() {
     instance.Register(Name, commands, nil)
 }
+*/

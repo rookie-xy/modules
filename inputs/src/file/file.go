@@ -4,7 +4,7 @@ import (
     "unsafe"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/instance"
-"github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/module"
 )
 
 const Name  = "file"

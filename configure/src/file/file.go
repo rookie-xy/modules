@@ -14,8 +14,9 @@ const Name  = "file"
 var Event chan string = make(chan string)
 
 var (
-    format   = &command.Meta{ "-f", "format", "yaml", "Configure file format" }
-    resource = &command.Meta{ "-r", "resource", "./usr/local/conf/worker.yaml", "Resource type" }
+    //format   = &command.Meta{ "-f", "format", "yaml", "Configure file format" }
+    format   = &command.Meta{ "-f", "file", "yaml", "Configure file format" }
+    resource = &command.Meta{ "-p", "path", "./usr/local/conf/worker.yaml", "Resource type" }
 )
 
 var commands = []command.Item{
@@ -40,20 +41,17 @@ type file struct {
     log.Log
 }
 
-func New() *file {
-    return &file{}
+func New(log log.Log) *file {
+    return &file{
+            Log: log,
+    }
 }
 
-func (r *file) Init(name string) module.Template {
-    if name != Name {
-        return nil
-    }
+func Init(log log.Log) module.Template {
+    file := New(log)
 
-    file := New()
-
-
-
-//fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
+    //fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
+    // 判断文件是否存在，可读性
     // 初始化文件监视器，监控配置文件
     // 初始化解析器
 
@@ -73,5 +71,5 @@ func (r *file) Exit() {
 }
 
 func init() {
-    instance.Register(Name, Name, commands, New())
+    instance.Register(Name, Name, commands, Init)
 }
