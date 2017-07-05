@@ -13,8 +13,12 @@ import (
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
+  "github.com/rookie-xy/worker/src/cycle"
+  "github.com/rookie-xy/worker/src/instance"
+    "github.com/rookie-xy/worker/src/module"
+    "github.com/elastic/beats/filebeat/prospector/log"
 )
-/*
+
 const Name  = "configure"
 
 var (
@@ -37,14 +41,16 @@ type Configure struct {
     children []module.Template
 }
 
-func New(c *configure.Configure) *Configure {
+func New(log log.Log) *Configure {
     return &Configure{
-        Configure: c,
+        Log: log,
     }
 }
 
-func (r *Configure) Init() {
+func Init(log log.Log) module.Template {
     // 根据指令加载所需模块
+    config := New(log)
+
     name := Name
     if v := config.Value; v != nil {
         name = v.(string)
@@ -53,14 +59,16 @@ func (r *Configure) Init() {
     }
 
     if m, ok := module.Pool[name]; ok {
-        r.Load(m)
+        //判断作用域
+        config.Load(m(log))
     }
 
-    return
+    return config
 }
 
 func (r *Configure) Main() {
     // 启动各个子模块组件
+/*
     for _, child := range r.children {
         if child.Init() == Error {
             return
@@ -88,6 +96,7 @@ func (r *Configure) Main() {
     }
 
     return
+    */
 }
 
 func (r *Configure) Exit() {
@@ -104,6 +113,5 @@ func (r *Configure) Load(m module.Template) {
 }
 
 func init() {
-    instance.Register(Name, commands, nil)
+    instance.Register(Name, Name, commands, Init)
 }
-*/

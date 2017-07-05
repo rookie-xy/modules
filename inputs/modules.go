@@ -9,15 +9,21 @@ import (
     "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/prototype"
     */
+    "github.com/rookie-xy/worker/src/command"
+    "github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/prototype"
   _ "github.com/rookie-xy/modules/inputs/src/file"
+    "github.com/rookie-xy/worker/src/cycle"
+    "github.com/rookie-xy/worker/src/instance"
 )
 
 const Name  = "inputs"
 
 
-
-/*
 type Input struct {
+    observers []observer.Observer
+    Data prototype.Object
     log.Log
     children []module.Template
 }
@@ -25,6 +31,12 @@ type Input struct {
 func New(log log.Log) *Input {
     return &Input{
         Log: log,
+    }
+}
+
+func (r *Input) Update(configure prototype.Object) {
+    if configure != nil {
+        inputs.Value <- configure
     }
 }
 
@@ -43,7 +55,8 @@ var commands = []command.Item{
 
 }
 
-func (r *Input) Init() {
+func Init(log log.Log) module.Template {
+    // 等待配置更新完成的信号
 
     // TODO load 各个组件
     if v := inputs.Value; v != nil {
@@ -55,8 +68,8 @@ func (r *Input) Init() {
             }
 
             if m, ok := module.Pool[name]; ok {
-		              m.Init()
-                r.Load(m)
+                // TODO 判断作用域
+                r.Load(m.Init())
             }
         }
 
@@ -64,10 +77,11 @@ func (r *Input) Init() {
         fmt.Println("input value is nil")
     }
 
-    return
+    return nil
 }
 
 func (r *Input) Main() {
+    /*
     // 启动各个组件
     for _, child := range r.children {
         child.Main()
@@ -85,15 +99,18 @@ func (r *Input) Main() {
     }
 
     return
+    */
 }
 
 func (r *Input) Exit() {
+    /*
     for _, module := range r.children {
         module.Exit()
     }
 
     //r.cycle.Quit()
     return
+    */
 }
 
 func (r *Input) Load(m module.Template) {
@@ -101,6 +118,5 @@ func (r *Input) Load(m module.Template) {
 }
 
 func init() {
-    instance.Register(Name, commands, nil)
+    instance.Register(Name, Name, commands, Init)
 }
-*/
