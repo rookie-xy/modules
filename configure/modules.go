@@ -13,8 +13,8 @@ import (
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
-  "github.com/rookie-xy/worker/src/cycle"
-  "github.com/rookie-xy/worker/src/instance"
+    "github.com/rookie-xy/worker/src/cycle"
+    "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/module"
     "github.com/elastic/beats/filebeat/prospector/log"
 )
