@@ -1,22 +1,13 @@
 package configure
 
 import (
-    /*
-    "fmt"
-    "unsafe"
-
     "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/instance"
-    "github.com/rookie-xy/worker/src/configure"
-    */
-
-  _ "github.com/rookie-xy/modules/configure/src/file"
-  _ "github.com/rookie-xy/modules/configure/src/zookeeper"
-    "github.com/rookie-xy/worker/src/cycle"
     "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/module"
     "github.com/elastic/beats/filebeat/prospector/log"
+
+      _ "github.com/rookie-xy/modules/configure/src/file"
+  _ "github.com/rookie-xy/modules/configure/src/zookeeper"
 )
 
 const Name  = "configure"
@@ -37,19 +28,17 @@ var commands = []command.Item{
 }
 
 type Configure struct {
-    *configure.Configure
+    log.Log
     children []module.Template
 }
 
-func New(log log.Log) *Configure {
-    return &Configure{
-        Log: log,
-    }
+func New() *Configure {
+    return &Configure{}
 }
 
-func Init(log log.Log) module.Template {
+func Init() module.Template {
     // 根据指令加载所需模块
-    config := New(log)
+    config := New()
 
     name := Name
     if v := config.Value; v != nil {
@@ -58,9 +47,11 @@ func Init(log log.Log) module.Template {
         return
     }
 
-    if m, ok := module.Pool[name]; ok {
+    if init, ok := module.Pool[name]; ok {
         //判断作用域
-        config.Load(m(log))
+        for _, module := range init {
+            config.Load(module)
+        }
     }
 
     return config
@@ -99,9 +90,9 @@ func (r *Configure) Main() {
     */
 }
 
-func (r *Configure) Exit() {
+func (r *Configure) Exit(code int) {
     for _, module := range r.children {
-        module.Exit()
+        module.Exit(code)
     }
 
     //r.cycle.Quit()

@@ -3,7 +3,7 @@ package file
 import (
     "unsafe"
     "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/instance"
+    "github.com/rookie-xy/worker/src/init"
     "github.com/rookie-xy/worker/src/module"
 )
 
@@ -62,21 +62,23 @@ var commands = []command.Item{
       nil },
 }
 
-func (r *fileInput) Init() {
+func Init() module.Template {
+    file := New()
     //利用group codec等,进行初始化
     if group.Value != nil {
     }
+
+    return file
 }
 
 func (r *fileInput) Main() {
     // 编写主要业务逻辑
 }
 
-func (r *fileInput) Exit() {
+func (r *fileInput) Exit(code int) {
     // 退出
 }
 
 func init() {
-    instance.Register(Name, commands, New)
+    init.Register(Name, Name, commands, Init)
 }
-
