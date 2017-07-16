@@ -7,6 +7,7 @@ import (
     "github.com/rookie-xy/worker/src/prototype"
 
   _ "github.com/rookie-xy/modules/inputs/src/file"
+        "github.com/rookie-xy/worker/src/register"
 )
 
 const Name = "inputs"
@@ -113,7 +114,7 @@ func (r *Input) Load(m module.Template) {
 }
 
 func init() {
-    instance.Register(Name, Name, commands, nil)
+    register.Module(Name, Name, commands, nil)
 }
 
 /*

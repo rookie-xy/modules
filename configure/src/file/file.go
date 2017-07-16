@@ -7,6 +7,7 @@ import (
     "github.com/rookie-xy/worker/src/configure"
     "github.com/rookie-xy/worker/src/log"
     "fmt"
+        "github.com/rookie-xy/worker/src/register"
 )
 
 const Name  = "file"
@@ -30,7 +31,7 @@ type file struct {
     log.Log
 }
 
-func New(log log.Log) module.Module {
+func New(log log.Log) module.Template {
     return &file{
         Log: log,
     }
@@ -60,5 +61,5 @@ func (r *file) Exit() {
 }
 
 func init() {
-    instance.Register(configure.Name, Name, commands, New)
+    register.Module(configure.Name, Name, commands, New)
 }

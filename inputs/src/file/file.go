@@ -3,17 +3,21 @@ package file
 import (
     "unsafe"
     "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/init"
     "github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/register"
+    "github.com/rookie-xy/worker/src/log"
 )
 
 const Name  = "file"
 
 type fileInput struct{
+    log.Log
 }
 
-func New() *fileInput {
-    return &fileInput{}
+func New(log log.Log) module.Template {
+    return &fileInput{
+        Log: log,
+    }
 }
 
 var (
@@ -62,13 +66,12 @@ var commands = []command.Item{
       nil },
 }
 
-func Init() module.Template {
-    file := New()
+func (r *fileInput) Init() {
     //利用group codec等,进行初始化
     if group.Value != nil {
     }
 
-    return file
+    return
 }
 
 func (r *fileInput) Main() {
@@ -80,5 +83,5 @@ func (r *fileInput) Exit(code int) {
 }
 
 func init() {
-    init.Register(Name, Name, commands, Init)
+    register.Module(Name, Name, commands, New)
 }

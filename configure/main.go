@@ -8,6 +8,7 @@ import (
     "github.com/rookie-xy/worker/src/configure"
     "github.com/rookie-xy/worker/src/observer"
     "github.com/rookie-xy/worker/src/prototype"
+    "github.com/rookie-xy/worker/src/register"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -118,5 +119,5 @@ func (r *Configure) Load(m module.Template) {
 }
 
 func init() {
-    instance.Register(Name, Name, commands, nil)
+    register.Module(Name, Name, commands, nil)
 }
