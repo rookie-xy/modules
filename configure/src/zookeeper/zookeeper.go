@@ -2,9 +2,9 @@ package zookeeper
 
 import (
     "unsafe"
-    "github.com/rookie-xy/worker/src/instance"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
+    "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
     "fmt"
 )
@@ -12,24 +12,16 @@ import (
 const Name  = "zookeeper"
 
 var (
-
-    resource = &command.Meta{ "-r", "resource", "192.168.1.1:2181", "Resource type" }
+    address = &command.Meta{ "-a", "address", "192.168.1.1:2181", "Resource type" }
 )
 
 var commands = []command.Item{
 
-    { format,
+    { address,
       command.LINE,
-      module.GLOBEL,
+      module.Configure,
       command.SetObject,
-      unsafe.Offsetof(format.Value),
-      nil },
-
-    { resource,
-      command.LINE,
-      module.GLOBEL,
-      command.SetObject,
-      unsafe.Offsetof(resource.Value),
+      unsafe.Offsetof(address.Value),
       nil },
 
 }
@@ -38,19 +30,18 @@ type zookeeper struct {
     log.Log
 }
 
-func New() *zookeeper {
-    return &zookeeper{}
+func New(log log.Log) module.Template {
+    return &zookeeper{
+        Log: log,
+    }
 }
 
-func (r *zookeeper) Init(name string) module.Template {
-fmt.Println("zookeeperffffffffffffffff inittttttttttttt", resource.Value.(string))
+func (r *zookeeper) Init() {
+fmt.Println("zookeeperffffffffffffffff inittttttttttttt", address.Value.(string))
     // 初始化zkClient
     // 初始化文件解析器解析文件
 
-    zk := New()
-
-
-    return zk
+    return
 }
 
 func (r *zookeeper) Main() {
@@ -62,11 +53,11 @@ fmt.Println("zookeeperffffffffffffffff mainnnnnnnnnnnnnnnnn")
     return
 }
 
-func (r *zookeeper) Exit() {
+func (r *zookeeper) Exit(code int) {
     //r.cycle.Quit()
     return
 }
 
 func init() {
-    instance.Register(Name, Name, commands, New())
+    register.Module(module.Configure, Name, commands, New)
 }

@@ -4,7 +4,6 @@ import (
     "unsafe"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/configure"
     "github.com/rookie-xy/worker/src/log"
     "fmt"
         "github.com/rookie-xy/worker/src/register"
@@ -20,7 +19,7 @@ var commands = []command.Item{
 
     { path,
       command.LINE,
-      module.GLOBEL,
+      module.Configure,
       command.SetObject,
       unsafe.Offsetof(path.Value),
       nil },
@@ -49,17 +48,14 @@ func (r *file) Init() {
 func (r *file) Main() {
 fmt.Println("fileffffffffffffffff mainnnnnnnnnnnnnnnnn")
     // 发现文件变更，通知给其他模块
-
-    configure.Event
-
     return
 }
 
-func (r *file) Exit() {
+func (r *file) Exit(code int) {
     //r.cycle.Quit()
     return
 }
 
 func init() {
-    register.Module(configure.Name, Name, commands, New)
+    register.Module(module.Configure, Name, commands, New)
 }

@@ -10,17 +10,17 @@ import (
         "github.com/rookie-xy/worker/src/register"
 )
 
-const Name = "inputs"
+const Name = module.Inputs
 
 var (
-    inputs = command.Meta{ "", Name, nil, "inputs may be many" }
+    inputs = &command.Meta{ "", Name, nil, "inputs may be many" }
 )
 
 var commands = []command.Item{
 
-    { &inputs,
+    { inputs,
       command.LINE,
-      module.GLOBEL,
+      Name,
       nil,
       0,
       nil },
@@ -33,7 +33,7 @@ type Input struct {
     children []module.Template
 }
 
-func New(log log.Log) module.Template {
+func New(log log.Log) *Input {
     return &Input{
         Log: log,
         event: make(chan int),
@@ -42,7 +42,7 @@ func New(log log.Log) module.Template {
 
 func (r *Input) Update(configure prototype.Object) {
     if configure != nil {
-        inputs.Value <- configure
+        inputs.Value = configure
     }
 
     r.event <-1
@@ -73,7 +73,7 @@ func (r *Input) Init() {
     }
     */
 
-    return nil
+    return
 }
 
 func (r *Input) Main() {
@@ -98,7 +98,7 @@ func (r *Input) Main() {
     */
 }
 
-func (r *Input) Exit() {
+func (r *Input) Exit(code int) {
     /*
     for _, module := range r.children {
         module.Exit()
