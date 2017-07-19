@@ -37,7 +37,8 @@ func New(log log.Log) module.Template {
 }
 
 func (r *file) Init() {
-    //fmt.Println("fileffffffffffffffff inittttttttttttt", resource.Value.(string))
+
+    fmt.Println("fileffffffffffffffff inittttttttttttt", path.Value.(string))
     // 判断文件是否存在，可读性
     // 初始化文件监视器，监控配置文件
     // 初始化解析器

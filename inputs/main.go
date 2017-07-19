@@ -1,6 +1,7 @@
 package inputs
 
 import (
+"fmt"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/log"
@@ -40,6 +41,10 @@ func New(log log.Log) *Input {
     }
 }
 
+func setup(log log.Log) module.Template {
+    return New(log)
+}
+
 func (r *Input) Update(configure prototype.Object) {
     if configure != nil {
         inputs.Value = configure
@@ -49,6 +54,7 @@ func (r *Input) Update(configure prototype.Object) {
 }
 
 func (r *Input) Init() {
+    fmt.Println("aaaaaaaaaaaaaaa")
     // 等待配置更新完成的信号
     <-r.event
 
@@ -114,7 +120,7 @@ func (r *Input) Load(m module.Template) {
 }
 
 func init() {
-    register.Module(Name, Name, commands, nil)
+    register.Module(module.Worker, Name, commands, setup)
 }
 
 /*

@@ -66,15 +66,14 @@ func (r *Configure) Notify() {
 }
 
 func (r *Configure) Init() {
-
     if v := config.Value; v != nil {
-        if new, ok := module.Pool[v.(string)]; ok {
-            this := *new
-            if module := this(r.Log); module != nil {
-                r.Load(module)
-            }
+        key := Name + "_" + v.(string)
+
+        if module := module.Setup(key, r.Log); module != nil {
+            r.Load(module)
         }
     }
+
 /*
     if v := format.Value; v != nil {
         if codec := plugins.Codec(v.(string)); codec != nil {
@@ -90,7 +89,7 @@ func (r *Configure) Main() {
     // 启动各个子模块组件
     for _, child := range r.children {
         child.Init()
-        child.Main()
+        go child.Main()
     }
 
     // 渲染所有配置指令
@@ -126,5 +125,5 @@ func (r *Configure) Load(m module.Template) {
 }
 
 func init() {
-    register.Module(module.Configure, Name, commands, nil)
+    register.Module(module.Worker, Name, commands, nil)
 }
