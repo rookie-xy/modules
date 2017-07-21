@@ -20,7 +20,7 @@ var (
 var commands = []command.Item{
 
     { inputs,
-      command.LINE,
+      command.FILE,
       Name,
       nil,
       0,
