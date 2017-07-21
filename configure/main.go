@@ -19,8 +19,8 @@ import (
 const Name  = module.Configure
 
 var (
-    config = &command.Meta{ "-c", "config", "file", "This configure file path" }
-    format = &command.Meta{ "-f", "format", "json", "Configure file format" }
+    config = &command.Meta{ "-c", "config", "file", "Specifies how to obtain the configuration file" }
+    format = &command.Meta{ "-f", "format", "yaml", "Specifies the format of the configuration file" }
 )
 
 var commands = []command.Item{

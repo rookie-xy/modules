@@ -12,7 +12,8 @@ import (
 const Name  = "file"
 
 var (
-    path = &command.Meta{ "-p", "path", "./usr/local/conf/worker.yaml", "Resource type" }
+    path = &command.Meta{ "-p", "path", "./usr/local/conf/worker.yaml", "If you want to " +
+                                        "get locally, you need to specify the profile path" }
 )
 
 var commands = []command.Item{

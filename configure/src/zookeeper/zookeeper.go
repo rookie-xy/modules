@@ -12,7 +12,8 @@ import (
 const Name  = "zookeeper"
 
 var (
-    address = &command.Meta{ "-a", "address", "192.168.1.1:2181", "Resource type" }
+    address = &command.Meta{ "-a", "address", "192.168.1.1:2181", "If you are getting from " +
+                                              "remote, you need to specify the host address" }
 )
 
 var commands = []command.Item{
