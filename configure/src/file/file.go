@@ -104,10 +104,12 @@ func (r *file) Main() {
             r.Print(err)
         }
 
+        file.Close()
 	return
     }
 
     configure.Event <- char
+    file.Close()
 
     // 发现文件变更，通知给其他模块
     for {
