@@ -105,7 +105,7 @@ func (r *file) Main() {
         }
 
         file.Close()
-	return
+        return
     }
 
     configure.Event <- char

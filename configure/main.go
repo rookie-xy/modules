@@ -4,6 +4,8 @@ import (
     "unsafe"
     "fmt"
 
+    "github.com/rookie-xy/plugins"
+
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/configure"
@@ -11,6 +13,7 @@ import (
     "github.com/rookie-xy/worker/src/prototype"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/plugin"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -43,7 +46,7 @@ var commands = []command.Item{
 
 type Configure struct {
     log.Log
-    //codec.Codec
+    plugin.Codec
     observers []observer.Observer
     data prototype.Object
     children []module.Template
@@ -74,13 +77,11 @@ func (r *Configure) Init() {
         }
     }
 
-/*
     if v := format.Value; v != nil {
         if codec := plugins.Codec(v.(string)); codec != nil {
             r.Codec = codec
         }
     }
-    */
 
     return
 }
@@ -99,6 +100,12 @@ func (r *Configure) Main() {
 
         case e := <-configure.Event:
             fmt.Println(e)
+            /*
+            data, err := r.Codec.Decode(e)
+            if err != nil {
+                fmt.Println(data)
+            }
+            */
             // TODO 解析配置，通知加载三大模块
             // TODO 监听外部启停指令
             r.Notify()
