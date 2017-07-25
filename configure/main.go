@@ -4,7 +4,6 @@ import (
     "unsafe"
     "fmt"
 
-    "github.com/rookie-xy/plugins"
 
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
@@ -17,6 +16,7 @@ import (
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
+    "github.com/rookie-xy/worker/src/plugin/codec"
 )
 
 const Name  = module.Configure
@@ -46,9 +46,9 @@ var commands = []command.Item{
 
 type Configure struct {
     log.Log
-    plugin.Codec
+    codec     codec.Template
     observers []observer.Observer
-    data prototype.Object
+    data      prototype.Object
     children []module.Template
 }
 
@@ -63,8 +63,34 @@ func (r *Configure) Attach(obs observer.Observer) {
 }
 
 func (r *Configure) Notify() {
+    if r.data == nil {
+        return
+    }
+
+    switch v := r.data.(type) {
+
+    case []interface{}:
+        //fmt.Println("A")
+
+    case map[interface{}]interface{}:
+        for key, value := range v {
+            r.Update(value)
+        }
+    }
+}
+
+func (r *Configure) Update() {
     for _, observer := range r.observers {
-         observer.Update(r.data)
+        status := observer.Update(r.data)
+        if status == state.Ok {
+            break
+
+        } else if status == state.Declined {
+            continue
+
+        } else if status == state.Error {
+            break
+        }
     }
 }
 
@@ -78,8 +104,8 @@ func (r *Configure) Init() {
     }
 
     if v := format.Value; v != nil {
-        if codec := plugins.Codec(v.(string)); codec != nil {
-            r.Codec = codec
+        if codec := plugin.Codec(v.(string)); codec != nil {
+            r.codec = codec
         }
     }
 
@@ -93,21 +119,17 @@ func (r *Configure) Main() {
         go child.Main()
     }
 
-    // 渲染所有配置指令
     for ;; {
 
         select {
 
         case e := <-configure.Event:
-            fmt.Println(e)
-            /*
-            data, err := r.Codec.Decode(e)
+            r.data, err = r.codec.Decode(e)
             if err != nil {
-                fmt.Println(data)
+                fmt.Println("error", data)
+                return
             }
-            */
-            // TODO 解析配置，通知加载三大模块
-            // TODO 监听外部启停指令
+
             r.Notify()
 
         default:

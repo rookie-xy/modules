@@ -9,6 +9,7 @@ import (
 
   _ "github.com/rookie-xy/modules/inputs/src/file"
         "github.com/rookie-xy/worker/src/register"
+"github.com/rookie-xy/worker/src/state"
 )
 
 const Name = module.Inputs
@@ -45,16 +46,23 @@ func setup(log log.Log) module.Template {
     return New(log)
 }
 
-func (r *Input) Update(configure prototype.Object) {
-    if configure != nil {
-        inputs.Value = configure
+func (r *Input) Update(name string, configure prototype.Object) int {
+    if name == "" || configure == nil {
+        return state.Error
     }
 
+    if name != Name {
+        return state.Declined
+    }
+
+    inputs.Value = configure
     r.event <-1
+
+    return state.Ok
 }
 
 func (r *Input) Init() {
-    fmt.Println("aaaaaaaaaaaaaaa")
+    fmt.Println("input init")
     // 等待配置更新完成的信号
     <-r.event
 
