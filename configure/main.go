@@ -12,11 +12,12 @@ import (
     "github.com/rookie-xy/worker/src/prototype"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/plugin"
+    "github.com/rookie-xy/worker/src/plugin/codec"
+    "github.com/rookie-xy/worker/src/state"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
-    "github.com/rookie-xy/worker/src/plugin/codec"
+
 )
 
 const Name  = module.Configure
@@ -46,7 +47,7 @@ var commands = []command.Item{
 
 type Configure struct {
     log.Log
-    codec     codec.Template
+    codec     codec.Codec
     observers []observer.Observer
     data      prototype.Object
     children []module.Template
@@ -67,6 +68,8 @@ func (r *Configure) Notify() {
         return
     }
 
+    fmt.Println(r.data)
+/*
     switch v := r.data.(type) {
 
     case []interface{}:
@@ -74,14 +77,15 @@ func (r *Configure) Notify() {
 
     case map[interface{}]interface{}:
         for key, value := range v {
-            r.Update(value)
+            r.Update()
         }
     }
+    */
 }
 
 func (r *Configure) Update() {
     for _, observer := range r.observers {
-        status := observer.Update(r.data)
+        status := observer.Update("inputs", r.data)
         if status == state.Ok {
             break
 
@@ -104,7 +108,16 @@ func (r *Configure) Init() {
     }
 
     if v := format.Value; v != nil {
-        if codec := plugin.Codec(v.(string)); codec != nil {
+
+        config := &codec.Config{
+            Name: v.(string),
+        }
+
+        if codec, err := codec.CreateCodec(config); err != nil {
+            fmt.Println(err)
+            return
+
+        } else {
             r.codec = codec
         }
     }
@@ -124,11 +137,14 @@ func (r *Configure) Main() {
         select {
 
         case e := <-configure.Event:
+	    var err error
             r.data, err = r.codec.Decode(e)
             if err != nil {
-                fmt.Println("error", data)
+                fmt.Println("error", r.data)
                 return
             }
+
+            fmt.Println(r.data)
 
             r.Notify()
 

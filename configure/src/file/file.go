@@ -88,20 +88,20 @@ func (r *file) Init() {
 
 func (r *file) Main() {
     var char []byte
-
     file, err := os.OpenFile(r.name, os.O_RDWR, 0777)
     if err != nil {
-        r.Print("OpenFile error")
+        fmt.Println(err)
+    //    r.Print("OpenFile error")
     }
 
     char = make([]byte, r.size)
 
     if size, err := file.Read(char); err != nil {
         if size != int(r.size) {
-            r.Print("size is not r.size")
+//            r.Print("size is not r.size")
 
         } else {
-            r.Print(err)
+//            r.Print(err)
         }
 
         file.Close()
