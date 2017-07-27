@@ -49,7 +49,6 @@ func New(log log.Log) module.Template {
 
 func (r *file) Init() {
     // 初始化文件监视器，监控配置文件
-
     resource := ""
 
     if v := path.Value; v != nil {
@@ -59,7 +58,7 @@ func (r *file) Init() {
     fileInfo, err := os.Stat(resource)
     if err != nil {
         if os.IsNotExist(err) {
-	    fmt.Println("a file or directory does not exist")
+	           fmt.Println("a file or directory does not exist")
 
         } else if os.IsPermission(err) {
             fmt.Println("permission is denied")
@@ -76,7 +75,7 @@ func (r *file) Init() {
 
     r.watcher, err = fsnotify.NewWatcher()
     if err != nil {
-	fmt.Println(err)
+        fmt.Println(err)
         return
 
     } else {

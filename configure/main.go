@@ -4,7 +4,6 @@ import (
     "unsafe"
     "fmt"
 
-
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/configure"
@@ -14,6 +13,7 @@ import (
     "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/plugin/codec"
     "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/worker/src/factory"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -113,7 +113,7 @@ func (r *Configure) Init() {
             Name: v.(string),
         }
 
-        if codec, err := codec.CreateCodec(config); err != nil {
+        if codec, err := factory.Codec(config); err != nil {
             fmt.Println(err)
             return
 
@@ -137,7 +137,7 @@ func (r *Configure) Main() {
         select {
 
         case e := <-configure.Event:
-	    var err error
+	           var err error
             r.data, err = r.codec.Decode(e)
             if err != nil {
                 fmt.Println("error", r.data)
@@ -146,7 +146,7 @@ func (r *Configure) Main() {
 
             fmt.Println(r.data)
 
-            r.Notify()
+            //r.Notify()
 
         default:
 
