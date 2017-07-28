@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/configure/main.go" afterPath="$PROJECT_DIR$/configure/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/main.go" afterPath="$PROJECT_DIR$/inputs/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/src/file/file.go" afterPath="$PROJECT_DIR$/inputs/src/file/file.go" />
     </list>
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />

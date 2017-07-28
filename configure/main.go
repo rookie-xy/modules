@@ -11,7 +11,7 @@ import (
     "github.com/rookie-xy/worker/src/prototype"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/plugin/codec"
+    "github.com/rookie-xy/worker/src/codec"
     "github.com/rookie-xy/worker/src/state"
     "github.com/rookie-xy/worker/src/factory"
 
