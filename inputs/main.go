@@ -35,15 +35,15 @@ type Input struct {
     children []module.Template
 }
 
-func New(log log.Log) *Input {
-    return &Input{
+func New(log log.Log) module.Template {
+    new := &Input{
         Log: log,
         event: make(chan int),
     }
-}
 
-func setup(log log.Log) module.Template {
-    return New(log)
+    register.Observer(Name, new)
+
+    return new
 }
 
 func (r *Input) Update(name string, configure prototype.Object) int {
@@ -128,7 +128,7 @@ func (r *Input) Load(m module.Template) {
 }
 
 func init() {
-    register.Module(module.Worker, Name, commands, setup)
+    register.Module(module.Worker, Name, commands, New)
 }
 
 /*

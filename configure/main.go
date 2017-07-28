@@ -53,14 +53,24 @@ type Configure struct {
     children []module.Template
 }
 
-func New(log log.Log) *Configure {
-    return &Configure{
+func New(log log.Log) module.Template {
+    new := &Configure{
         Log: log,
     }
+
+    register.Subject(Name, new)
+
+    return new
 }
 
-func (r *Configure) Attach(obs observer.Observer) {
-    r.observers = append(r.observers, obs)
+func (r *Configure) Attach(o observer.Observer) {
+    if o != nil {
+        r.observers = append(r.observers, o)
+        return
+    }
+
+    fmt.Println("attach error")
+    return
 }
 
 func (r *Configure) Notify() {
@@ -100,7 +110,7 @@ func (r *Configure) Update() {
 
 func (r *Configure) Init() {
     if v := config.Value; v != nil {
-        key := Name + "_" + v.(string)
+        key := Name + "." + v.(string)
 
         if module := module.Setup(key, r.Log); module != nil {
             r.Load(module)
@@ -145,6 +155,7 @@ func (r *Configure) Main() {
             }
 
             fmt.Println(r.data)
+            fmt.Println("yuezhanggggggggggggggggggggggggggggg", len(r.observers))
 
             //r.Notify()
 
@@ -170,5 +181,5 @@ func (r *Configure) Load(m module.Template) {
 }
 
 func init() {
-    register.Module(module.Worker, Name, commands, nil)
+    register.Module(module.Worker, Name, commands, New)
 }

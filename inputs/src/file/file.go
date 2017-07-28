@@ -83,5 +83,5 @@ func (r *fileInput) Exit(code int) {
 }
 
 func init() {
-    register.Module(Name, Name, commands, New)
+    register.Module(module.Inputs, Name, commands, New)
 }
