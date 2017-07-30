@@ -47,7 +47,7 @@ var commands = []command.Item{
 
 type Configure struct {
     log.Log
-    codec     codec.Codec
+    codec.Codec
     observers []observer.Observer
     data      prototype.Object
     children []module.Template
@@ -128,7 +128,7 @@ func (r *Configure) Init() {
             return
 
         } else {
-            r.codec = codec
+            r.Codec = codec
         }
     }
 
@@ -147,8 +147,9 @@ func (r *Configure) Main() {
         select {
 
         case e := <-configure.Event:
-	           var err error
-            r.data, err = r.codec.Decode(e)
+            var err error
+
+            r.data, err = r.Decode(e)
             if err != nil {
                 fmt.Println("error", r.data)
                 return
