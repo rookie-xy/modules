@@ -60,7 +60,7 @@ func (r *memoryChannel) Init() {
 
     r.Pull, r.subject = factory.Pull(name), subject.New(r.Log)
     if r.Pull == nil || r.subject == nil {
-	fmt.Println("pull or subject init error")
+        fmt.Println("pull or subject init error")
         return
     }
 
