@@ -1,6 +1,5 @@
 package channels
 
-
 import (
     "fmt"
 
@@ -60,7 +59,7 @@ func (r *Channel) Update(name string, configure prototype.Object) int {
 }
 
 func (r *Channel) Init() {
-    fmt.Println("input init")
+    fmt.Println("channel init")
     // 等待配置更新完成的信号
     <-r.event
 

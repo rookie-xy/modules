@@ -46,13 +46,17 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Input) Update(name string, configure prototype.Object) int {
-    if name == "" || configure == nil {
+func (r *Input) Update(configure prototype.Object) int {
+    if configure == nil {
         return state.Error
     }
 
-    if name != Name {
-        return state.Declined
+    //fmt.Println("inputs: ", configure)
+
+    if data, exist := configure.(map[interface{}]interface{})[Name]; exist {
+        fmt.Println("hahahahhhhhhhhhhhhhhh", data)
+    } else {
+        fmt.Println("errorrrrrrrrrrrrrrrr")
     }
 
     inputs.Value = configure

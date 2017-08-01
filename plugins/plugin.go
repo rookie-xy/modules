@@ -58,5 +58,5 @@ func (r *plugins) Exit(code int) {
 }
 
 func init() {
-    register.Module(module.Worker, plugin.Name, commands, nil)
+    register.Module(module.Worker, module.Plugins, commands, nil)
 }

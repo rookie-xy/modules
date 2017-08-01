@@ -78,24 +78,14 @@ func (r *Configure) Notify() {
         return
     }
 
-    fmt.Println(r.data)
-/*
-    switch v := r.data.(type) {
-
-    case []interface{}:
-        //fmt.Println("A")
-
-    case map[interface{}]interface{}:
-        for key, value := range v {
-            r.Update()
-        }
-    }
-    */
+    //fmt.Println(r.data)
+    r.update()
 }
 
-func (r *Configure) Update() {
+func (r *Configure) update() {
+    fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
     for _, observer := range r.observers {
-        status := observer.Update("inputs", r.data)
+        status := observer.Update(r.data)
         if status == state.Ok {
             break
 
@@ -155,10 +145,10 @@ func (r *Configure) Main() {
                 return
             }
 
-            fmt.Println(r.data)
-            fmt.Println("yuezhanggggggggggggggggggggggggggggg", len(r.observers))
+            //fmt.Println(r.data)
+            //fmt.Println("yuezhanggggggggggggggggggggggggggggg", len(r.observers))
 
-            //r.Notify()
+            r.Notify()
 
         default:
 
