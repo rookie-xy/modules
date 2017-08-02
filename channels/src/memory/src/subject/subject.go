@@ -29,7 +29,7 @@ func (r *Subject) Attach(o observer.Observer) {
 }
 
 func (r *Subject) Notify() {
-    if r.data == nil {
+    if r.data == "" {
         return
     }
 

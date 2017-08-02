@@ -83,9 +83,13 @@ func (r *Configure) Notify() {
 }
 
 func (r *Configure) update() {
-    fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
     for _, observer := range r.observers {
+        if observer.Update(r.data) == state.Error {
+            break
+        }
+        /*
         status := observer.Update(r.data)
+        fmt.Println("jjjjjjjjjjjjjjjj")
         if status == state.Ok {
             break
 
@@ -95,6 +99,7 @@ func (r *Configure) update() {
         } else if status == state.Error {
             break
         }
+        */
     }
 }
 

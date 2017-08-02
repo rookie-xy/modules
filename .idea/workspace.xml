@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/channels/channel.go" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/main.go" afterPath="$PROJECT_DIR$/channels/main.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/src/memory/main.go" afterPath="$PROJECT_DIR$/channels/src/memory/main.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" afterPath="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/configure/main.go" afterPath="$PROJECT_DIR$/configure/main.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/main.go" afterPath="$PROJECT_DIR$/inputs/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/outputs/main.go" afterPath="$PROJECT_DIR$/outputs/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plugins/plugin.go" afterPath="$PROJECT_DIR$/plugins/plugin.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/src/file/main.go" afterPath="$PROJECT_DIR$/inputs/src/file/main.go" />
     </list>
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,8 +36,8 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/configure/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="441">
-              <caret line="147" column="13" selection-start-line="147" selection-start-column="13" selection-end-line="147" selection-end-column="13" />
+            <state relative-caret-position="-798">
+              <caret line="103" column="0" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -47,42 +46,28 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/channels/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-924">
-              <caret line="16" column="21" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-              <folding>
-                <element signature="e#18#311#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="observer.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../worker/src/observer/observer.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
-              <folding>
-                <marker date="1501588517522" expanded="true" signature="165:206" ph="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="plugin.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../worker/src/plugin/plugin.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="84">
-              <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+            <state relative-caret-position="252">
+              <caret line="12" column="52" selection-start-line="12" selection-start-column="52" selection-end-line="12" selection-end-column="52" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/inputs/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="55" column="69" selection-start-line="55" selection-start-column="69" selection-end-line="55" selection-end-column="69" />
+            <state relative-caret-position="168">
+              <caret line="8" column="3" selection-start-line="8" selection-start-column="3" selection-end-line="8" selection-end-column="3" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="command.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../worker/src/command/command.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="51" column="6" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -91,7 +76,7 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/outputs/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1281">
+            <state relative-caret-position="1101">
               <caret line="61" column="22" selection-start-line="61" selection-start-column="22" selection-end-line="61" selection-end-column="22" />
               <folding>
                 <element signature="e#17#310#0" expanded="true" />
@@ -103,8 +88,8 @@
       <file leaf-file-name="module.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../worker/src/module/module.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="9" column="5" selection-start-line="9" selection-start-column="5" selection-end-line="9" selection-end-column="5" />
+            <state relative-caret-position="206">
+              <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -113,9 +98,34 @@
       <file leaf-file-name="register.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../worker/src/register/register.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+            <state relative-caret-position="441">
+              <caret line="41" column="14" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="14" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/channels/src/memory/main.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="399">
+              <caret line="29" column="19" selection-start-line="29" selection-start-column="19" selection-end-line="29" selection-end-column="19" />
+              <folding>
+                <element signature="e#16#477#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inputs/src/file/main.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="73" column="45" selection-start-line="73" selection-start-column="45" selection-end-line="73" selection-end-column="45" />
+              <folding>
+                <element signature="e#14#228#0" expanded="true" />
+                <marker date="1501655623072" expanded="true" signature="1512:1672" ph="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -140,14 +150,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/inputs/src/file/main.go" />
         <option value="$PROJECT_DIR$/modules.iml" />
         <option value="$PROJECT_DIR$/../worker/src/instance/instance.go" />
         <option value="$PROJECT_DIR$/configure/src/zookeeper/main.go" />
         <option value="$PROJECT_DIR$/configure/src/file/main.go" />
         <option value="$PROJECT_DIR$/inputs/modules.go" />
         <option value="$PROJECT_DIR$/configure/modules.go" />
-        <option value="$PROJECT_DIR$/../worker/src/command/command.go" />
         <option value="$PROJECT_DIR$/configure/src/zookeeper/zookeeper.go" />
         <option value="$PROJECT_DIR$/../worker/src/log/decorator.go" />
         <option value="$PROJECT_DIR$/../plugins/plugin.go" />
@@ -161,15 +169,17 @@
         <option value="$PROJECT_DIR$/channels/src/memory/src/subject.go" />
         <option value="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" />
         <option value="$PROJECT_DIR$/channels/src/memory/src/process.go" />
-        <option value="$PROJECT_DIR$/channels/src/memory/main.go" />
         <option value="$PROJECT_DIR$/channels/channel.go" />
         <option value="$PROJECT_DIR$/plugins/plugin.go" />
         <option value="$PROJECT_DIR$/../worker/src/module/module.go" />
-        <option value="$PROJECT_DIR$/channels/main.go" />
         <option value="$PROJECT_DIR$/outputs/main.go" />
         <option value="$PROJECT_DIR$/../worker/src/observer/observer.go" />
         <option value="$PROJECT_DIR$/configure/main.go" />
+        <option value="$PROJECT_DIR$/../worker/src/command/command.go" />
+        <option value="$PROJECT_DIR$/inputs/src/file/main.go" />
         <option value="$PROJECT_DIR$/inputs/main.go" />
+        <option value="$PROJECT_DIR$/channels/main.go" />
+        <option value="$PROJECT_DIR$/channels/src/memory/main.go" />
       </list>
     </option>
   </component>
@@ -214,134 +224,7 @@
       <pane id="PackagesPane" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="plugins" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="outputs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="inputs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="configure" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="configure" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="configure" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="file" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="modules" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="channels" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
+        <subPane />
       </pane>
     </panes>
   </component>
@@ -774,7 +657,7 @@
       <workItem from="1501214128789" duration="7292000" />
       <workItem from="1501404060208" duration="8837000" />
       <workItem from="1501482711661" duration="6556000" />
-      <workItem from="1501556136878" duration="9070000" />
+      <workItem from="1501556136878" duration="22431000" />
     </task>
     <task id="LOCAL-00001" summary="update">
       <created>1498727174377</created>
@@ -794,14 +677,14 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="138824000" />
+    <option name="totallyTimeSpent" value="152185000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16812749" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16812749" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -868,14 +751,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md" />
     <entry file="file://$PROJECT_DIR$/configure/modules.go" />
-    <entry file="file://$PROJECT_DIR$/../worker/src/command/command.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="18" column="5" selection-start-line="18" selection-start-column="5" selection-end-line="18" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/go/1.8.3/libexec/src/syscall/syscall_unix.go" />
     <entry file="file:///usr/local/Cellar/go/1.8.3/libexec/src/syscall/zerrors_darwin_amd64.go" />
     <entry file="file:///usr/local/Cellar/go/1.8.3/libexec/src/syscall/syscall.go" />
@@ -895,6 +770,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
           <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -975,14 +851,6 @@
       </provider>
     </entry>
     <entry file="file:///usr/local/Cellar/go/1.8.3/libexec/src/builtin/builtin.go" />
-    <entry file="file://$PROJECT_DIR$/inputs/src/file/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1302">
-          <caret line="68" column="0" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../worker/src/event/event.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
@@ -1023,75 +891,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/channels/src/memory/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1113">
-          <caret line="62" column="7" selection-start-line="62" selection-start-column="7" selection-end-line="62" selection-end-column="7" />
-          <folding>
-            <element signature="e#16#448#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../worker/src/plugin/plugin.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../worker/src/register/register.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../worker/src/module/module.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="5" selection-start-line="9" selection-start-column="5" selection-end-line="9" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/outputs/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1281">
-          <caret line="61" column="22" selection-start-line="61" selection-start-column="22" selection-end-line="61" selection-end-column="22" />
-          <folding>
-            <element signature="e#17#310#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/channels/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-924">
-          <caret line="16" column="21" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-          <folding>
-            <element signature="e#18#311#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/plugins/plugin.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="973">
           <caret line="60" column="29" selection-start-line="60" selection-start-column="29" selection-end-line="60" selection-end-column="29" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../worker/src/observer/observer.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
-          <folding>
-            <marker date="1501588517522" expanded="true" signature="165:206" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1103,19 +907,98 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../worker/src/observer/observer.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../worker/src/plugin/plugin.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/outputs/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1101">
+          <caret line="61" column="22" selection-start-line="61" selection-start-column="22" selection-end-line="61" selection-end-column="22" />
+          <folding>
+            <element signature="e#17#310#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/configure/main.go">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-798">
+          <caret line="103" column="0" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputs/src/file/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="73" column="45" selection-start-line="73" selection-start-column="45" selection-end-line="73" selection-end-column="45" />
+          <folding>
+            <element signature="e#14#228#0" expanded="true" />
+            <marker date="1501655623072" expanded="true" signature="1512:1672" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../worker/src/command/command.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="51" column="6" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../worker/src/module/module.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="206">
+          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../worker/src/register/register.go">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
-          <caret line="147" column="13" selection-start-line="147" selection-start-column="13" selection-end-line="147" selection-end-column="13" />
+          <caret line="41" column="14" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="14" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/inputs/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="55" column="69" selection-start-line="55" selection-start-column="69" selection-end-line="55" selection-end-column="69" />
+        <state relative-caret-position="168">
+          <caret line="8" column="3" selection-start-line="8" selection-start-column="3" selection-end-line="8" selection-end-column="3" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channels/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="12" column="52" selection-start-line="12" selection-start-column="52" selection-end-line="12" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channels/src/memory/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="29" column="19" selection-start-line="29" selection-start-column="19" selection-end-line="29" selection-end-column="19" />
+          <folding>
+            <element signature="e#16#477#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -1,17 +1,17 @@
 package memory
 
 import (
-    "unsafe"
     "fmt"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/factory"
+//    "github.com/rookie-xy/worker/src/factory"
     "github.com/rookie-xy/worker/src/channel"
 
   . "github.com/rookie-xy/modules/channels/src/memory/src"
     "github.com/rookie-xy/modules/channels/src/memory/src/subject"
+"github.com/rookie-xy/worker/src/state"
 )
 
 const Name  = "memory"
@@ -24,8 +24,10 @@ type memoryChannel struct{
 }
 
 var (
-    name = &command.Meta{ "", "name", "nginx", "This option use to group" }
-    size = &command.Meta{ "", "size", "16384", "file type, this is use to find some question" }
+    name   = command.Metas( "", "name", "nginx",    state.On, "This option use to group" )
+    mode   = command.Metas( "", "mode", "pipeline", state.On, "This option use to group" )
+    size   = command.Metas( "", "size", "16384",    state.On, "file type, this is use to find some question" )
+    filter = command.Metas( "", "filter", nil,      state.On, "file type, this is use to find some question" )
 )
 
 var commands = []command.Item{
@@ -34,14 +36,28 @@ var commands = []command.Item{
       command.FILE,
       module.Channels,
       command.SetObject,
-      unsafe.Offsetof(name.Value),
+      0,
+      nil },
+
+    { mode,
+      command.FILE,
+      module.Channels,
+      command.SetObject,
+      0,
       nil },
 
     { size,
       command.FILE,
       module.Channels,
       command.SetObject,
-      unsafe.Offsetof(size.Value),
+      0,
+      nil },
+
+    { filter,
+      command.FILE,
+      module.Channels,
+      command.SetObject,
+      0,
       nil },
 
 }
@@ -53,18 +69,28 @@ func New(log log.Log) module.Template {
 }
 
 func (r *memoryChannel) Init() {
-    name = ""
-    if v := name.Value; v != nil {
-        name = v.(string)
-    }
 
+    fmt.Println("wwwwwwwwwwwwwwwwwwwwwww", name.Value, mode.Value, size.Value, filter.Value)
+
+    names := ""
+    if v := name.Value; v != nil {
+        names = v.(string)
+    }
+/*
     r.Pull, r.subject = factory.Pull(name), subject.New(r.Log)
     if r.Pull == nil || r.subject == nil {
         fmt.Println("pull or subject init error")
         return
     }
+    */
 
-    register.Subject(name, r.subject)
+    r.subject = subject.New(r.Log)
+    if r.subject == nil {
+        fmt.Println("pull or subject init error")
+        return
+    }
+
+    register.Subject(names, r.subject)
 
     return
 }
@@ -76,10 +102,12 @@ func (r *memoryChannel) Main() {
 
     for {
         select {
-
-        case event := r.Pull():
+         /*
+        case event := r.Pull.Pull():
             Process(event, r.filter, r.subject)
+            */
         }
+
     }
 }
 

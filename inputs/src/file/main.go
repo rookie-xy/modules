@@ -1,7 +1,9 @@
 package file
 
 import (
+    "fmt"
     "unsafe"
+
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/register"
@@ -21,11 +23,11 @@ func New(log log.Log) module.Template {
 }
 
 var (
-    group   = &command.Meta{ "", "group",   "nginx",     "This option use to group" }
-    types   = &command.Meta{ "", "type",    "log",       "file type, this is use to find some question" }
-    paths   = &command.Meta{ "", "paths",   nil, "File path, its is manny option" }
-    publish = &command.Meta{ "", "publish", nil, "publish topic" }
-    codec   = &command.Meta{ "", "codec",   nil, "codec method" }
+    group   = &command.Meta{ "", "group",   "nginx", "This option use to group" }
+    types   = &command.Meta{ "", "type",    "log",   "file type, this is use to find some question" }
+    paths   = &command.Meta{ "", "paths",   nil,     "File path, its is manny option" }
+    publish = &command.Meta{ "", "publish", nil,     "publish topic" }
+    codec   = &command.Meta{ "", "codec",   nil,     "codec method" }
 )
 
 var commands = []command.Item{
@@ -68,8 +70,9 @@ var commands = []command.Item{
 
 func (r *fileInput) Init() {
     //利用group codec等,进行初始化
-    if group.Value != nil {
-    }
+
+    fmt.Println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqq", group.Value, types.Value, paths.Value, publish.Value, codec.Value)
+
 
     return
 }
