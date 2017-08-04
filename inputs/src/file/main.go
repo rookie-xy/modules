@@ -2,12 +2,12 @@ package file
 
 import (
     "fmt"
-    "unsafe"
 
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/state"
 )
 
 const Name  = "file"
@@ -23,11 +23,11 @@ func New(log log.Log) module.Template {
 }
 
 var (
-    group   = &command.Meta{ "", "group",   "nginx", "This option use to group" }
-    types   = &command.Meta{ "", "type",    "log",   "file type, this is use to find some question" }
-    paths   = &command.Meta{ "", "paths",   nil,     "File path, its is manny option" }
-    publish = &command.Meta{ "", "publish", nil,     "publish topic" }
-    codec   = &command.Meta{ "", "codec",   nil,     "codec method" }
+    group   = command.Metas( "", "group",   "nginx", "This option use to group" )
+    types   = command.Metas( "", "type",    "log",   "file type, this is use to find some question" )
+    paths   = command.Metas( "", "paths",   nil,     "File path, its is manny option" )
+    publish = command.Metas( "", "publish", nil,     "publish topic" )
+    codec   = command.Metas( "", "codec",   nil,     "codec method" )
 )
 
 var commands = []command.Item{
@@ -36,35 +36,40 @@ var commands = []command.Item{
       command.FILE,
       module.Inputs,
       command.SetObject,
-      unsafe.Offsetof(group.Value),
+      state.Enable,
+      0,
       nil },
 
     { types,
       command.FILE,
       module.Inputs,
       command.SetObject,
-      unsafe.Offsetof(types.Value),
+      state.Enable,
+      0,
       nil },
 
     { paths,
       command.FILE,
       module.Inputs,
       command.SetObject,
-      unsafe.Offsetof(paths.Value),
+      state.Enable,
+      0,
       nil },
 
     { publish,
       command.FILE,
       module.Inputs,
       command.SetObject,
-      unsafe.Offsetof(publish.Value),
+      state.Enable,
+      0,
       nil },
 
     { codec,
       command.FILE,
       module.Inputs,
       command.SetObject,
-      unsafe.Offsetof(codec.Value),
+      state.Enable,
+      0,
       nil },
 }
 

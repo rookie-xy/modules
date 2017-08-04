@@ -3,7 +3,6 @@ package file
 import (
     "os"
     "fmt"
-    "unsafe"
 
     "github.com/fsnotify/fsnotify"
 
@@ -12,13 +11,14 @@ import (
     "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/configure"
+    "github.com/rookie-xy/worker/src/state"
 )
 
 const Name  = "file"
 
 var (
-    path = &command.Meta{ "-p", "path", "./usr/local/conf/worker.yaml", "If you want to " +
-                                        "get locally, you need to specify the profile path" }
+    path = command.Metas("-p", "path", "./usr/local/conf/worker.yaml", "If you want to " +
+                                       "get locally, you need to specify the profile path")
 )
 
 var commands = []command.Item{
@@ -27,7 +27,8 @@ var commands = []command.Item{
       command.LINE,
       module.Configure,
       command.SetObject,
-      unsafe.Offsetof(path.Value),
+      state.Enable,
+      0,
       nil },
 
 }

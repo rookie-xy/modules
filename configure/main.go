@@ -1,7 +1,6 @@
 package configure
 
 import (
-    "unsafe"
     "fmt"
 
     "github.com/rookie-xy/worker/src/command"
@@ -23,8 +22,8 @@ import (
 const Name  = module.Configure
 
 var (
-    config = &command.Meta{ "-c", "config", "file", "Specifies how to obtain the configuration file" }
-    format = &command.Meta{ "-f", "format", "yaml", "Specifies the format of the configuration file" }
+    config = command.Metas( "-c", "config", "file", "Specifies how to obtain the configuration file" )
+    format = command.Metas( "-f", "format", "yaml", "Specifies the format of the configuration file" )
 )
 
 var commands = []command.Item{
@@ -33,14 +32,16 @@ var commands = []command.Item{
       command.LINE,
       module.Configure,
       command.SetObject,
-      unsafe.Offsetof(config.Value),
+      state.Enable,
+      0,
       nil },
 
     { format,
       command.LINE,
       module.Configure,
       command.SetObject,
-      unsafe.Offsetof(format.Value),
+      state.Enable,
+      0,
       nil },
 
 }

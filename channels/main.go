@@ -16,7 +16,7 @@ import (
 const Name = module.Channels
 
 var (
-    channels = &command.Meta{ "", Name, nil, "channels may be many" }
+    channels = command.Metas( "", Name, nil, "channels may be many" )
 )
 
 var commands = []command.Item{
@@ -25,6 +25,7 @@ var commands = []command.Item{
       command.FILE,
       Name,
       nil,
+      state.Enable,
       0,
       nil },
 

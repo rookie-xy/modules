@@ -24,10 +24,10 @@ type memoryChannel struct{
 }
 
 var (
-    name   = command.Metas( "", "name", "nginx",    state.On, "This option use to group" )
-    mode   = command.Metas( "", "mode", "pipeline", state.On, "This option use to group" )
-    size   = command.Metas( "", "size", "16384",    state.On, "file type, this is use to find some question" )
-    filter = command.Metas( "", "filter", nil,      state.On, "file type, this is use to find some question" )
+    name   = command.Metas( "", "name", "nginx",    "This option use to group" )
+    mode   = command.Metas( "", "mode", "pipeline", "This option use to group" )
+    size   = command.Metas( "", "size", "16384",    "file type, this is use to find some question" )
+    filter = command.Metas( "", "filter", nil,      "file type, this is use to find some question" )
 )
 
 var commands = []command.Item{
@@ -36,6 +36,7 @@ var commands = []command.Item{
       command.FILE,
       module.Channels,
       command.SetObject,
+      state.Enable,
       0,
       nil },
 
@@ -43,6 +44,7 @@ var commands = []command.Item{
       command.FILE,
       module.Channels,
       command.SetObject,
+      state.Enable,
       0,
       nil },
 
@@ -50,6 +52,7 @@ var commands = []command.Item{
       command.FILE,
       module.Channels,
       command.SetObject,
+      state.Enable,
       0,
       nil },
 
@@ -57,6 +60,7 @@ var commands = []command.Item{
       command.FILE,
       module.Channels,
       command.SetObject,
+      state.Enable,
       0,
       nil },
 

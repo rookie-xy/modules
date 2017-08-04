@@ -14,7 +14,7 @@ import (
 const Name = module.Outputs
 
 var (
-    outputs = &command.Meta{ "", Name, nil, "outputs may be many" }
+    outputs = command.Metas("", Name, nil, "outputs may be many")
 )
 
 var commands = []command.Item{
@@ -23,6 +23,7 @@ var commands = []command.Item{
       command.FILE,
       Name,
       nil,
+      state.Enable,
       0,
       nil },
 

@@ -1,19 +1,19 @@
 package zookeeper
 
 import (
-    "unsafe"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/register"
     "github.com/rookie-xy/worker/src/log"
+    "github.com/rookie-xy/worker/src/state"
     "fmt"
 )
 
 const Name  = "zookeeper"
 
 var (
-    address = &command.Meta{ "-a", "address", "192.168.1.1:2181", "If you are getting from " +
-                                              "remote, you need to specify the host address" }
+    address = command.Metas( "-a", "address", "192.168.1.1:2181", "If you are getting from " +
+                                              "remote, you need to specify the host address" )
 )
 
 var commands = []command.Item{
@@ -22,7 +22,8 @@ var commands = []command.Item{
       command.LINE,
       module.Configure,
       command.SetObject,
-      unsafe.Offsetof(address.Value),
+      state.Enable,
+      0,
       nil },
 
 }

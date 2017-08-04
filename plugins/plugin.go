@@ -2,18 +2,18 @@ package plugins
 
 import (
     "fmt"
-    "unsafe"
 
     "github.com/rookie-xy/worker/src/plugin"
     "github.com/rookie-xy/worker/src/command"
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/register"
+    "github.com/rookie-xy/worker/src/state"
 
   _ "github.com/rookie-xy/plugins/codec"
 )
 
 var (
-    dso = &command.Meta{ "-so", "plugin", paths, "You can dynamically load the plugin in DSO mode" }
+    dso = command.Metas("-so", "plugin", paths, "You can dynamically load the plugin in DSO mode")
 )
 
 var commands = []command.Item{
@@ -22,7 +22,8 @@ var commands = []command.Item{
       command.LINE,
       module.Plugins,
       command.SetObject,
-      unsafe.Offsetof(dso.Value),
+      state.Enable,
+      0,
       nil },
 
 }

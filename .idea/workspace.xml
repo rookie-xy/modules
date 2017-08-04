@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/main.go" afterPath="$PROJECT_DIR$/channels/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/src/memory/main.go" afterPath="$PROJECT_DIR$/channels/src/memory/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" afterPath="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/configure/main.go" afterPath="$PROJECT_DIR$/configure/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/main.go" afterPath="$PROJECT_DIR$/inputs/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/inputs/src/file/main.go" afterPath="$PROJECT_DIR$/inputs/src/file/main.go" />
-    </list>
+    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="" />
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -191,9 +184,9 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="65" />
-    <option name="y" value="-4" />
+    <option name="y" value="24" />
     <option name="width" value="1301" />
-    <option name="height" value="772" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -680,8 +673,8 @@
     <option name="totallyTimeSpent" value="152185000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
+    <frame x="65" y="24" width="1301" height="744" extended-state="6" />
+    <editor active="false" />
     <layout>
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16812749" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
