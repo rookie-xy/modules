@@ -6,12 +6,11 @@ import (
     "github.com/rookie-xy/worker/src/module"
     "github.com/rookie-xy/worker/src/log"
     "github.com/rookie-xy/worker/src/register"
-//    "github.com/rookie-xy/worker/src/factory"
     "github.com/rookie-xy/worker/src/channel"
+    "github.com/rookie-xy/worker/src/state"
 
   . "github.com/rookie-xy/modules/channels/src/memory/src"
     "github.com/rookie-xy/modules/channels/src/memory/src/subject"
-"github.com/rookie-xy/worker/src/state"
 )
 
 const Name  = "memory"

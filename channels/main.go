@@ -78,7 +78,7 @@ func (r *Channel) Init() {
             for name, value := range configure.(map[interface{}]interface{}) {
                 // 渲染指令
                 for k, v := range value.(map[interface{}]interface{}) {
-                    if status := command.File(k.(string), v); status != state.Ok {
+                    if status := command.File(Name, k.(string), v); status != state.Ok {
                         fmt.Println("command file error", status)
                         //exit(status)
                     }
