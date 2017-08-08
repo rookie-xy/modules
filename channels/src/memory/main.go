@@ -15,7 +15,7 @@ import (
 
 const Name  = "memory"
 
-type memoryChannel struct{
+type memory struct{
     log.Log
     channel.Pull
     subject  *subject.Subject
@@ -66,12 +66,12 @@ var commands = []command.Item{
 }
 
 func New(log log.Log) module.Template {
-    return &memoryChannel{
+    return &memory{
         Log: log,
     }
 }
 
-func (r *memoryChannel) Init() {
+func (r *memory) Init() {
 
     fmt.Println("wwwwwwwwwwwwwwwwwwwwwww", name.Value, mode.Value, size.Value, filter.Value)
 
@@ -98,7 +98,7 @@ func (r *memoryChannel) Init() {
     return
 }
 
-func (r *memoryChannel) Main() {
+func (r *memory) Main() {
     if r.Pull == nil {
         return
     }
@@ -114,7 +114,7 @@ func (r *memoryChannel) Main() {
     }
 }
 
-func (r *memoryChannel) Exit(code int) {
+func (r *memory) Exit(code int) {
     // 退出
 }
 

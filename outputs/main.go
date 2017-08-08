@@ -10,7 +10,7 @@ import (
     "github.com/rookie-xy/worker/src/prototype"
     "github.com/rookie-xy/worker/src/state"
 
-  _ "github.com/rookie-xy/modules/outputs/src/transport"
+  _ "github.com/rookie-xy/modules/outputs/src/sender"
 )
 
 const Name = module.Outputs

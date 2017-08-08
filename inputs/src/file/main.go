@@ -12,12 +12,12 @@ import (
 
 const Name  = "file"
 
-type fileInput struct{
+type file struct{
     log.Log
 }
 
 func New(log log.Log) module.Template {
-    return &fileInput{
+    return &file{
         Log: log,
     }
 }
@@ -73,7 +73,7 @@ var commands = []command.Item{
       nil },
 }
 
-func (r *fileInput) Init() {
+func (r *file) Init() {
     //利用group codec等,进行初始化
 
     fmt.Println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqq", group.Value, types.Value, paths.Value, publish.Value, codec.Value)
@@ -82,11 +82,11 @@ func (r *fileInput) Init() {
     return
 }
 
-func (r *fileInput) Main() {
+func (r *file) Main() {
     // 编写主要业务逻辑
 }
 
-func (r *fileInput) Exit(code int) {
+func (r *file) Exit(code int) {
     // 退出
 }
 
