@@ -3,17 +3,20 @@ package plugins
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/plugin"
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/plugin"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/state"
 
   _ "github.com/rookie-xy/plugins/codec"
+  _ "github.com/rookie-xy/plugins/pipeline"
+  _ "github.com/rookie-xy/plugins/event"
+  _ "github.com/rookie-xy/plugins/client"
 )
 
 var (
-    dso = command.Metas("-so", "plugin", paths, "You can dynamically load the plugin in DSO mode")
+    dso = command.New("-so", "plugin", paths, "You can dynamically load the plugin in DSO mode")
 )
 
 var commands = []command.Item{

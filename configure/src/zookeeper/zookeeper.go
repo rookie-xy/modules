@@ -1,19 +1,19 @@
 package zookeeper
 
 import (
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/state"
     "fmt"
 )
 
 const Name  = "zookeeper"
 
 var (
-    address = command.Metas( "-a", "address", "192.168.1.1:2181", "If you are getting from " +
-                                              "remote, you need to specify the host address" )
+    address = command.New( "-a", "address", "192.168.1.1:2181", "If you are getting from " +
+                                            "remote, you need to specify the host address" )
 )
 
 var commands = []command.Item{

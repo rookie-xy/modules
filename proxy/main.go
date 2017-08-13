@@ -3,20 +3,21 @@ package outputs
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/prototype"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/prototype"
+    "github.com/rookie-xy/hubble/src/state"
 
-  _ "github.com/rookie-xy/modules/outputs/src/sender"
+  _ "github.com/rookie-xy/modules/proxy/src/forward"
+  _ "github.com/rookie-xy/modules/proxy/src/reverse"
 )
 
 const Name = module.Outputs
 
 var (
-    outputs = command.Metas("", Name, nil, "outputs may be many")
+    outputs = command.New("", Name, nil, "outputs may be many")
 )
 
 var commands = []command.Item{

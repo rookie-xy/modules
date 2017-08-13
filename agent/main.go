@@ -3,20 +3,20 @@ package inputs
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/prototype"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/prototype"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/state"
 
-  _ "github.com/rookie-xy/modules/inputs/src/file"
+  _ "github.com/rookie-xy/modules/agent/src/file"
 )
 
 const Name = module.Inputs
 
 var (
-    inputs = command.Metas("", Name, nil, "inputs may be many")
+    inputs = command.New("", Name, nil, "inputs may be many")
 )
 
 var commands = []command.Item{

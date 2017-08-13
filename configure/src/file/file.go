@@ -6,18 +6,18 @@ import (
 
     "github.com/fsnotify/fsnotify"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/configure"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/configure"
+    "github.com/rookie-xy/hubble/src/state"
 )
 
 const Name  = "file"
 
 var (
-    path = command.Metas("-p", "path", "./usr/local/conf/worker.yaml", "If you want to " +
+    path = command.New("-p", "path", "./usr/local/conf/hubble.yaml", "If you want to " +
                                        "get locally, you need to specify the profile path")
 )
 

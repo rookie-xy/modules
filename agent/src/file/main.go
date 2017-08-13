@@ -3,11 +3,12 @@ package file
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/state"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/src/plugin"
 )
 
 const Name  = "file"
@@ -23,11 +24,11 @@ func New(log log.Log) module.Template {
 }
 
 var (
-    group   = command.Metas( "", "group",   "nginx", "This option use to group" )
-    types   = command.Metas( "", "type",    "log",   "file type, this is use to find some question" )
-    paths   = command.Metas( "", "paths",   nil,     "File path, its is manny option" )
-    publish = command.Metas( "", "publish", nil,     "publish topic" )
-    codec   = command.Metas( "", "codec",   nil,     "codec method" )
+    group   = command.New( module.Flag, "group",   "nginx", "This option use to group" )
+    types   = command.New( module.Flag, "type",    "log",   "file type, this is use to find some question" )
+    paths   = command.New( module.Flag, "paths",   nil,     "File path, its is manny option" )
+    codec   = command.New( plugin.Flag, "codec",   nil,     "codec method" )
+    client  = command.New( plugin.Flag, "client",  nil,     "client method" )
 )
 
 var commands = []command.Item{
@@ -56,13 +57,6 @@ var commands = []command.Item{
       0,
       nil },
 
-    { publish,
-      command.FILE,
-      module.Inputs,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
 
     { codec,
       command.FILE,
@@ -71,12 +65,21 @@ var commands = []command.Item{
       state.Enable,
       0,
       nil },
+
+    { client,
+      command.FILE,
+      module.Inputs,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
 }
 
 func (r *file) Init() {
     //利用group codec等,进行初始化
 
-    fmt.Println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqq", group.Value, types.Value, paths.Value, publish.Value, codec.Value)
+    fmt.Println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqq", group.Value, types.Value, paths.Value, codec.Value)
 
 
     return

@@ -1,33 +1,34 @@
-package sender
+package forward
 
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/state"
-    "github.com/rookie-xy/worker/src/factory"
-//    "github.com/rookie-xy/worker/src/types"
- cli "github.com/rookie-xy/worker/src/client"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/src/factory"
+//    "github.com/rookie-xy/hubble/src/types"
+ cli "github.com/rookie-xy/hubble/src/client"
+        "github.com/rookie-xy/hubble/src/plugin"
 )
 
-const Name  = "sender"
+const Name  = "forward"
 
-type sender struct {
+type forward struct {
     log.Log
     clients []cli.Client
 }
 
 var (
-    subscribe = command.Metas( "", "subscribe", nil, "This option use to group" )
-    client    = command.Metas( "", "client",    nil, "This option use to group" )
+    pipeline  = command.New( plugin.Flag, "pipeline",  nil, "This option use to group" )
+    client    = command.New( plugin.Flag, "client",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
 
-    { subscribe,
+    { pipeline,
       command.FILE,
       module.Outputs,
       command.SetObject,
@@ -46,19 +47,20 @@ var commands = []command.Item{
 }
 
 func New(log log.Log) module.Template {
-    return &sender{
+    return &forward{
         Log: log,
     }
 }
 
-func (r *sender) Init() {
+func (r *forward) Init() {
 
     fmt.Println(Name + " init")
-
+    /*
     subscribes := subscribe.Value.([]interface{})
     for index, element := range subscribes {
         fmt.Println("subscribessssssssssssss ", index, element)
     }
+    */
 
     clients := client.Value.(map[interface{}]interface{})
     for key, value := range clients {
@@ -73,7 +75,7 @@ func (r *sender) Init() {
     return
 }
 
-func (r *sender) Main() {
+func (r *forward) Main() {
 
     for {
         select {
@@ -88,7 +90,7 @@ func (r *sender) Main() {
     }
 }
 
-func (r *sender) Exit(code int) {
+func (r *forward) Exit(code int) {
     // 退出
 }
 

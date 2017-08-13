@@ -3,16 +3,16 @@ package configure
 import (
     "fmt"
 
-    "github.com/rookie-xy/worker/src/command"
-    "github.com/rookie-xy/worker/src/module"
-    "github.com/rookie-xy/worker/src/configure"
-    "github.com/rookie-xy/worker/src/observer"
-    "github.com/rookie-xy/worker/src/prototype"
-    "github.com/rookie-xy/worker/src/register"
-    "github.com/rookie-xy/worker/src/log"
-    "github.com/rookie-xy/worker/src/codec"
-    "github.com/rookie-xy/worker/src/state"
-    "github.com/rookie-xy/worker/src/factory"
+    "github.com/rookie-xy/hubble/src/command"
+    "github.com/rookie-xy/hubble/src/module"
+    "github.com/rookie-xy/hubble/src/configure"
+    "github.com/rookie-xy/hubble/src/observer"
+    "github.com/rookie-xy/hubble/src/prototype"
+    "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/src/codec"
+    "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/src/factory"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -22,8 +22,8 @@ import (
 const Name  = module.Configure
 
 var (
-    config = command.Metas( "-c", "config", "file", "Specifies how to obtain the configuration file" )
-    format = command.Metas( "-f", "format", "yaml", "Specifies the format of the configuration file" )
+    config = command.New( "-c", "config", "file", "Specifies how to obtain the configuration file" )
+    format = command.New( "-f", "format", "yaml", "Specifies the format of the configuration file" )
 )
 
 var commands = []command.Item{
@@ -55,7 +55,7 @@ type Configure struct {
 }
 
 func New(log log.Log) module.Template {
-    new := &Configure{
+   new := &Configure{
         Log: log,
     }
 
