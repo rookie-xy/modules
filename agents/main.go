@@ -10,18 +10,18 @@ import (
     "github.com/rookie-xy/hubble/src/register"
     "github.com/rookie-xy/hubble/src/state"
 
-  _ "github.com/rookie-xy/modules/agent/src/file"
+  _ "github.com/rookie-xy/modules/agents/src/file"
 )
 
-const Name = module.Inputs
+const Name = module.Agents
 
 var (
-    inputs = command.New("", Name, nil, "inputs may be many")
+    agents = command.New("", Name, nil, "inputs may be many")
 )
 
 var commands = []command.Item{
 
-    { inputs,
+    { agents,
       command.FILE,
       Name,
       nil,
@@ -31,14 +31,14 @@ var commands = []command.Item{
 
 }
 
-type Input struct {
+type Agent struct {
     log.Log
     event chan int
     children []module.Template
 }
 
 func New(log log.Log) module.Template {
-    new := &Input{
+    new := &Agent{
         Log: log,
         event: make(chan int, 1),
     }
@@ -48,13 +48,13 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Input) Update(configure prototype.Object) int {
+func (r *Agent) Update(configure prototype.Object) int {
     if configure == nil {
         return state.Error
     }
 
     exist := true
-    inputs.Value, exist = configure.(map[interface{}]interface{})[Name]
+    agents.Value, exist = configure.(map[interface{}]interface{})[Name]
     if !exist {
         fmt.Println("Not found inputs configure")
         return state.Error
@@ -64,13 +64,14 @@ func (r *Input) Update(configure prototype.Object) int {
     return state.Ok
 }
 
-func (r *Input) Init() {
+func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
-    fmt.Println("input init")
-    //fmt.Println(inputs.Value)
+    fmt.Println("agents init")
+    fmt.Println(agents.Value)
+    return
 
-    if v := inputs.Value; v != nil {
+    if v := agents.Value; v != nil {
         // key为各个模块名字，value为各个模块配置
         for _, configure := range v.([]interface{}) {
             // 渲染模块命令
@@ -105,7 +106,7 @@ func (r *Input) Init() {
     return
 }
 
-func (r *Input) Main() {
+func (r *Agent) Main() {
     // 启动各个组件
     if len(r.children) < 1 {
         return
@@ -120,7 +121,7 @@ func (r *Input) Main() {
     }
 }
 
-func (r *Input) Exit(code int) {
+func (r *Agent) Exit(code int) {
     /*
     for _, module := range r.children {
         module.Exit()
@@ -131,7 +132,7 @@ func (r *Input) Exit(code int) {
     */
 }
 
-func (r *Input) Load(m module.Template) {
+func (r *Agent) Load(m module.Template) {
     r.children = append(r.children, m)
 }
 

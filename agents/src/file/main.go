@@ -35,7 +35,7 @@ var commands = []command.Item{
 
     { group,
       command.FILE,
-      module.Inputs,
+      module.Agents,
       command.SetObject,
       state.Enable,
       0,
@@ -43,7 +43,7 @@ var commands = []command.Item{
 
     { types,
       command.FILE,
-      module.Inputs,
+      module.Agents,
       command.SetObject,
       state.Enable,
       0,
@@ -51,7 +51,7 @@ var commands = []command.Item{
 
     { paths,
       command.FILE,
-      module.Inputs,
+      module.Agents,
       command.SetObject,
       state.Enable,
       0,
@@ -60,7 +60,7 @@ var commands = []command.Item{
 
     { codec,
       command.FILE,
-      module.Inputs,
+      module.Agents,
       command.SetObject,
       state.Enable,
       0,
@@ -68,7 +68,7 @@ var commands = []command.Item{
 
     { client,
       command.FILE,
-      module.Inputs,
+      module.Agents,
       command.SetObject,
       state.Enable,
       0,
@@ -94,5 +94,5 @@ func (r *file) Exit(code int) {
 }
 
 func init() {
-    register.Module(module.Inputs, Name, commands, New)
+    register.Module(module.Agents, Name, commands, New)
 }

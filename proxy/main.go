@@ -14,15 +14,15 @@ import (
   _ "github.com/rookie-xy/modules/proxy/src/reverse"
 )
 
-const Name = module.Outputs
+const Name = module.Proxy
 
 var (
-    outputs = command.New("", Name, nil, "outputs may be many")
+    proxy = command.New("", Name, nil, "outputs may be many")
 )
 
 var commands = []command.Item{
 
-    { outputs,
+    { proxy,
       command.FILE,
       Name,
       nil,
@@ -32,14 +32,14 @@ var commands = []command.Item{
 
 }
 
-type Output struct {
+type Proxy struct {
     log.Log
     event    chan int
     children []module.Template
 }
 
 func New(log log.Log) module.Template {
-    new := &Output{
+    new := &Proxy{
         Log: log,
         event: make(chan int, 1),
     }
@@ -49,21 +49,25 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Output) Init() {
+func (r *Proxy) Init() {
     // 等待配置更新完成的信号
     <-r.event
-    fmt.Println("output init")
+    fmt.Println("proxy init")
+    //fmt.Println(proxy.Value)
+    //return
 
-    if v := outputs.Value; v != nil {
+    if v := proxy.Value; v != nil {
         // key为各个模块名字，value为各个模块配置
         for _, configure := range v.([]interface{}) {
             // 渲染模块命令
             for name, value := range configure.(map[interface{}]interface{}) {
                 // 渲染指令
-                for k, v := range value.(map[interface{}]interface{}) {
-                    if status := command.File(Name, k.(string), v); status != state.Ok {
-                        fmt.Println("command file error", status)
-                        //exit(status)
+                if value != nil {
+                    for k, v := range value.(map[interface{}]interface{}) {
+                        if status := command.File(Name, k.(string), v); status != state.Ok {
+                            fmt.Println("command file error", status)
+                            //exit(status)
+                        }
                     }
                 }
 
@@ -89,21 +93,21 @@ func (r *Output) Init() {
     return
 }
 
-func (r *Output) Main() {
+func (r *Proxy) Main() {
     return
 }
 
-func (r *Output) Exit(code int) {
+func (r *Proxy) Exit(code int) {
     return
 }
 
-func (r *Output) Update(configure prototype.Object) int {
+func (r *Proxy) Update(configure prototype.Object) int {
     if configure == nil {
         return state.Error
     }
 
     exist := true
-    outputs.Value, exist = configure.(map[interface{}]interface{})[Name]
+    proxy.Value, exist = configure.(map[interface{}]interface{})[Name]
     if !exist {
         fmt.Println("Not found inputs configure")
         return state.Error
@@ -113,7 +117,7 @@ func (r *Output) Update(configure prototype.Object) int {
     return state.Ok
 }
 
-func (r *Output) Load(m module.Template) {
+func (r *Proxy) Load(m module.Template) {
     r.children = append(r.children, m)
 }
 
