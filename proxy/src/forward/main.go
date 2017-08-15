@@ -7,18 +7,19 @@ import (
     "github.com/rookie-xy/hubble/src/module"
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/factory"
     "github.com/rookie-xy/hubble/src/state"
-//    "github.com/rookie-xy/hubble/src/factory"
-//    "github.com/rookie-xy/hubble/src/types"
- cli "github.com/rookie-xy/hubble/src/client"
+  cli "github.com/rookie-xy/hubble/src/client"
         "github.com/rookie-xy/hubble/src/plugin"
+  pipe "github.com/rookie-xy/hubble/src/pipeline"
 )
 
 const Name  = "forward"
 
 type forward struct {
     log.Log
-    clients []cli.Client
+    client  cli.Client
+    pipeline pipe.Pipeline
 }
 
 var (
@@ -53,44 +54,47 @@ func New(log log.Log) module.Template {
 }
 
 func (r *forward) Init() {
-
-    fmt.Println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhh", pipeline.GetKey(), pipeline.GetMap())
-    fmt.Println("iiiiiiiiiiiiiiiiiiiiiiiiiiiii", client.GetKey(), client.GetMap())
-
-    fmt.Println(Name + " init")
-    /*
-    subscribes := subscribe.Value.([]interface{})
-    for index, element := range subscribes {
-        fmt.Println("subscribessssssssssssss ", index, element)
+    key := pipeline.GetFlag() + "." + pipeline.GetKey()
+    if pipeline, err := factory.Pipeline(key, r.Log, pipeline); err != nil {
+        fmt.Println("pipeline error", err)
+        return
+    } else {
+        r.pipeline = pipeline
     }
-    */
-/*
-    clients := client.Value.(map[interface{}]interface{})
-    for key, value := range clients {
-        if client, err := factory.Client(value.(string)); err == nil {
-            r.clients = append(r.clients, client)
-            //fmt.Println("factory client error")
-        }
 
-        fmt.Println("clientssssssssssssss ", key, value)
+    key = client.GetFlag() + "." + client.GetKey()
+    if client, err := factory.Client(key, r.Log, client); err != nil {
+        fmt.Println("client error", err)
+        return
+    } else {
+        r.client = client
     }
-    */
+
+    //fmt.Println("hahahahahhahahahahah")
 
     return
 }
 
 func (r *forward) Main() {
+    if r.client == nil || r.pipeline == nil {
+        fmt.Println("kaddddddddddddddddddddddddd")
+        return
+    } else {
+        fmt.Println("jjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+    }
 
     for {
-        select {
-/*
-        case:
+        event, status := r.pipeline.Pull(10)
 
-            for _, client := range r.clients {
-                client.Sender()
-            }
-            */
+        switch status {
+
+        case state.Ignore:
+            continue
+        case state.Busy:
+            //TODO sleep
         }
+
+        r.client.Sender(event)
     }
 }
 

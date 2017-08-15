@@ -49,9 +49,10 @@ var commands = []command.Item{
 type Configure struct {
     log.Log
     codec.Codec
-    observers []observer.Observer
-    data      prototype.Object
-    children []module.Template
+
+    observers  []observer.Observer
+    data       prototype.Object
+    children   []module.Template
 }
 
 func New(log log.Log) module.Template {
@@ -88,44 +89,21 @@ func (r *Configure) update() {
         if observer.Update(r.data) == state.Error {
             break
         }
-        /*
-        status := observer.Update(r.data)
-        fmt.Println("jjjjjjjjjjjjjjjj")
-        if status == state.Ok {
-            break
-
-        } else if status == state.Declined {
-            continue
-
-        } else if status == state.Error {
-            break
-        }
-        */
     }
 }
 
 func (r *Configure) Init() {
-    if v := config.Value; v != nil {
-        key := Name + "." + v.(string)
-
-        if module := module.Setup(key, r.Log); module != nil {
-            r.Load(module)
-        }
+    key := Name + "." + config.GetString()
+    if module := module.Setup(key, r.Log); module != nil {
+        r.Load(module)
     }
 
-    if v := format.Value; v != nil {
+    if codec, err := factory.Codec(format.GetString(), r.Log, nil); err != nil {
+        fmt.Println(err)
+        return
 
-        config := &codec.Config{
-            Name: v.(string),
-        }
-
-        if codec, err := factory.Codec(config); err != nil {
-            fmt.Println(err)
-            return
-
-        } else {
-            r.Codec = codec
-        }
+    } else {
+        r.Codec = codec
     }
 
     return
@@ -150,9 +128,6 @@ func (r *Configure) Main() {
                 fmt.Println("error", r.data)
                 return
             }
-
-            //fmt.Println(r.data)
-            //fmt.Println("yuezhanggggggggggggggggggggggggggggg", len(r.observers))
 
             r.Notify()
 
