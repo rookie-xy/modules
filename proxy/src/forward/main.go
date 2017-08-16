@@ -70,18 +70,15 @@ func (r *forward) Init() {
         r.client = client
     }
 
-    //fmt.Println("hahahahahhahahahahah")
-
     return
 }
 
 func (r *forward) Main() {
     if r.client == nil || r.pipeline == nil {
-        fmt.Println("kaddddddddddddddddddddddddd")
         return
-    } else {
-        fmt.Println("jjjjjjjjjjjjjjjjjjjjjjjjjjjj")
     }
+
+    fmt.Println("Start proxy forward module ...")
 
     for {
         event, status := r.pipeline.Pull(10)

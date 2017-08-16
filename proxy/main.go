@@ -56,9 +56,9 @@ func (r *Proxy) Init() {
     //fmt.Println(proxy.Value)
     //return
 
-    if v := proxy.Value; v != nil {
+    if value := proxy.GetArray(); value != nil {
         // key为各个模块名字，value为各个模块配置
-        for _, configure := range v.([]interface{}) {
+        for _, configure := range value {
             // 渲染模块命令
             for name, value := range configure.(map[interface{}]interface{}) {
                 // 渲染指令
@@ -94,7 +94,18 @@ func (r *Proxy) Init() {
 }
 
 func (r *Proxy) Main() {
-    return
+    fmt.Println("Start proxy modules ...")
+    if len(r.children) < 1 {
+        return
+    }
+
+    for _, child := range r.children {
+        child.Main()
+    }
+
+    for ;; {
+        select {}
+    }
 }
 
 func (r *Proxy) Exit(code int) {
@@ -109,7 +120,7 @@ func (r *Proxy) Update(configure prototype.Object) int {
     exist := true
     proxy.Value, exist = configure.(map[interface{}]interface{})[Name]
     if !exist {
-        fmt.Println("Not found inputs configure")
+        fmt.Println("Not found proxy configure")
         return state.Error
     }
 

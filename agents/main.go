@@ -68,12 +68,11 @@ func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
     fmt.Println("agents init")
-    fmt.Println(agents.Value)
-    return
+    //fmt.Println(agents.Value)
 
-    if v := agents.Value; v != nil {
+    if value := agents.GetArray(); value != nil {
         // key为各个模块名字，value为各个模块配置
-        for _, configure := range v.([]interface{}) {
+        for _, configure := range value {
             // 渲染模块命令
             for name, value := range configure.(map[interface{}]interface{}) {
                 // 渲染指令
@@ -107,7 +106,7 @@ func (r *Agent) Init() {
 }
 
 func (r *Agent) Main() {
-    // 启动各个组件
+    fmt.Println("Start agent modules ...")
     if len(r.children) < 1 {
         return
     }

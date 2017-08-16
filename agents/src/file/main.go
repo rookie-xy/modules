@@ -79,13 +79,37 @@ var commands = []command.Item{
 func (r *file) Init() {
     //利用group codec等,进行初始化
 
-    fmt.Println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqq", group.Value, types.Value, paths.Value, codec.Value)
+    //init group
+    fmt.Println(group.GetString())
 
+    // init type
+    fmt.Println(types.GetString())
+
+    if p := paths.GetArray(); p != nil {
+        // init paths
+        fmt.Println(p)
+    }
+
+    if c := codec.GetMap(); c != nil {
+        // init codec
+        fmt.Println(c)
+        codec.Clear()
+    } else {
+        // default init
+    }
+
+    if c := client.GetMap(); c != nil {
+        fmt.Println(c)
+        client.Clear()
+    } else {
+        // default init
+    }
 
     return
 }
 
 func (r *file) Main() {
+    fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
 }
 
