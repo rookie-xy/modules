@@ -7,11 +7,12 @@ import (
     "github.com/rookie-xy/hubble/src/module"
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/prototype"
     "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/src/types"
 
   _ "github.com/rookie-xy/modules/proxy/src/forward"
   _ "github.com/rookie-xy/modules/proxy/src/reverse"
+
 )
 
 const Name = module.Proxy
@@ -50,44 +51,54 @@ func New(log log.Log) module.Template {
 }
 
 func (r *Proxy) Init() {
-    // 等待配置更新完成的信号
     <-r.event
     fmt.Println("proxy init")
-    //fmt.Println(proxy.Value)
-    //return
 
-    if value := proxy.GetArray(); value != nil {
-        // key为各个模块名字，value为各个模块配置
-        for _, configure := range value {
-            // 渲染模块命令
-            for name, value := range configure.(map[interface{}]interface{}) {
-                // 渲染指令
-                if value != nil {
-                    for k, v := range value.(map[interface{}]interface{}) {
-                        if status := command.File(Name, k.(string), v); status != state.Ok {
+    build := func(name string, i types.Iterator) int {
+        for iterator := i; iterator.Has(); iterator.Next() {
+            iterm := iterator.Iterm()
+
+            if value := iterm.Value; value != nil {
+                it := value.GetIterator(nil)
+                if it == nil {
+                    continue
+                }
+
+                for iterator := it; iterator.Has(); iterator.Next() {
+                    if iterm := iterator.Iterm(); iterm != nil {
+                        key := iterm.Key.GetString()
+
+                        if status := command.File(name, key, iterm.Value); status != state.Ok {
                             fmt.Println("command file error", status)
-                            //exit(status)
+                            return state.Error
                         }
                     }
                 }
-
-                // 安装模块
-                key := Name + "." + name.(string)
-                module := module.Setup(key, r.Log)
-                if module != nil {
-                    module.Init()
-
-                } else {
-                    fmt.Println("output setup module error")
-                    return
-                }
-
-                r.Load(module)
             }
+
+            namespace := name + "." + iterm.Key.GetString()
+            module := module.Setup(namespace, r.Log)
+            if module != nil {
+                module.Init()
+
+            } else {
+                fmt.Println("proxy module setup error")
+                return state.Error
+            }
+
+            r.Load(module)
         }
 
-    } else {
-        fmt.Println("output value is nil")
+        return state.Ok
+    }
+
+    if proxy := proxy.GetValue(); proxy != nil {
+        iterator := proxy.GetIterator(nil)
+        if iterator != nil {
+            if build(Name, iterator) == state.Error {
+                return
+            }
+        }
     }
 
     return
@@ -112,16 +123,18 @@ func (r *Proxy) Exit(code int) {
     return
 }
 
-func (r *Proxy) Update(configure prototype.Object) int {
-    if configure == nil {
+func (r *Proxy) Update(v types.Value) int {
+    if v.GetType() != types.Map {
         return state.Error
     }
 
     exist := true
-    proxy.Value, exist = configure.(map[interface{}]interface{})[Name]
-    if !exist {
-        fmt.Println("Not found proxy configure")
-        return state.Error
+    if value := v.GetMap(); value != nil {
+        proxy.Value, exist = value[Name]
+        if !exist {
+            fmt.Println("Not found proxy configure")
+            return state.Error
+        }
     }
 
     r.event <- 1

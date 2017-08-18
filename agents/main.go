@@ -6,9 +6,9 @@ import (
     "github.com/rookie-xy/hubble/src/command"
     "github.com/rookie-xy/hubble/src/module"
     "github.com/rookie-xy/hubble/src/log"
-    "github.com/rookie-xy/hubble/src/prototype"
     "github.com/rookie-xy/hubble/src/register"
     "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/src/types"
 
   _ "github.com/rookie-xy/modules/agents/src/file"
 )
@@ -48,7 +48,8 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Agent) Update(configure prototype.Object) int {
+func (r *Agent) Update(v types.Value) int {
+    /*
     if configure == nil {
         return state.Error
     }
@@ -59,6 +60,7 @@ func (r *Agent) Update(configure prototype.Object) int {
         fmt.Println("Not found inputs configure")
         return state.Error
     }
+    */
 
     r.event <- 1
     return state.Ok
@@ -69,7 +71,7 @@ func (r *Agent) Init() {
     <-r.event
     fmt.Println("agents init")
     //fmt.Println(agents.Value)
-
+/*
     if value := agents.GetArray(); value != nil {
         // key为各个模块名字，value为各个模块配置
         for _, configure := range value {
@@ -101,6 +103,7 @@ func (r *Agent) Init() {
     } else {
         fmt.Println("input value is nil")
     }
+    */
 
     return
 }

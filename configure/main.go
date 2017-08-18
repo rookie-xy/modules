@@ -13,6 +13,7 @@ import (
     "github.com/rookie-xy/hubble/src/codec"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/factory"
+    "github.com/rookie-xy/hubble/src/value"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
@@ -86,19 +87,27 @@ func (r *Configure) Notify() {
 
 func (r *Configure) update() {
     for _, observer := range r.observers {
-        if observer.Update(r.data) == state.Error {
+        v := value.New(r.data)
+        if observer.Update(v) == state.Error {
             break
         }
     }
 }
 
 func (r *Configure) Init() {
-    key := Name + "." + config.GetString()
-    if module := module.Setup(key, r.Log); module != nil {
-        r.Load(module)
+    if value := config.GetValue(); value != nil {
+        key := Name + "." + value.GetString()
+        if module := module.Setup(key, r.Log); module != nil {
+            r.Load(module)
+        }
     }
 
-    if codec, err := factory.Codec(format.GetString(), r.Log, nil); err != nil {
+    value := format.GetValue()
+    if value == nil {
+        return
+    }
+
+    if codec, err := factory.Codec(value.GetString(), r.Log, nil); err != nil {
         fmt.Println(err)
         return
 

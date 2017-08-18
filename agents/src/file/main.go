@@ -78,7 +78,7 @@ var commands = []command.Item{
 
 func (r *file) Init() {
     //利用group codec等,进行初始化
-
+/*
     //init group
     fmt.Println(group.GetString())
 
@@ -104,7 +104,7 @@ func (r *file) Init() {
     } else {
         // default init
     }
-
+*/
     return
 }
 
