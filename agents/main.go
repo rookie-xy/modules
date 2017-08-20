@@ -9,6 +9,8 @@ import (
     "github.com/rookie-xy/hubble/src/register"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/types"
+    "github.com/rookie-xy/hubble/src/types/value"
+    "github.com/rookie-xy/hubble/src/configure"
 
   _ "github.com/rookie-xy/modules/agents/src/file"
 )
@@ -48,19 +50,21 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Agent) Update(v types.Value) int {
-    /*
-    if configure == nil {
+func (r *Agent) Update(o types.Object) int {
+    v := value.New(o)
+    if v.GetType() != types.Map {
         return state.Error
     }
 
-    exist := true
-    agents.Value, exist = configure.(map[interface{}]interface{})[Name]
-    if !exist {
-        fmt.Println("Not found inputs configure")
-        return state.Error
+    if value := v.GetMap(); value != nil {
+        val, exist := value[Name]
+        if !exist {
+            fmt.Println("Not found agents configure")
+            return state.Error
+        }
+
+        agents.SetValue(val)
     }
-    */
 
     r.event <- 1
     return state.Ok
@@ -70,40 +74,28 @@ func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
     fmt.Println("agents init")
-    //fmt.Println(agents.Value)
-/*
-    if value := agents.GetArray(); value != nil {
-        // key为各个模块名字，value为各个模块配置
-        for _, configure := range value {
-            // 渲染模块命令
-            for name, value := range configure.(map[interface{}]interface{}) {
-                // 渲染指令
-                for k, v := range value.(map[interface{}]interface{}) {
-                    if status := command.File(Name, k.(string), v); status != state.Ok {
-                        fmt.Println("command file error", status)
-                        //exit(status)
-                    }
-                }
 
-                // 安装模块
-                key := Name + "." + name.(string)
-                module := module.Setup(key, r.Log)
-                if module != nil {
-                    module.Init()
+    if agents := agents.GetValue(); agents != nil {
+
+        iterator := agents.GetIterator(nil)
+        if iterator != nil {
+            for {
+                if build := configure.Build; build != nil {
+                    if build(Name, iterator, r.Load) == state.Error {
+                        fmt.Println("agents init error")
+                        return
+                    } else {
+                        fmt.Println("agents init not error")
+                        break
+                    }
 
                 } else {
-                    fmt.Println("inputs setup module error")
-                    return
+                    fmt.Println("proxy hava not init finish")
+                    continue
                 }
-
-                r.Load(module)
             }
         }
-
-    } else {
-        fmt.Println("input value is nil")
     }
-    */
 
     return
 }

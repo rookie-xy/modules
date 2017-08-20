@@ -9,10 +9,12 @@ import (
     "github.com/rookie-xy/hubble/src/register"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/types"
+	"github.com/rookie-xy/hubble/src/types/value"
 
   _ "github.com/rookie-xy/modules/proxy/src/forward"
   _ "github.com/rookie-xy/modules/proxy/src/reverse"
 
+    "github.com/rookie-xy/hubble/src/configure"
 )
 
 const Name = module.Proxy
@@ -54,11 +56,12 @@ func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
 
-    build := func(name string, i types.Iterator) int {
+    build := func(name string, i types.Iterator, load module.Load) int {
         for iterator := i; iterator.Has(); iterator.Next() {
             iterm := iterator.Iterm()
 
-            if value := iterm.Value; value != nil {
+            if v := iterm.Value; v != nil {
+		value := value.New(v)
                 it := value.GetIterator(nil)
                 if it == nil {
                     continue
@@ -82,11 +85,11 @@ func (r *Proxy) Init() {
                 module.Init()
 
             } else {
-                fmt.Println("proxy module setup error")
+                fmt.Printf("[%s] module setup error", name)
                 return state.Error
             }
 
-            r.Load(module)
+            load(module)
         }
 
         return state.Ok
@@ -95,9 +98,11 @@ func (r *Proxy) Init() {
     if proxy := proxy.GetValue(); proxy != nil {
         iterator := proxy.GetIterator(nil)
         if iterator != nil {
-            if build(Name, iterator) == state.Error {
+            if build(Name, iterator, r.Load) == state.Error {
                 return
             }
+
+            configure.Build = build
         }
     }
 
@@ -123,18 +128,20 @@ func (r *Proxy) Exit(code int) {
     return
 }
 
-func (r *Proxy) Update(v types.Value) int {
+func (r *Proxy) Update(o types.Object) int {
+    v := value.New(o)
     if v.GetType() != types.Map {
         return state.Error
     }
 
-    exist := true
     if value := v.GetMap(); value != nil {
-        proxy.Value, exist = value[Name]
+        val, exist := value[Name]
         if !exist {
             fmt.Println("Not found proxy configure")
             return state.Error
         }
+
+        proxy.SetValue(val)
     }
 
     r.event <- 1

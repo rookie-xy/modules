@@ -18,7 +18,7 @@ const Name  = "file"
 
 var (
     path = command.New("-p", "path", "./usr/local/conf/hubble.yaml", "If you want to " +
-                                       "get locally, you need to specify the profile path")
+                                     "get locally, you need to specify the profile path")
 )
 
 var commands = []command.Item{
@@ -39,27 +39,34 @@ type file struct {
     name      string
     size      int64
 
+   *configure.Configure
+
     watcher  *fsnotify.Watcher
 }
 
 func New(log log.Log) module.Template {
-    return &file{
+    new := &file{
         Log: log,
+        Configure: configure.New(log),
     }
+
+    register.Subject(module.Configure + "." + Name, new.Configure)
+
+    return new
 }
 
 func (r *file) Init() {
     // 初始化文件监视器，监控配置文件
     resource := ""
 
-    if v := path.Value; v != nil {
-        resource = v.(string)
+    if value := path.GetValue(); value != nil {
+        resource = value.GetString()
     }
 
     fileInfo, err := os.Stat(resource)
     if err != nil {
         if os.IsNotExist(err) {
-	           fmt.Println("a file or directory does not exist")
+	    fmt.Println("a file or directory does not exist")
 
         } else if os.IsPermission(err) {
             fmt.Println("permission is denied")
@@ -108,7 +115,9 @@ func (r *file) Main() {
         return
     }
 
-    configure.Event <- char
+    //configure.Event <- char
+    r.Notify(char)
+
     file.Close()
 
     // 发现文件变更，通知给其他模块
@@ -117,7 +126,8 @@ func (r *file) Main() {
 
         case event := <-r.watcher.Events:
             if event.Op & fsnotify.Write == fsnotify.Write {
-                configure.Event <- char
+                //configure.Event <- char
+                r.Notify(char)
             }
 
         case err := <-r.watcher.Errors:

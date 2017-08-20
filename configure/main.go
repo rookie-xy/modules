@@ -2,22 +2,19 @@ package configure
 
 import (
     "fmt"
-
     "github.com/rookie-xy/hubble/src/command"
     "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/configure"
+    "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/observer"
-    "github.com/rookie-xy/hubble/src/prototype"
     "github.com/rookie-xy/hubble/src/register"
+    "github.com/rookie-xy/hubble/src/factory"
+    "github.com/rookie-xy/hubble/src/types"
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/codec"
-    "github.com/rookie-xy/hubble/src/state"
-    "github.com/rookie-xy/hubble/src/factory"
-    "github.com/rookie-xy/hubble/src/value"
+	"github.com/rookie-xy/hubble/src/memento"
 
   _ "github.com/rookie-xy/modules/configure/src/file"
   _ "github.com/rookie-xy/modules/configure/src/zookeeper"
-
 )
 
 const Name  = module.Configure
@@ -52,16 +49,18 @@ type Configure struct {
     codec.Codec
 
     observers  []observer.Observer
-    data       prototype.Object
+    event      chan types.Object
     children   []module.Template
 }
 
 func New(log log.Log) module.Template {
-   new := &Configure{
+    new := &Configure{
         Log: log,
+	event: make(chan types.Object, 1),
     }
 
     register.Subject(Name, new)
+    register.Observer(Name, new)
 
     return new
 }
@@ -76,28 +75,40 @@ func (r *Configure) Attach(o observer.Observer) {
     return
 }
 
-func (r *Configure) Notify() {
-    if r.data == nil {
-        return
+func (r *Configure) Notify(o types.Object) {
+    if o != nil {
+	r.update(o)
     }
 
     //fmt.Println(r.data)
-    r.update()
+    return
 }
 
-func (r *Configure) update() {
+func (r *Configure) update(o types.Object) {
     for _, observer := range r.observers {
-        v := value.New(r.data)
-        if observer.Update(v) == state.Error {
+        if observer.Update(o) == state.Error {
             break
         }
     }
 }
 
+func (r *Configure) Update(o types.Object) int {
+
+    data, err := r.Decode(o.([]byte))
+    if err != nil {
+        fmt.Println("error", data)
+        return state.Error
+    }
+
+    r.event <- data
+
+    return state.Ok
+}
+
 func (r *Configure) Init() {
     if value := config.GetValue(); value != nil {
-        key := Name + "." + value.GetString()
-        if module := module.Setup(key, r.Log); module != nil {
+        memento.Name = Name + "." + value.GetString()
+        if module := module.Setup(memento.Name, r.Log); module != nil {
             r.Load(module)
         }
     }
@@ -126,19 +137,10 @@ func (r *Configure) Main() {
     }
 
     for ;; {
+	select {
 
-        select {
-
-        case e := <-configure.Event:
-            var err error
-
-            r.data, err = r.Decode(e)
-            if err != nil {
-                fmt.Println("error", r.data)
-                return
-            }
-
-            r.Notify()
+        case e := <- r.event:
+            r.Notify(e)
 
         default:
 

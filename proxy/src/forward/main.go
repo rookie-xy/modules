@@ -54,8 +54,10 @@ func New(log log.Log) module.Template {
 }
 
 func (r *forward) Init() {
+//       pv :=  pipeline.GetValue()
+//        fmt.Println("pvvvvvvvvvvvvvvvvvvv", pv.GetType())
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    if pipeline, err := factory.Pipeline(key, r.Log, pipeline); err != nil {
+    if pipeline, err := factory.Pipeline(key, r.Log, pipeline.GetValue()); err != nil {
         fmt.Println("pipeline error", err)
         return
     } else {
@@ -63,7 +65,7 @@ func (r *forward) Init() {
     }
 
     key = client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, r.Log, client); err != nil {
+    if client, err := factory.Client(key, r.Log, client.GetValue()); err != nil {
         fmt.Println("client error", err)
         return
     } else {

@@ -9,6 +9,8 @@ import (
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/plugin"
+//        "github.com/rookie-xy/hubble/src/types/value"
+//        "github.com/rookie-xy/hubble/src/types/value"
 )
 
 const Name  = "file"
@@ -77,14 +79,19 @@ var commands = []command.Item{
 }
 
 func (r *file) Init() {
+        if group := group.GetValue(); group != nil {
+                fmt.Println("groupppppppppppppp", group.GetString())
+        }
     //利用group codec等,进行初始化
-/*
+
     //init group
-    fmt.Println(group.GetString())
+    //gValue := group.GetValue()
+    //fmt.Println(gValue.GetString())
 
     // init type
-    fmt.Println(types.GetString())
-
+    //tValue := types.GetValue()
+    //fmt.Println(tValue.GetString())
+/*
     if p := paths.GetArray(); p != nil {
         // init paths
         fmt.Println(p)
