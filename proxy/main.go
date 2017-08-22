@@ -61,7 +61,7 @@ func (r *Proxy) Init() {
             iterm := iterator.Iterm()
 
             if v := iterm.Value; v != nil {
-		value := value.New(v)
+                value := value.New(v)
                 it := value.GetIterator(nil)
                 if it == nil {
                     continue

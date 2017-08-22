@@ -115,7 +115,6 @@ func (r *file) Main() {
         return
     }
 
-    //configure.Event <- char
     r.Notify(char)
 
     file.Close()
@@ -126,7 +125,6 @@ func (r *file) Main() {
 
         case event := <-r.watcher.Events:
             if event.Op & fsnotify.Write == fsnotify.Write {
-                //configure.Event <- char
                 r.Notify(char)
             }
 

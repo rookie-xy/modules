@@ -9,6 +9,7 @@ import (
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/plugin"
+"github.com/rookie-xy/hubble/src/paths"
 //        "github.com/rookie-xy/hubble/src/types/value"
 //        "github.com/rookie-xy/hubble/src/types/value"
 )
@@ -28,7 +29,7 @@ func New(log log.Log) module.Template {
 var (
     group   = command.New( module.Flag, "group",   "nginx", "This option use to group" )
     types   = command.New( module.Flag, "type",    "log",   "file type, this is use to find some question" )
-    paths   = command.New( module.Flag, "paths",   nil,     "File path, its is manny option" )
+    path    = command.New( module.Flag, "paths",   nil,     "File path, its is manny option" )
     codec   = command.New( plugin.Flag, "codec",   nil,     "codec method" )
     client  = command.New( plugin.Flag, "client",  nil,     "client method" )
 )
@@ -51,7 +52,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { paths,
+    { path,
       command.FILE,
       module.Agents,
       command.SetObject,
@@ -79,9 +80,13 @@ var commands = []command.Item{
 }
 
 func (r *file) Init() {
-        if group := group.GetValue(); group != nil {
-                fmt.Println("groupppppppppppppp", group.GetString())
-        }
+    if group := group.GetValue(); group != nil {
+        fmt.Println("groupppppppppppppp", group.GetString())
+    }
+
+    registry := paths.Resolve(paths.Data, "registry")
+    fmt.Println("hahahahha",registry)
+
     //利用group codec等,进行初始化
 
     //init group

@@ -56,7 +56,7 @@ type Configure struct {
 func New(log log.Log) module.Template {
     new := &Configure{
         Log: log,
-	event: make(chan types.Object, 1),
+        event: make(chan types.Object, 1),
     }
 
     register.Subject(Name, new)
@@ -137,7 +137,7 @@ func (r *Configure) Main() {
     }
 
     for ;; {
-	select {
+        select {
 
         case e := <- r.event:
             r.Notify(e)
