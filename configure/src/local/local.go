@@ -14,10 +14,10 @@ import (
     "github.com/rookie-xy/hubble/src/state"
 )
 
-const Name  = "file"
+const Name  = "local"
 
 var (
-    path = command.New("-p", "path", "./usr/local/conf/hubble.yaml", "If you want to " +
+    path = command.New("-f", "file", "./usr/local/conf/hubble.yaml", "If you want to " +
                                      "get locally, you need to specify the profile path")
 )
 

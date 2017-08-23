@@ -13,20 +13,20 @@ import (
     "github.com/rookie-xy/hubble/src/codec"
 	"github.com/rookie-xy/hubble/src/memento"
 
-  _ "github.com/rookie-xy/modules/configure/src/file"
-  _ "github.com/rookie-xy/modules/configure/src/zookeeper"
+  _ "github.com/rookie-xy/modules/configure/src/local"
+  _ "github.com/rookie-xy/modules/configure/src/remote"
 )
 
 const Name  = module.Configure
 
 var (
-    config = command.New( "-c", "config", "file", "Specifies how to obtain the configuration file" )
-    format = command.New( "-f", "format", "yaml", "Specifies the format of the configuration file" )
+    mode  = command.New( "-m", "mode",  "local", "Specifies how to obtain the configuration file" )
+    style = command.New( "-s", "style", "yaml", "Specifies the format of the configuration file" )
 )
 
 var commands = []command.Item{
 
-    { config,
+    { mode,
       command.LINE,
       module.Configure,
       command.SetObject,
@@ -34,7 +34,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { format,
+    { style,
       command.LINE,
       module.Configure,
       command.SetObject,
@@ -77,7 +77,7 @@ func (r *Configure) Attach(o observer.Observer) {
 
 func (r *Configure) Notify(o types.Object) {
     if o != nil {
-	r.update(o)
+        r.update(o)
     }
 
     //fmt.Println(r.data)
@@ -106,14 +106,14 @@ func (r *Configure) Update(o types.Object) int {
 }
 
 func (r *Configure) Init() {
-    if value := config.GetValue(); value != nil {
+    if value := mode.GetValue(); value != nil {
         memento.Name = Name + "." + value.GetString()
         if module := module.Setup(memento.Name, r.Log); module != nil {
             r.Load(module)
         }
     }
 
-    value := format.GetValue()
+    value := style.GetValue()
     if value == nil {
         return
     }
