@@ -18,7 +18,7 @@ import (
 const Name = module.Agents
 
 var (
-    agents = command.New("", Name, nil, "inputs may be many")
+    agents = command.New(module.Flag, Name, nil, "inputs may be many")
 )
 
 var commands = []command.Item{
