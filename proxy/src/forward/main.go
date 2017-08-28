@@ -89,6 +89,7 @@ func (r *forward) Main() {
 
         case state.Ignore:
             continue
+
         case state.Busy:
             //TODO sleep
         }

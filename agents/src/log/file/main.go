@@ -2,6 +2,7 @@ package file
 
 import (
     "fmt"
+    "sync"
 
     "github.com/rookie-xy/hubble/src/command"
     "github.com/rookie-xy/hubble/src/module"
@@ -9,12 +10,19 @@ import (
     "github.com/rookie-xy/hubble/src/log"
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/plugin"
+
+    "github.com/rookie-xy/modules/agents/src/log/api"
+    "github.com/rookie-xy/modules/agents/src/log/file/src/collector"
 )
 
 const Name  = "file"
 
-type file struct{
+type file struct {
     log.Log
+   	api.Collector
+   	done       chan struct{}
+   	wg        *sync.WaitGroup
+   	id         uint64
 }
 
 func New(log log.Log) module.Template {
@@ -81,6 +89,8 @@ func (r *file) Init() {
         fmt.Println("groupppppppppppppp", group.GetString())
     }
 
+    r.Collector = collector.New()
+
     /*
     registry := paths.Resolve(paths.Data, "registry")
     fmt.Println("hahahahha",registry)
@@ -122,6 +132,29 @@ func (r *file) Init() {
 func (r *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
+
+	   r.wg.Add(1)
+	   //r.Print("Starting prospector of type: %v; id: %v ", p.config.Type, p.ID())
+
+	   onceWg := sync.WaitGroup{}
+	   if r.Once {
+		      // Make sure start is only completed when Run did a complete first scan
+		      defer onceWg.Wait()
+				}
+
+	   onceWg.Add(1)
+	   // Add waitgroup to make sure prospectors finished
+	   go func() {
+		      defer func() {
+			         onceWg.Done()
+			         r.stop()
+			         r.wg.Done()
+		      }()
+
+		     r.Run()
+	   }()
+
+    return
 }
 
 func (r *file) Exit(code int) {
