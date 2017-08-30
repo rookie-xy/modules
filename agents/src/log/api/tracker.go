@@ -1,7 +1,7 @@
 package api
 
-type Collector interface {
-   	Run()
+type Tracker interface {
+   	Start()
    	Stop()
    	Wait()
 }

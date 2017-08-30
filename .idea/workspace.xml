@@ -2,14 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/src/log/api/collector.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/src/log/file/main.go" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/file/main.go" afterPath="$PROJECT_DIR$/agents/src/log/stdin/main.go" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/file/src/collector/collector.go" afterPath="$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/file/src/scanner/scanner.go" afterPath="$PROJECT_DIR$/agents/src/log/scanner/scanner.go" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/file/src/tracker/tracker.go" afterPath="$PROJECT_DIR$/agents/src/log/tracker/tracker.go" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/src/log/file/src/tracker/tracker.go" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/src/log/tracker/tracker.go" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/log/api/collector.go" afterPath="$PROJECT_DIR$/agents/src/log/api/tracker.go" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go" afterPath="$PROJECT_DIR$/agents/src/log/collector/collector.go" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/proxy/src/forward/main.go" afterPath="$PROJECT_DIR$/proxy/src/forward/main.go" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/src/log/file/main.go" afterPath="$PROJECT_DIR$/agents/src/log/file/main.go" />
     </list>
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,22 +33,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="local.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/configure/src/local/local.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
-              <folding>
-                <element signature="e#14#352#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/agents/src/log/stdin/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
+            <state relative-caret-position="399">
               <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
               <folding>
                 <element signature="e#15#366#0" expanded="true" />
@@ -59,19 +45,44 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/agents/src/log/file/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="132" column="13" selection-start-line="132" selection-start-column="13" selection-end-line="132" selection-end-column="13" />
+            <state relative-caret-position="3801">
+              <caret line="181" column="13" selection-start-line="181" selection-start-column="13" selection-end-line="181" selection-end-column="13" />
               <folding>
-                <marker date="1503921191686" expanded="true" signature="21:439" ph="..." />
-                <marker date="1503921191686" expanded="true" signature="634:679" ph="{...}" />
-                <marker date="1503921191686" expanded="true" signature="1807:2663" ph="{...}" />
-                <marker date="1503921191686" expanded="true" signature="2687:3245" ph="{...}" />
-                <marker date="1503921191686" expanded="true" signature="3100:3229" ph="{...}" />
-                <marker date="1503921191686" expanded="true" signature="3123:3205" ph="{...}" />
+                <element signature="e#14#508#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/agents/main.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="284">
+              <caret line="104" column="14" selection-start-line="104" selection-start-column="14" selection-end-line="104" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sleep.go" pinned="false" current-in-tab="false">
+        <entry file="file:///usr/local/go/src/time/sleep.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3129">
+              <caret line="149" column="5" selection-start-line="149" selection-start-column="5" selection-end-line="149" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="scanner.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/agents/src/log/scanner/scanner.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="42">
+              <caret line="2" column="20" selection-start-line="2" selection-start-column="20" selection-end-line="2" selection-end-column="20" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -79,8 +90,18 @@
       <file leaf-file-name="waitgroup.go" pinned="false" current-in-tab="false">
         <entry file="file:///usr/local/go/src/sync/waitgroup.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
+            <state relative-caret-position="987">
               <caret line="51" column="21" selection-start-line="51" selection-start-column="21" selection-end-line="51" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="collector.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/agents/src/log/collector/collector.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="147">
+              <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -96,18 +117,18 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collector.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/agents/src/log/api/collector.go">
+      <file leaf-file-name="tracker.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/agents/src/log/api/tracker.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="63">
-              <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+            <state relative-caret-position="84">
+              <caret line="4" column="9" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collector.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go">
+      <file leaf-file-name="tracker.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/tracker/tracker.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="147">
               <caret line="7" column="5" selection-start-line="7" selection-start-column="5" selection-end-line="7" selection-end-column="5" />
@@ -136,7 +157,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/channels/src/memory/src/subject.go" />
         <option value="$PROJECT_DIR$/channels/src/memory/src/subject/subject.go" />
         <option value="$PROJECT_DIR$/channels/src/memory/src/process.go" />
         <option value="$PROJECT_DIR$/channels/channel.go" />
@@ -181,11 +201,12 @@
         <option value="$PROJECT_DIR$/agents/src/file/src/collector/collector.go" />
         <option value="$PROJECT_DIR$/agents/src/log/stdin/main.go" />
         <option value="$PROJECT_DIR$/agents/src/log/file/src/collecter/collecter.go" />
-        <option value="$PROJECT_DIR$/agents/src/log/collector/collector.go" />
         <option value="$PROJECT_DIR$/agents/src/log/collecter/collector.go" />
         <option value="$PROJECT_DIR$/agents/src/log/file/src/collector/collecter.go" />
         <option value="$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go" />
         <option value="$PROJECT_DIR$/agents/src/log/api/collector.go" />
+        <option value="$PROJECT_DIR$/agents/src/log/collector/collector.go" />
+        <option value="$PROJECT_DIR$/agents/src/log/file/src/tracker/tracker.go" />
         <option value="$PROJECT_DIR$/agents/src/log/file/main.go" />
       </list>
     </option>
@@ -227,6 +248,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -274,6 +298,10 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="reverse" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -408,10 +436,6 @@
               <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="collector" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -435,15 +459,12 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="api" />
+              <option name="myItemId" value="collector" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -459,15 +480,16 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/agents/src/log/stdin" />
-      <recent name="$PROJECT_DIR$/agents/src/log" />
-      <recent name="$PROJECT_DIR$/channels/src/memory/src/subject" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/agents/src/log/file" />
       <recent name="$PROJECT_DIR$/outputs/src/transport" />
       <recent name="$PROJECT_DIR$/channels/src/disk" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/agents/src/log" />
+      <recent name="$PROJECT_DIR$/agents/src/log/file/src" />
+      <recent name="$PROJECT_DIR$/agents/src/log/stdin" />
+      <recent name="$PROJECT_DIR$/channels/src/memory/src/subject" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -897,7 +919,9 @@
       <workItem from="1503571060780" duration="1348000" />
       <workItem from="1503631774828" duration="2610000" />
       <workItem from="1503653025003" duration="1970000" />
-      <workItem from="1503888666748" duration="11333000" />
+      <workItem from="1503888666748" duration="11426000" />
+      <workItem from="1503980093147" duration="8888000" />
+      <workItem from="1504067542762" duration="940000" />
     </task>
     <task id="LOCAL-00001" summary="update">
       <created>1498727174377</created>
@@ -917,7 +941,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="241678000" />
+    <option name="totallyTimeSpent" value="251599000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
@@ -983,7 +1007,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/channels/channel.go" />
     <entry file="file://$PROJECT_DIR$/channel/src/memory/src/filter.go" />
     <entry file="file://$PROJECT_DIR$/channel/src/memory/src/process.go" />
     <entry file="file://$PROJECT_DIR$/../worker/src/observer/observer.go" />
@@ -1106,7 +1129,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2541">
           <caret line="127" column="5" selection-start-line="127" selection-start-column="5" selection-end-line="127" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1128,10 +1150,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/configure/src/local/local.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="399">
           <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
           <folding>
-            <element signature="e#14#352#0" expanded="true" />
+            <element signature="e#14#352#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1140,6 +1162,54 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="14" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/proxy/src/forward/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="85" column="16" selection-start-line="85" selection-start-column="16" selection-end-line="85" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/configure/src/remote/remote.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../hubble/src/log/log.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/log/log.go" />
+    <entry file="file://$PROJECT_DIR$/agents/src/log/stdin/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
+          <folding>
+            <element signature="e#15#366#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/go/src/sync/waitgroup.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="987">
+          <caret line="51" column="21" selection-start-line="51" selection-start-column="21" selection-end-line="51" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/go/src/time/sleep.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3129">
+          <caret line="149" column="5" selection-start-line="149" selection-start-column="5" selection-end-line="149" selection-end-column="5" />
           <folding />
         </state>
       </provider>
@@ -1152,75 +1222,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/proxy/src/forward/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="85" column="16" selection-start-line="85" selection-start-column="16" selection-end-line="85" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/tracker/tracker.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/configure/src/remote/remote.go">
+    <entry file="file://$PROJECT_DIR$/agents/src/log/api/tracker.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="84">
-          <caret line="11" column="20" selection-start-line="11" selection-start-column="20" selection-end-line="11" selection-end-column="20" />
+          <caret line="4" column="9" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/agents/src/log/file/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3801">
+          <caret line="181" column="13" selection-start-line="181" selection-start-column="13" selection-end-line="181" selection-end-column="13" />
           <folding>
-            <element signature="e#16#260#0" expanded="false" />
+            <element signature="e#14#508#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/agents/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="104" column="14" selection-start-line="104" selection-start-column="14" selection-end-line="104" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../hubble/src/log/log.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/log/log.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="11" selection-start-line="0" selection-start-column="11" selection-end-line="0" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/stdin/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
-          <folding>
-            <element signature="e#15#366#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/api/collector.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go">
+    <entry file="file://$PROJECT_DIR$/agents/src/log/file/src/tracker/tracker.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="147">
           <caret line="7" column="5" selection-start-line="7" selection-start-column="5" selection-end-line="7" selection-end-column="5" />
@@ -1228,26 +1248,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/go/src/sync/waitgroup.go">
+    <entry file="file://$PROJECT_DIR$/agents/src/log/collector/collector.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
-          <caret line="51" column="21" selection-start-line="51" selection-start-column="21" selection-end-line="51" selection-end-column="21" />
+        <state relative-caret-position="147">
+          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/agents/src/log/file/main.go">
+    <entry file="file://$PROJECT_DIR$/agents/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="132" column="13" selection-start-line="132" selection-start-column="13" selection-end-line="132" selection-end-column="13" />
-          <folding>
-            <marker date="1503921191686" expanded="true" signature="21:439" ph="..." />
-            <marker date="1503921191686" expanded="true" signature="634:679" ph="{...}" />
-            <marker date="1503921191686" expanded="true" signature="1807:2663" ph="{...}" />
-            <marker date="1503921191686" expanded="true" signature="2687:3245" ph="{...}" />
-            <marker date="1503921191686" expanded="true" signature="3100:3229" ph="{...}" />
-            <marker date="1503921191686" expanded="true" signature="3123:3205" ph="{...}" />
-          </folding>
+        <state relative-caret-position="284">
+          <caret line="104" column="14" selection-start-line="104" selection-start-column="14" selection-end-line="104" selection-end-column="14" />
+          <folding />
         </state>
       </provider>
     </entry>
