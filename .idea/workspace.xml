@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/src/log/file/src/tracker/tracker.go" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/src/log/tracker/tracker.go" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/log/api/collector.go" afterPath="$PROJECT_DIR$/agents/src/log/api/tracker.go" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/agents/src/log/file/src/collector/collector.go" afterPath="$PROJECT_DIR$/agents/src/log/collector/collector.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/src/log/file/main.go" afterPath="$PROJECT_DIR$/agents/src/log/file/main.go" />
-    </list>
+    <list default="true" id="5e9153a7-a8cb-4491-8a00-64642fbd0e49" name="Default" comment="" />
     <ignored path="modules.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -921,7 +914,7 @@
       <workItem from="1503653025003" duration="1970000" />
       <workItem from="1503888666748" duration="11426000" />
       <workItem from="1503980093147" duration="8888000" />
-      <workItem from="1504067542762" duration="940000" />
+      <workItem from="1504067542762" duration="1161000" />
     </task>
     <task id="LOCAL-00001" summary="update">
       <created>1498727174377</created>
@@ -941,11 +934,11 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="251599000" />
+    <option name="totallyTimeSpent" value="251820000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21513945" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
