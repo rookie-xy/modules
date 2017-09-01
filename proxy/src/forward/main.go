@@ -9,16 +9,16 @@ import (
     "github.com/rookie-xy/hubble/src/register"
     "github.com/rookie-xy/hubble/src/factory"
     "github.com/rookie-xy/hubble/src/state"
-  cli "github.com/rookie-xy/hubble/src/client"
-        "github.com/rookie-xy/hubble/src/plugin"
-  pipe "github.com/rookie-xy/hubble/src/pipeline"
+    "github.com/rookie-xy/hubble/src/proxy"
+ pipe "github.com/rookie-xy/hubble/src/pipeline"
+    "github.com/rookie-xy/hubble/src/plugin"
 )
 
 const Name  = "forward"
 
 type forward struct {
     log.Log
-    client  cli.Client
+    client   proxy.Forward
     pipeline pipe.Pipeline
 }
 
