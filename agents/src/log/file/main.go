@@ -12,19 +12,19 @@ import (
     "github.com/rookie-xy/hubble/src/state"
     "github.com/rookie-xy/hubble/src/plugin"
 
-    "github.com/rookie-xy/modules/agents/src/log/api"
     "github.com/rookie-xy/modules/agents/src/log/collector"
-    "github.com/rookie-xy/modules/agents/src/log/file/src/tracker"
+    "github.com/rookie-xy/modules/agents/src/log/file/src/scanner"
 )
 
 const Name  = "file"
 
 type file struct {
     log.Log
-   	api.Tracker
-   	done       chan struct{}
-   	wg        *sync.WaitGroup
-   	id         uint64
+    scanner   *scanner.Scanner
+
+    done       chan struct{}
+    wg        *sync.WaitGroup
+    id         uint64
 
     frequency  time.Duration
 }
@@ -102,7 +102,7 @@ func (r *file) Init() {
         fmt.Println("groupppppppppppppp", group.GetString())
     }
 
-    r.Tracker = tracker.New()
+    r.scanner = scanner.New()
 
     //if r.frequency = frequency.GetTime();
 
@@ -148,33 +148,33 @@ func (r *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
 
-	   r.wg.Add(1)
-	   //r.Print("Starting prospector of type: %v; id: %v ", p.config.Type, p.ID())
+    r.wg.Add(1)
+    //r.Print("Starting prospector of type: %v; id: %v ", p.config.Type, p.ID())
 
-	   onceWg := sync.WaitGroup{}
+    onceWg := sync.WaitGroup{}
+    onceWg.Add(1)
 
-	   onceWg.Add(1)
-	   // Add waitgroup to make sure prospectors finished
-	   start := func() int {
-		      defer func() {
-			         onceWg.Done()
-			         r.stop()
-			         r.wg.Done()
-		      }()
+    // Add waitgroup to make sure prospectors finished
+    run := func() int {
+        defer func() {
+            onceWg.Done()
+            r.stop()
+            r.wg.Done()
+        }()
 
-		     r.Run()
+        r.Run()
 
-       return state.Ok
-	   }
+        return state.Ok
+    }
 
-    start()
+    run()
 
     return
 }
 
 func (r *file) Run() {
-    // Initial prospector run
-    r.Start()
+    // Initial tracker run
+    r.scanner.Run()
 
     for {
         select {
@@ -184,15 +184,15 @@ func (r *file) Run() {
             return
 
         case <-time.After(r.frequency):
-            //r.Debug("prospector", "Run prospector")
-            r.Start()
+            //r.Debug("collector", "Run collector")
+            r.scanner.Run()
         }
     }
 }
 
 func (r *file) stop() {
     //r.Print("Stopping Collector: %v", r.ID())
-    r.Stop()
+    r.scanner.Stop()
 }
 
 func (r *file) Exit(code int) {
