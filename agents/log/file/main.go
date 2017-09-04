@@ -102,7 +102,7 @@ func (r *file) Init() {
         fmt.Println("groupppppppppppppp", group.GetString())
     }
 
-    r.scanner = scanner.New()
+    r.scanner = scanner.New(paths)
 
     //if r.frequency = frequency.GetTime();
 
