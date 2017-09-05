@@ -1,20 +1,19 @@
-package outputs
+package proxy
 
 import (
     "fmt"
 
-    "github.com/rookie-xy/hubble/src/command"
-    "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/log"
-    "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/state"
-    "github.com/rookie-xy/hubble/src/types"
-	"github.com/rookie-xy/hubble/src/types/value"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/register"
+    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/types"
+    "github.com/rookie-xy/hubble/configure"
+    "github.com/rookie-xy/hubble/types/value"
 
-  _ "github.com/rookie-xy/modules/proxy/src/forward"
-  _ "github.com/rookie-xy/modules/proxy/src/reverse"
-
-    "github.com/rookie-xy/hubble/src/configure"
+  _ "github.com/rookie-xy/modules/proxy/forward"
+  _ "github.com/rookie-xy/modules/proxy/reverse"
 )
 
 const Name = module.Proxy

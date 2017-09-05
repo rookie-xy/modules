@@ -5,19 +5,44 @@ import (
     "os"
     "path/filepath"
 
-    "github.com/rookie-xy/hubble/src/types"
-    "github.com/rookie-xy/modules/agents/src/log/collector"
+    "github.com/rookie-xy/hubble/types"
+
+    "github.com/rookie-xy/hubble/job"
+    "github.com/rookie-xy/hubble/log"
+
+    "github.com/rookie-xy/modules/agents/log/collector"
+    "github.com/rookie-xy/modules/agents/log/file/file"
 )
 
 type Scanner struct {
-    paths    types.Value
-    exclude  types.Value
+    log        log.Log
+    jobs      *job.Jobs
+    paths      types.Value
+    excludes   types.Value
+    from       string
+    states    *file.States
+    done       chan struct{}
+
+    collector *collector.Collector
+    limit      int
 }
 
-func New(paths types.Value) *Scanner {
+func New(log log.Log) *Scanner {
     return &Scanner{
-        paths: paths,
+        log:  log,
+        jobs: job.New(log),
     }
+}
+
+func (r *Scanner) Init(from string,
+                       paths, excludes types.Value,
+                       cc *collector.Collector) error {
+    r.paths    = paths
+    r.excludes = excludes
+    r.from = from
+    r.collector = cc
+
+    return nil
 }
 
 func (r *Scanner) Run() {
@@ -33,7 +58,7 @@ func getKeys(files map[string]os.FileInfo) []string {
     return paths
 }
 
-func getFileState(path string, info os.FileInfo, p *Scanner) (file.State, error) {
+func getFileState(path string, fi os.FileInfo, s *Scanner) (file.State, error) {
     var err error
     var absolutePath string
 
@@ -45,7 +70,7 @@ func getFileState(path string, info os.FileInfo, p *Scanner) (file.State, error)
     fmt.Println("scanner", "Check file for collecting: %s", absolutePath)
 
     // Create new state for comparison
-    newState := file.NewState(info, absolutePath, p.config.Type)
+    newState := file.NewState(fi, absolutePath, s.from)
 
     return newState, nil
 }
@@ -96,8 +121,7 @@ func (r *Scanner) scan() {
         if lastState.IsEmpty() {
 
             fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
-
-            err := collector.New(r, newState, 0)
+            err := r.startCollector(newState, 0)
             if err != nil {
                 fmt.Println("collector could not be started on new file: %s, Err: %s", newState.Source, err)
             }
@@ -110,8 +134,8 @@ func (r *Scanner) scan() {
 
 // startCollector starts a new collector with the given offset
 // In case the CollectorLimit is reached, an error is returned
-func (r *Scanner) startCollector(sta state, offset int64) error {
-    if r.config.CollectorLimit > 0 && r.collectors.Len() >= r.config.CollectorLimit {
+func (r *Scanner) startCollector(state file.State, offset int64) error {
+    if r.limit > 0 && r.jobs.Len() >= r.limit {
         //collectorSkipped.Add(1)
         return fmt.Errorf("collector limit reached")
     }
@@ -121,23 +145,14 @@ func (r *Scanner) startCollector(sta state, offset int64) error {
     state.Offset = offset
 
     // Create collector with state
-    //c, err := r.createCollector(state)
-    c, err := collector.New(state)
-    if err != nil {
-        return err
-    }
-
-    err = r.Setup()
-    if err != nil {
-        return fmt.Errorf("Error setting up collector: %s", err)
-    }
+    collector := r.collector.Create(state)
 
     // Update state before staring collector
     // This makes sure the states is set to Finished: false
     // This is synchronous state update as part of the scan
-    c.SendStateUpdate()
+    collector.SendStateUpdate()
 
-    r.collectors.Start(c)
+    r.jobs.Start(collector)
 
     return nil
 }

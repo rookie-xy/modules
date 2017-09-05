@@ -5,21 +5,21 @@ import (
     "sync"
     "time"
 
-    "github.com/rookie-xy/hubble/src/command"
-    "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/log"
-    "github.com/rookie-xy/hubble/src/state"
-    "github.com/rookie-xy/hubble/src/plugin"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/register"
+    "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/plugin"
 
-    "github.com/rookie-xy/modules/agents/src/log/collector"
-    "github.com/rookie-xy/modules/agents/src/log/file/src/scanner"
+    "github.com/rookie-xy/modules/agents/log/collector"
+    "github.com/rookie-xy/modules/agents/log/file/scanner"
 )
 
 const Name  = "file"
 
 type file struct {
-    log.Log
+    log        log.Log
     scanner   *scanner.Scanner
 
     done       chan struct{}
@@ -31,14 +31,15 @@ type file struct {
 
 func New(log log.Log) module.Template {
     return &file{
-        Log: log,
+        log: log,
     }
 }
 
 var (
     group     = command.New( module.Flag, "group",     "nginx", "This option use to group" )
-    types     = command.New( module.Flag, "type",      "log",   "file type, this is use to find some question" )
+    Type      = command.New( module.Flag, "type",      "log",   "file type, this is use to find some question" )
     paths     = command.New( module.Flag, "paths",     nil,     "File path, its is manny option" )
+    excludes  = command.New( module.Flag, "paths",     nil,     "File path, its is manny option" )
     codec     = command.New( plugin.Flag, "codec",     nil,     "codec method" )
     client    = command.New( plugin.Flag, "client",    nil,     "client method" )
     frequency = command.New( module.Flag, "frequency", 10 * time.Second, "scan frequency method" )
@@ -54,7 +55,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { types,
+    { Type,
       command.FILE,
       module.Agents,
       command.SetObject,
@@ -70,6 +71,13 @@ var commands = []command.Item{
       0,
       nil },
 
+    { excludes,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
 
     { codec,
       command.FILE,
@@ -98,49 +106,26 @@ var commands = []command.Item{
 }
 
 func (r *file) Init() {
-    if group := group.GetValue(); group != nil {
-        fmt.Println("groupppppppppppppp", group.GetString())
+    group, Type := group.GetValue(), Type.GetValue()
+    if group == nil || Type == nil {
+        return
     }
 
-    r.scanner = scanner.New(paths)
-
-    //if r.frequency = frequency.GetTime();
-
-    /*
-    registry := paths.Resolve(paths.Data, "registry")
-    fmt.Println("hahahahha",registry)
-    */
-
-    //利用group codec等,进行初始化
-
-    //init group
-    //gValue := group.GetValue()
-    //fmt.Println(gValue.GetString())
-
-    // init type
-    //tValue := types.GetValue()
-    //fmt.Println(tValue.GetString())
-/*
-    if p := paths.GetArray(); p != nil {
-        // init paths
-        fmt.Println(p)
+    collector := collector.New(r.log)
+    if err := collector.Init(group.GetString(), Type.GetString(),
+                             codec, client); err != nil {
+        fmt.Println(err)
+        return
     }
 
-    if c := codec.GetMap(); c != nil {
-        // init codec
-        fmt.Println(c)
-        codec.Clear()
-    } else {
-        // default init
+    scanner := scanner.New(r.log)
+    if err := scanner.Init(Name, paths, excludes, collector); err != nil {
+        fmt.Println(err)
+        return
     }
 
-    if c := client.GetMap(); c != nil {
-        fmt.Println(c)
-        client.Clear()
-    } else {
-        // default init
-    }
-*/
+    r.scanner = scanner
+
     return
 }
 
