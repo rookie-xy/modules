@@ -1,4 +1,4 @@
-package file
+package state
 
 import (
     "fmt"
@@ -12,7 +12,7 @@ type States struct {
     sync.RWMutex
 }
 
-func NewStates() *States {
+func News() *States {
     return &States{
         states: []State{},
     }

@@ -1,8 +1,9 @@
-package scanner
+package finder
 
 import (
     "fmt"
     "os"
+    "errors"
     "path/filepath"
 
     "github.com/rookie-xy/hubble/types"
@@ -10,43 +11,45 @@ import (
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
 
-    "github.com/rookie-xy/modules/agents/log/collector"
-    "github.com/rookie-xy/modules/agents/log/file/file"
+    "github.com/rookie-xy/modules/agents/log/text"
+    "github.com/rookie-xy/modules/agents/log/file/state"
 )
 
-type Scanner struct {
+type Finder struct {
     log        log.Log
     jobs      *job.Jobs
     paths      types.Value
     excludes   types.Value
     from       string
-    states    *file.States
+    states    *state.States
     done       chan struct{}
 
-    collector *collector.Collector
-    limit      int
+    scanner   *text.Finder
+    limit      uint64
 }
 
-func New(log log.Log) *Scanner {
-    return &Scanner{
+func New(log log.Log) *Finder {
+    return &Finder{
         log:  log,
         jobs: job.New(log),
     }
 }
 
-func (r *Scanner) Init(from string,
+func (r *Finder) Init(from string,
                        paths, excludes types.Value,
-                       cc *collector.Collector) error {
+                       ts *text.Finder, limit uint64) error {
     r.paths    = paths
     r.excludes = excludes
     r.from = from
-    r.collector = cc
+    r.scanner = ts
+
+    if limit > 0 {
+        r.limit = limit
+    } else {
+        return errors.New("limit is error")
+    }
 
     return nil
-}
-
-func (r *Scanner) Run() {
-    r.scan()
 }
 
 func getKeys(files map[string]os.FileInfo) []string {
@@ -58,13 +61,13 @@ func getKeys(files map[string]os.FileInfo) []string {
     return paths
 }
 
-func getFileState(path string, fi os.FileInfo, s *Scanner) (file.State, error) {
+func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
     var err error
     var absolutePath string
 
     absolutePath, err = filepath.Abs(path)
     if err != nil {
-        return file.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
+        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
     }
 
     fmt.Println("scanner", "Check file for collecting: %s", absolutePath)
@@ -75,7 +78,7 @@ func getFileState(path string, fi os.FileInfo, s *Scanner) (file.State, error) {
     return newState, nil
 }
 
-func (r *Scanner) scan() {
+func (r *Finder) Scan() bool {
     var paths []string
 
     files := r.getFiles()
@@ -121,7 +124,7 @@ func (r *Scanner) scan() {
         if lastState.IsEmpty() {
 
             fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
-            err := r.startCollector(newState, 0)
+            err := r.startTextFinder(newState, 0)
             if err != nil {
                 fmt.Println("collector could not be started on new file: %s, Err: %s", newState.Source, err)
             }
@@ -130,11 +133,13 @@ func (r *Scanner) scan() {
             r.collectExistingFile(newState, lastState)
         }
     }
+
+    return true
 }
 
 // startCollector starts a new collector with the given offset
 // In case the CollectorLimit is reached, an error is returned
-func (r *Scanner) startCollector(state file.State, offset int64) error {
+func (r *Finder) startTextFinder(state state.State, offset int64) error {
     if r.limit > 0 && r.jobs.Len() >= r.limit {
         //collectorSkipped.Add(1)
         return fmt.Errorf("collector limit reached")
@@ -145,27 +150,27 @@ func (r *Scanner) startCollector(state file.State, offset int64) error {
     state.Offset = offset
 
     // Create collector with state
-    collector := r.collector.Create(state)
+    job := r.scanner.Job(r.states)
 
     // Update state before staring collector
     // This makes sure the states is set to Finished: false
     // This is synchronous state update as part of the scan
-    collector.SendStateUpdate()
+    job.Update(state)
 
-    r.jobs.Start(collector)
+    r.jobs.Start(job)
 
     return nil
 }
 
-func (r *Scanner) Stop() {
+func (r *Finder) Stop() {
 
 }
 
-func (r *Scanner) Wait() {
+func (r *Finder) Wait() {
 
 }
 
-func (r *Scanner) getFiles() map[string]os.FileInfo {
+func (r *Finder) getFiles() map[string]os.FileInfo {
     files := map[string]os.FileInfo{}
     paths := r.paths.GetArray()
 
@@ -234,7 +239,7 @@ func (r *Scanner) getFiles() map[string]os.FileInfo {
 }
 
 // isFileExcluded checks if the given path should be excluded
-func (r *Scanner) isFileExcluded(file string) bool {
-    patterns := r.exclude
-    return len(patterns) > 0 && collector.MatchAny(patterns, file)
+func (r *Finder) isFileExcluded(file string) bool {
+    patterns := r.excludes
+    return len(patterns) > 0 && text.MatchAny(patterns, file)
 }

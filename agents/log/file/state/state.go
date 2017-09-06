@@ -1,4 +1,4 @@
-package file
+package state
 
 import (
     "os"
@@ -18,7 +18,7 @@ type State struct {
 }
 
 // NewState creates a new file state
-func NewState(fi os.FileInfo, path string, from string) State {
+func New(fi os.FileInfo, path string, from string) State {
     return State{
         Finished:    false,
         Fileinfo:    fi,
