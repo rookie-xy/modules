@@ -12,14 +12,14 @@ import (
     "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
 
-    "github.com/rookie-xy/modules/agents/log/text"
-    "github.com/rookie-xy/modules/agents/log/file/scanner"
+    "github.com/rookie-xy/modules/agents/log/collector"
+    "github.com/rookie-xy/modules/agents/log/file/finder"
 )
 
 const Name  = "file"
 
 type file struct {
-    scanner    *scanner.Scanner
+    finder     *finder.Finder
     frequency   time.Duration
     log         log.Log
 
@@ -118,8 +118,8 @@ func (f *file) Init() {
         return
     }
 
-    text := text.New(f.log)
-    if err := text.Init(group.GetString(), Type.GetString(),
+    collector := collector.New(f.log)
+    if err := collector.Init(group.GetString(), Type.GetString(),
                                               codec, client); err != nil {
         fmt.Println(err)
         return
@@ -134,14 +134,14 @@ func (f *file) Init() {
         return
     }
 
-    fscanner := scanner.New(f.log)
-    if err := fscanner.Init(Name, paths, excludes,
-                                         text, limit.GetUint64()); err != nil {
+    finder := finder.New(f.log)
+    if err := finder.Init(Name, paths, excludes,
+                                       collector, limit.GetUint64()); err != nil {
         fmt.Println(err)
         return
     }
 
-    f.scanner = fscanner
+    f.finder = finder
 
     return
 }
@@ -157,7 +157,7 @@ func (f *file) Main() {
     onceWg.Add(1)
 
     // Add waitgroup to make sure prospectors finished
-    run := func(file *scanner.Scanner) int {
+    run := func() int {
         defer func() {
             onceWg.Done()
             close(f.done)

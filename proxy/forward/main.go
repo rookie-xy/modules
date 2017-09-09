@@ -3,15 +3,15 @@ package forward
 import (
     "fmt"
 
-    "github.com/rookie-xy/hubble/src/command"
-    "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/log"
-    "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/factory"
-    "github.com/rookie-xy/hubble/src/state"
-    "github.com/rookie-xy/hubble/src/proxy"
- pipe "github.com/rookie-xy/hubble/src/pipeline"
-    "github.com/rookie-xy/hubble/src/plugin"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/register"
+    "github.com/rookie-xy/hubble/factory"
+    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/proxy"
+    queue "github.com/rookie-xy/hubble/pipeline"
+    "github.com/rookie-xy/hubble/plugin"
 )
 
 const Name  = "forward"
@@ -19,7 +19,7 @@ const Name  = "forward"
 type forward struct {
     log.Log
     client   proxy.Forward
-    pipeline pipe.Pipeline
+    pipeline queue.Queue
 }
 
 var (
@@ -54,8 +54,6 @@ func New(log log.Log) module.Template {
 }
 
 func (r *forward) Init() {
-//       pv :=  pipeline.GetValue()
-//        fmt.Println("pvvvvvvvvvvvvvvvvvvv", pv.GetType())
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
     if pipeline, err := factory.Pipeline(key, r.Log, pipeline.GetValue()); err != nil {
         fmt.Println("pipeline error", err)
@@ -63,6 +61,8 @@ func (r *forward) Init() {
     } else {
         r.pipeline = pipeline
     }
+
+    register.Clones(client.GetKey(), pipeline)
 
     key = client.GetFlag() + "." + client.GetKey()
     if client, err := factory.Client(key, r.Log, client.GetValue()); err != nil {
@@ -83,7 +83,7 @@ func (r *forward) Main() {
     fmt.Println("Start proxy forward module ...")
 
     for {
-        event, status := r.pipeline.Pull(10)
+        event, status := r.pipeline.Dequeue(10)
 
         switch status {
 

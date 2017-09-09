@@ -11,7 +11,7 @@ import (
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
 
-    "github.com/rookie-xy/modules/agents/log/text"
+    "github.com/rookie-xy/modules/agents/log/collector"
     "github.com/rookie-xy/modules/agents/log/file/state"
 )
 
@@ -24,7 +24,7 @@ type Finder struct {
     states    *state.States
     done       chan struct{}
 
-    scanner   *text.Finder
+    collector *collector.Collector
     limit      uint64
 }
 
@@ -37,11 +37,11 @@ func New(log log.Log) *Finder {
 
 func (r *Finder) Init(from string,
                        paths, excludes types.Value,
-                       ts *text.Finder, limit uint64) error {
+                       cc *collector.Collector, limit uint64) error {
     r.paths    = paths
     r.excludes = excludes
     r.from = from
-    r.scanner = ts
+    r.collector = cc
 
     if limit > 0 {
         r.limit = limit
@@ -73,7 +73,7 @@ func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
     fmt.Println("scanner", "Check file for collecting: %s", absolutePath)
 
     // Create new state for comparison
-    newState := file.NewState(fi, absolutePath, s.from)
+    newState := state.New(fi, absolutePath, s.from)
 
     return newState, nil
 }
@@ -139,7 +139,7 @@ func (r *Finder) Scan() bool {
 
 // startCollector starts a new collector with the given offset
 // In case the CollectorLimit is reached, an error is returned
-func (r *Finder) startTextFinder(state state.State, offset int64) error {
+func (r *Finder) startCollector(state state.State, offset int64) error {
     if r.limit > 0 && r.jobs.Len() >= r.limit {
         //collectorSkipped.Add(1)
         return fmt.Errorf("collector limit reached")
@@ -150,7 +150,7 @@ func (r *Finder) startTextFinder(state state.State, offset int64) error {
     state.Offset = offset
 
     // Create collector with state
-    job := r.scanner.Job(r.states)
+    job := r.collector.Job(r.states)
 
     // Update state before staring collector
     // This makes sure the states is set to Finished: false
@@ -178,19 +178,19 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
 
         matches, err := filepath.Glob(path.(string))
         if err != nil {
-								    fmt.Println("glob(%s) failed: %v", path, err)
+            fmt.Println("glob(%s) failed: %v", path, err)
             continue
         }
 
     //OUTER:
-		      // Check any matched files to see if we need to start a collector
+        // Check any matched files to see if we need to start a collector
         for _, file := range matches {
 
-			         // check if the file is in the exclude_files list
-			         if r.isFileExcluded(file) {
-                fmt.Println("scanner", "Exclude file: %s", file)
-												    continue
-			         }
+             // check if the file is in the exclude_files list
+             if r.isFileExcluded(file) {
+                 fmt.Println("scanner", "Exclude file: %s", file)
+                 continue
+             }
 
             // Fetch Lstat File info to detected also symlinks
             fileInfo, err := os.Lstat(file)
@@ -204,11 +204,11 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
                 continue
             }
 
-								    isSymlink := fileInfo.Mode() & os.ModeSymlink > 0
+            isSymlink := fileInfo.Mode() & os.ModeSymlink > 0
             if isSymlink {
                 fmt.Println("scanner", "File %s skipped as it is a symlink.", file)
                 continue
-												}
+            }
 
             // Fetch Stat file info which fetches the inode.
 								    // In case of a symlink, the original inode is fetched
@@ -218,8 +218,8 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
                 continue
 												}
 
-			         // If symlink is enabled, it is checked that original is not part of same scanner
-			         // It original is harvested by other scanner, states will potentially overwrite each other
+            // If symlink is enabled, it is checked that original is not part of same scanner
+            // It original is harvested by other scanner, states will potentially overwrite each other
             /*
             if p.config.Symlinks {
                 for _, finfo := range paths {
@@ -241,5 +241,5 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
 // isFileExcluded checks if the given path should be excluded
 func (r *Finder) isFileExcluded(file string) bool {
     patterns := r.excludes
-    return len(patterns) > 0 && text.MatchAny(patterns, file)
+    return len(patterns) > 0 && MatchAny(patterns, file)
 }
