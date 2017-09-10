@@ -2,11 +2,11 @@ package remote
 
 import (
     "fmt"
-    "github.com/rookie-xy/hubble/src/command"
-    "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/state"
-    "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/log"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/register"
+    "github.com/rookie-xy/hubble/log"
 )
 
 const Name = "remote"

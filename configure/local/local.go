@@ -1,4 +1,4 @@
-package file
+package local
 
 import (
     "os"
@@ -6,24 +6,24 @@ import (
 
     "github.com/fsnotify/fsnotify"
 
-    "github.com/rookie-xy/hubble/src/command"
-    "github.com/rookie-xy/hubble/src/module"
-    "github.com/rookie-xy/hubble/src/log"
-    "github.com/rookie-xy/hubble/src/register"
-    "github.com/rookie-xy/hubble/src/configure"
-    "github.com/rookie-xy/hubble/src/state"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/register"
+    "github.com/rookie-xy/hubble/configure"
+    "github.com/rookie-xy/hubble/state"
 )
 
 const Name  = "local"
 
 var (
-    path = command.New("-f", "file", "./usr/local/conf/hubble.yaml", "If you want to " +
-                                     "get locally, you need to specify the profile path")
+    file = command.New("-f", "file", "./usr/local/conf/hubble.yaml", "If you want to " +
+                                     "get locally, you need to specify the prolocal path")
 )
 
 var commands = []command.Item{
 
-    { path,
+    { file,
       command.LINE,
       module.Configure,
       command.SetObject,
@@ -33,7 +33,7 @@ var commands = []command.Item{
 
 }
 
-type file struct {
+type local struct {
     log.Log
 
     name      string
@@ -45,7 +45,7 @@ type file struct {
 }
 
 func New(log log.Log) module.Template {
-    new := &file{
+    new := &local{
         Log: log,
         Configure: configure.New(log),
     }
@@ -55,18 +55,18 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *file) Init() {
+func (r *local) Init() {
     // 初始化文件监视器，监控配置文件
     resource := ""
 
-    if value := path.GetValue(); value != nil {
+    if value := file.GetValue(); value != nil {
         resource = value.GetString()
     }
 
-    fileInfo, err := os.Stat(resource)
+    localInfo, err := os.Stat(resource)
     if err != nil {
         if os.IsNotExist(err) {
-	    fmt.Println("a file or directory does not exist")
+	    fmt.Println("a local or directory does not exist")
 
         } else if os.IsPermission(err) {
             fmt.Println("permission is denied")
@@ -79,7 +79,7 @@ func (r *file) Init() {
     }
 
     r.name = resource
-    r.size = fileInfo.Size()
+    r.size = localInfo.Size()
 
     r.watcher, err = fsnotify.NewWatcher()
     if err != nil {
@@ -93,9 +93,9 @@ func (r *file) Init() {
     return
 }
 
-func (r *file) Main() {
+func (r *local) Main() {
     var char []byte
-    file, err := os.OpenFile(r.name, os.O_RDWR, 0777)
+    local, err := os.OpenFile(r.name, os.O_RDWR, 0777)
     if err != nil {
         fmt.Println(err)
     //    r.Print("OpenFile error")
@@ -103,7 +103,7 @@ func (r *file) Main() {
 
     char = make([]byte, r.size)
 
-    if size, err := file.Read(char); err != nil {
+    if size, err := local.Read(char); err != nil {
         if size != int(r.size) {
 //            r.Print("size is not r.size")
 
@@ -111,13 +111,13 @@ func (r *file) Main() {
 //            r.Print(err)
         }
 
-        file.Close()
+        local.Close()
         return
     }
 
     r.Notify(char)
 
-    file.Close()
+    local.Close()
 
     // 发现文件变更，通知给其他模块
     for {
@@ -136,7 +136,7 @@ func (r *file) Main() {
     return
 }
 
-func (r *file) Exit(code int) {
+func (r *local) Exit(code int) {
     //r.cycle.Quit()
     return
 }
