@@ -1,18 +1,19 @@
 package collector
 
 import (
+   	"fmt"
     "sync"
 
     "github.com/satori/go.uuid"
 
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/types"
+    "github.com/rookie-xy/hubble/codec"
+    "github.com/rookie-xy/hubble/proxy"
 
     "github.com/rookie-xy/modules/agents/log/util"
     "github.com/rookie-xy/modules/agents/log/file/state"
-    "github.com/rookie-xy/hubble/codec"
-    "github.com/rookie-xy/hubble/proxy"
-	"fmt"
+    "github.com/rookie-xy/modules/agents/log/collector/job"
 )
 
 type Collector struct {
@@ -25,16 +26,12 @@ type Collector struct {
     stopOnce  sync.Once
     stopWg   *sync.WaitGroup
 
-    // internal harvester state
+    // internal state
     state     state.State
     states   *state.States
     log       log.Log
     codec     codec.Codec
     client    proxy.Forward
-}
-
-type Scanner struct {
-
 }
 
 func New(log log.Log) *Collector {
@@ -44,15 +41,11 @@ func New(log log.Log) *Collector {
 }
 
 func (c *Collector) Init(group, Type string,
-                              codec, client types.Value) error {
+                         codec, client types.Value) error {
     return nil
 }
 
-func (c *Collector) Setup(codec types.Value) error {
-    return nil
-}
-
-func (c *Collector) Scanner(fstates *state.States) *Scanner {
+func (c *Collector) Job() *job.Job {
     return nil
 }
 
@@ -72,16 +65,4 @@ func (r *Collector) Update(fs state.State) {
     d := util.NewData()
     d.SetState(r.state)
     //h.publishState(d)
-}
-
-func (c *Collector) ID() uuid.UUID {
-    return 1
-}
-
-func (c *Collector) Run() error {
-    return nil
-}
-
-func (c *Collector) Stop() {
-    return
 }

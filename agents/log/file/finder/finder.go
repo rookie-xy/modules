@@ -78,7 +78,7 @@ func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
     return newState, nil
 }
 
-func (r *Finder) Scan() bool {
+func (r *Finder) Find() bool {
     var paths []string
 
     files := r.getFiles()
