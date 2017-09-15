@@ -95,7 +95,7 @@ func (r *Finder) Find() bool {
         select {
 
         case <-r.done:
-            fmt.Println("Scan aborted because scanner stopped.")
+            fmt.Println("Find aborted because scanner stopped.")
             return
 
         default:
@@ -182,7 +182,7 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
             continue
         }
 
-    //OUTER:
+    OUTER:
         // Check any matched files to see if we need to start a collector
         for _, file := range matches {
 
@@ -220,16 +220,12 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
 
             // If symlink is enabled, it is checked that original is not part of same scanner
             // It original is harvested by other scanner, states will potentially overwrite each other
-            /*
-            if p.config.Symlinks {
                 for _, finfo := range paths {
                     if os.SameFile(finfo, fileInfo) {
                         fmt.Println("Same file found as symlink and originap. Skipping file: %s", file)
 																				    continue OUTER
                     }
                 }
-            }
-            */
 
             files[file] = fileInfo
         }
