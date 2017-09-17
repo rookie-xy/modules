@@ -117,8 +117,9 @@ func (r *States) SetStates(states []State) {
 
 // Copy create a new copy of the states object
 func (r *States) Copy() *States {
-    states := NewStates()
-    states.states = r.GetStates()
+//    states := NewStates()
+//    states.states = r.GetStates()
 
-    return states
+//    return states
+    return nil
 }

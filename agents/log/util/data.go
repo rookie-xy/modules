@@ -1,7 +1,6 @@
 package util
 
-import "github.com/rookie-xy/modules/agents/log/file/file"
-
+/*
 type Data struct {
 //	Event beat.Event
     state file.State

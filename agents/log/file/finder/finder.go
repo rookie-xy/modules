@@ -82,10 +82,9 @@ func (r *Finder) Find() bool {
     var paths []string
 
     files := r.getFiles()
-		  paths = getKeys(files)
+    paths = getKeys(files)
 
     for i := 0; i < len(files); i++ {
-
         var path string
         var info os.FileInfo
 
@@ -96,21 +95,23 @@ func (r *Finder) Find() bool {
 
         case <-r.done:
             fmt.Println("Find aborted because scanner stopped.")
-            return
+            return true
 
         default:
 
         }
 
-        newState, err := getFileState(path, info, r)
+        //newState, err := getFileState(path, info, r)
+        _, err := getFileState(path, info, r)
         if err != nil {
             fmt.Println("Skipping file %s due to error %s", path, err)
         }
 
         // Load last state
-        lastState := r.states.FindPrevious(newState)
+        //lastState := r.states.FindPrevious(newState)
 
         // Ignores all files which fall under ignore_older
+        /*
         if r.isIgnoreOlder(newState) {
             err := r.handleIgnoreOlder(lastState, newState)
             if err != nil {
@@ -119,8 +120,10 @@ func (r *Finder) Find() bool {
 
             continue
         }
+        */
 
         // Decides if previous state exists
+        /*
         if lastState.IsEmpty() {
 
             fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
@@ -132,6 +135,7 @@ func (r *Finder) Find() bool {
         } else {
             r.collectExistingFile(newState, lastState)
         }
+        */
     }
 
     return true
@@ -144,7 +148,7 @@ func (r *Finder) startCollector(state state.State, offset int64) error {
         //collectorSkipped.Add(1)
         return fmt.Errorf("collector limit reached")
     }
-
+/*
     // Set state to "not" finished to indicate that a collector is running
     state.Finished = false
     state.Offset = offset
@@ -158,6 +162,7 @@ func (r *Finder) startCollector(state state.State, offset int64) error {
     job.Update(state)
 
     r.jobs.Start(job)
+    */
 
     return nil
 }
@@ -182,7 +187,7 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
             continue
         }
 
-    OUTER:
+//    OUTER:
         // Check any matched files to see if we need to start a collector
         for _, file := range matches {
 
@@ -220,12 +225,14 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
 
             // If symlink is enabled, it is checked that original is not part of same scanner
             // It original is harvested by other scanner, states will potentially overwrite each other
+            /*
                 for _, finfo := range paths {
                     if os.SameFile(finfo, fileInfo) {
                         fmt.Println("Same file found as symlink and originap. Skipping file: %s", file)
 																				    continue OUTER
                     }
                 }
+                */
 
             files[file] = fileInfo
         }
@@ -236,6 +243,9 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
 
 // isFileExcluded checks if the given path should be excluded
 func (r *Finder) isFileExcluded(file string) bool {
+    /*
     patterns := r.excludes
     return len(patterns) > 0 && MatchAny(patterns, file)
+    */
+    return true
 }

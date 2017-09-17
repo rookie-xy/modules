@@ -84,7 +84,7 @@ func (r *Proxy) Init() {
                 module.Init()
 
             } else {
-                fmt.Printf("[%s] module setup error", name)
+                fmt.Printf("[%s] module setup error\n", name)
                 return state.Error
             }
 
@@ -115,7 +115,7 @@ func (r *Proxy) Main() {
     }
 
     for _, child := range r.children {
-        child.Main()
+        go child.Main()
     }
 
     for ;; {

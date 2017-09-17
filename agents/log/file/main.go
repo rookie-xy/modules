@@ -12,7 +12,7 @@ import (
     "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
 
-    "github.com/rookie-xy/modules/agents/log/collector"
+//    "github.com/rookie-xy/modules/agents/log/collector"
     "github.com/rookie-xy/modules/agents/log/file/finder"
 )
 
@@ -113,6 +113,7 @@ var commands = []command.Item{
 }
 
 func (f *file) Init() {
+/*
     group, Type := group.GetValue(), Type.GetValue()
     if group == nil || Type == nil {
         return
@@ -135,21 +136,21 @@ func (f *file) Init() {
     }
 
     finder := finder.New(f.log)
-    if err := finder.Init(Name, paths, excludes,
-                                       collector, limit.GetUint64()); err != nil {
+    if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
+                                       nil, limit.GetUint64()); err != nil {
         fmt.Println(err)
         return
     }
 
     f.finder = finder
-
+*/
     return
 }
 
 func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-
+/*
     f.wg.Add(1)
     //r.Print("Starting prospector of type: %v; id: %v ", p.config.Type, p.ID())
 
@@ -185,6 +186,7 @@ func (f *file) Main() {
     }
 
     run(f.scanner)
+    */
 
     return
 }

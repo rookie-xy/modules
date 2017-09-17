@@ -1,5 +1,5 @@
 package match
-
+/*
 import "regexp/syntax"
 
 type trans func(*syntax.Regexp) (bool, *syntax.Regexp)
@@ -255,3 +255,4 @@ func flattenRepetition(r *syntax.Regexp) (bool, *syntax.Regexp) {
 	}
 	return changed, &tmp
 }
+*/

@@ -11,7 +11,7 @@ import (
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/proxy"
 
-    "github.com/rookie-xy/modules/agents/log/util"
+//    "github.com/rookie-xy/modules/agents/log/util"
     "github.com/rookie-xy/modules/agents/log/file/state"
     "github.com/rookie-xy/modules/agents/log/collector/job"
 )
@@ -27,11 +27,12 @@ type Collector struct {
     stopWg   *sync.WaitGroup
 
     // internal state
-    state     state.State
-    states   *state.States
-    log       log.Log
-    codec     codec.Codec
-    client    proxy.Forward
+    state      state.State
+    states    *state.States
+    log        log.Log
+    codec      codec.Codec
+    client     proxy.Forward
+    sincedb    proxy.Reverse
 }
 
 func New(log log.Log) *Collector {
@@ -62,7 +63,7 @@ func (r *Collector) Update(fs state.State) {
     fmt.Println("collector", "Update state: %s, offset: %v", r.state.Source, r.state.Offset)
     r.states.Update(r.state)
 
-    d := util.NewData()
-    d.SetState(r.state)
+//    d := util.NewData()
+//    d.SetState(r.state)
     //h.publishState(d)
 }

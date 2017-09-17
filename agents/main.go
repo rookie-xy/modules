@@ -110,7 +110,7 @@ func (r *Agent) Main() {
     }
 
     for _, child := range r.children {
-        child.Main()
+        go child.Main()
     }
 
     for ;; {

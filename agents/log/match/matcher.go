@@ -1,5 +1,5 @@
 package match
-
+/*
 import "regexp/syntax"
 
 type Matcher struct {
@@ -145,3 +145,4 @@ func matchAllStrings(m stringMatcher, strs []string) bool {
 	}
 	return true
 }
+*/

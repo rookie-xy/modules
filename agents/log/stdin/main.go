@@ -10,7 +10,7 @@ import (
     "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
 
-    "github.com/rookie-xy/modules/agents/log/collector"
+//    "github.com/rookie-xy/modules/agents/log/collector"
 )
 
 const Name  = "stdin"
@@ -114,7 +114,7 @@ func (r *stdin) Init() {
 func (r *stdin) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-
+/*
     c, err := collector.New(r.Log)
     if err != nil {
         //r.Print("Error in initing collector: %s", err)
@@ -123,6 +123,7 @@ func (r *stdin) Main() {
     }
 
     c.Start()
+    */
 
     return
 }

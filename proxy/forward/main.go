@@ -24,7 +24,7 @@ type forward struct {
 
 var (
     pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
-    client    = command.New( plugin.Flag, "client.kafka",    nil, "This option use to group" )
+    client    = command.New( plugin.Flag, "client.elasticsearch",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
@@ -55,14 +55,15 @@ func New(log log.Log) module.Template {
 
 func (r *forward) Init() {
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    if pipeline, err := factory.Pipeline(key, r.Log, pipeline.GetValue()); err != nil {
+    pipeline, err := factory.Pipeline(key, r.Log, pipeline.GetValue())
+    if err != nil {
         fmt.Println("pipeline error", err)
         return
     } else {
         r.pipeline = pipeline
     }
 
-    register.Clones(client.GetKey(), pipeline)
+    register.Queue(client.GetKey(), pipeline)
 
     key = client.GetFlag() + "." + client.GetKey()
     if client, err := factory.Client(key, r.Log, client.GetValue()); err != nil {
@@ -70,6 +71,7 @@ func (r *forward) Init() {
         return
     } else {
         r.client = client
+        register.Forword(key, client)
     }
 
     return

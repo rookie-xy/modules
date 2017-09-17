@@ -3,10 +3,13 @@ package job
 import (
     "github.com/rookie-xy/hubble/scanner"
     "github.com/rookie-xy/hubble/log"
+        "github.com/rookie-xy/hubble/codec"
+    "github.com/satori/go.uuid"
 )
 
 type Job struct {
     log log.Log
+    codec codec.Codec
 }
 
 func (j *Job) New(log log.Log) *Job {
@@ -15,13 +18,13 @@ func (j *Job) New(log log.Log) *Job {
     }
 }
 
-func (c *job) ID() uuid.UUID {
-    return 1
+func (c *Job) ID() uuid.UUID {
+    return uuid.UUID{}
 }
 
-func (c *job) Run() error {
+func (j *Job) Run() error {
     scanner := scanner.New(nil)
-    scanner.Split(c.codec.Decode)
+    scanner.Split(j.codec.Decode)
 
     for scanner.Scan() {
         value := scanner.Value()
@@ -31,6 +34,6 @@ func (c *job) Run() error {
     return nil
 }
 
-func (c *job) Stop() {
+func (j *Job) Stop() {
     return
 }
