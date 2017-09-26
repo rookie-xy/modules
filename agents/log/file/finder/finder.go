@@ -6,11 +6,15 @@ import (
     "errors"
     "regexp"
     "path/filepath"
+    "encoding/json"
 
     "github.com/rookie-xy/hubble/types"
 
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/factory"
+    "github.com/rookie-xy/hubble/types/value"
 
     "github.com/rookie-xy/modules/agents/log/collector"
     "github.com/rookie-xy/modules/agents/log/file/state"
@@ -23,6 +27,7 @@ type Finder struct {
     excludes   types.Value
     from       string
     states    *state.States
+    sincedb    adapter.SinceDB
     done       chan struct{}
 
     collector *collector.Collector
@@ -36,13 +41,30 @@ func New(log log.Log) *Finder {
     }
 }
 
-func (r *Finder) Init(from string,
+func (f *Finder) Init(from string,
                       paths, excludes types.Value,
                       cc *collector.Collector, limit uint64) error {
     r.paths    = paths
     r.excludes = excludes
     r.from = from
     r.collector = cc
+    r.states = state.News()
+
+    f.sincedb, err := factory.Client("plugin.client.service.sincedb", f.log, nil)
+    if err != nil {
+        return err
+    }
+
+    var states state.States
+    if v := f.sincedb.Find(); v != nil {
+        if value := value.New(v); value != nil {
+            if err := json.Unmarshal(value.GetBytes(), &states); err != nil {
+                return err
+            }
+        }
+    }
+
+    f.load(states.States)
 
     if limit > 0 {
         r.limit = limit
@@ -53,130 +75,15 @@ func (r *Finder) Init(from string,
     return nil
 }
 
-func getKeys(files map[string]os.FileInfo) []string {
-    paths := make([]string, 0)
-    for file := range files {
-        paths = append(paths, file)
-    }
-
-    return paths
-}
-
-func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
-    var err error
-    var absolutePath string
-
-    absolutePath, err = filepath.Abs(path)
-    if err != nil {
-        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
-    }
-
-    fmt.Println("finder", "Check file for collecting: %s", absolutePath)
-
-    newState := state.New(fi, absolutePath, s.from)
-
-    return newState, nil
-}
-
-func (r *Finder) Find() {
-    //var paths []string
-    r.getFiles()
-    /*
-    files := r.getFiles()
-    paths = getKeys(files)
-
-    for i := 0; i < len(files); i++ {
-        var path string
-        var info os.FileInfo
-
-        path = paths[i]
-        info = files[path]
-
-        select {
-
-        case <-r.done:
-            fmt.Println("Find aborted because scanner stopped.")
-            return
-
-        default:
-
-        }
-
-        //newState, err := getFileState(path, info, r)
-        _, err := getFileState(path, info, r)
-        if err != nil {
-            fmt.Println("Skipping file %s due to error %s", path, err)
-        }
-
-        // Load last state
-        //lastState := r.states.FindPrevious(newState)
-
-        // Ignores all files which fall under ignore_older
-        if r.isIgnoreOlder(newState) {
-            err := r.handleIgnoreOlder(lastState, newState)
-            if err != nil {
-                fmt.Println("Updating ignore_older state error: %s", err)
-												}
-
-            continue
-        }
-
-        // Decides if previous state exists
-        if lastState.IsEmpty() {
-
-            fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
-            err := r.startTextFinder(newState, 0)
-            if err != nil {
-                fmt.Println("collector could not be started on new file: %s, Err: %s", newState.Source, err)
-            }
-
-        } else {
-            r.collectExistingFile(newState, lastState)
-        }
-    }
-    */
-
-    return
-}
-
-func (r *Finder) startCollector(state state.State, offset int64) error {
-    if r.limit > 0 && r.jobs.Len() >= r.limit {
-        //collectorSkipped.Add(1)
-        return fmt.Errorf("collector limit reached")
-    }
-/*
-    // Set state to "not" finished to indicate that a collector is running
-    state.Finished = false
-    state.Offset = offset
-
-    // Create collector with state
-    job := r.collector.Job(r.states)
-
-    // Update state before staring collector
-    // This makes sure the states is set to Finished: false
-    // This is synchronous state update as part of the scan
-    job.Update(state)
-
-    r.jobs.Start(job)
-    */
-
+func (f *Finder) load(states []state.State) error {
     return nil
 }
 
-func (r *Finder) Stop() {
-
-}
-
-func (r *Finder) Wait() {
-
-}
-
-func (r *Finder) getFiles() map[string]os.FileInfo {
+func getFiles(path types.Value) map[string]os.FileInfo {
     files := map[string]os.FileInfo{}
-    paths := r.paths.GetArray()
+    paths := path.GetArray()
 
     for _, path := range paths {
-        //fmt.Println(path)
         matches, err := filepath.Glob(path.(string))
         if err != nil {
             fmt.Printf("glob(%s) failed: %v\n", path, err)
@@ -212,7 +119,6 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
                 continue
             }
 
-fmt.Println("hhhhhhhhhhhhhhhhhh", file)
             // Fetch Stat file info which fetches the inode.
 								    // In case of a symlink, the original inode is fetched
             fileInfo, err = os.Stat(file)
@@ -237,6 +143,122 @@ fmt.Println("hhhhhhhhhhhhhhhhhh", file)
     }
 
     return files
+}
+
+func getKeys(files map[string]os.FileInfo) []string {
+    paths := make([]string, 0)
+    for file := range files {
+        paths = append(paths, file)
+    }
+
+    return paths
+}
+
+func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
+    var err error
+    var absolutePath string
+
+    absolutePath, err = filepath.Abs(path)
+    if err != nil {
+        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
+    }
+
+    fmt.Println("finder", "Check file for collecting: %s", absolutePath)
+
+    newState := state.New(fi, absolutePath, s.from)
+
+    return newState, nil
+}
+
+func (r *Finder) Find() {
+    var paths []string
+
+    files := getFiles(r.paths)
+    paths = getKeys(files)
+
+    for i := 0; i < len(files); i++ {
+        var path string
+        var info os.FileInfo
+
+        path = paths[i]
+        info = files[path]
+        fmt.Println(info.Name())
+
+        select {
+
+        case <-r.done:
+            fmt.Println("Find aborted because scanner stopped.")
+            return
+        default:
+        }
+
+        //newState, err := getFileState(path, info, r)
+        _, err := getFileState(path, info, r)
+        if err != nil {
+            fmt.Println("Skipping file %s due to error %s", path, err)
+        }
+/*
+        // Load last state
+        //lastState := r.states.FindPrevious(newState)
+
+        // Ignores all files which fall under ignore_older
+        if r.isIgnoreOlder(newState) {
+            err := r.handleIgnoreOlder(lastState, newState)
+            if err != nil {
+                fmt.Println("Updating ignore_older state error: %s", err)
+												}
+
+            continue
+        }
+
+        // Decides if previous state exists
+        if lastState.IsEmpty() {
+
+            fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
+            err := r.startTextFinder(newState, 0)
+            if err != nil {
+                fmt.Println("collector could not be started on new file: %s, Err: %s", newState.Source, err)
+            }
+
+        } else {
+            r.collectExistingFile(newState, lastState)
+        }
+        */
+    }
+
+    return
+}
+
+func (r *Finder) startCollector(state state.State, offset int64) error {
+    if r.limit > 0 && r.jobs.Len() >= r.limit {
+        //collectorSkipped.Add(1)
+        return fmt.Errorf("collector limit reached")
+    }
+/*
+    // Set state to "not" finished to indicate that a collector is running
+    state.Finished = false
+    state.Offset = offset
+
+    // Create collector with state
+    job := r.collector.Job(r.states)
+
+    // Update state before staring collector
+    // This makes sure the states is set to Finished: false
+    // This is synchronous state update as part of the scan
+    job.Update(state)
+
+    r.jobs.Start(job)
+    */
+
+    return nil
+}
+
+func (r *Finder) Stop() {
+
+}
+
+func (r *Finder) Wait() {
+
 }
 
 func (r *Finder) isExcluded(file string) bool {

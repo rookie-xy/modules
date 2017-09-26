@@ -8,7 +8,7 @@ import (
 
 // States handles list of FileState
 type States struct {
-    states []State
+    States []State `json:"states"`
     sync.RWMutex
 }
 

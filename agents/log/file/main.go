@@ -11,6 +11,9 @@ import (
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
+    "github.com/rookie-xy/hubble/proxy"
+//    "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/factory"
 
 //    "github.com/rookie-xy/modules/agents/log/collector"
     "github.com/rookie-xy/modules/agents/log/file/finder"
@@ -21,10 +24,10 @@ const Name  = "file"
 type file struct {
     finder     *finder.Finder
     frequency   time.Duration
+//    client      proxy.Forward
     log         log.Log
-
     done        chan struct{}
-    wg         *sync.WaitGroup
+//    wg         *sync.WaitGroup
 }
 
 func New(log log.Log) module.Template {
@@ -135,6 +138,7 @@ func (f *file) Init() {
         return
     }
 
+
     finder := finder.New(f.log)
     if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
                                 nil, limit.GetUint64()); err != nil {
@@ -167,7 +171,7 @@ func (f *file) Main() {
         }()
 
         // Initial finder run
-        finder.Find()
+        finder.Find(f.client)
 
         for {
             select {
@@ -177,7 +181,7 @@ func (f *file) Main() {
                 return nil
             case <-time.After(f.frequency):
                 //r.Debug("finder", "Run finder")
-                finder.Find()
+                finder.Find(f.client)
             }
         }
 
