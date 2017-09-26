@@ -4,6 +4,7 @@ import (
     "fmt"
     "os"
     "errors"
+    "regexp"
     "path/filepath"
 
     "github.com/rookie-xy/hubble/types"
@@ -36,8 +37,8 @@ func New(log log.Log) *Finder {
 }
 
 func (r *Finder) Init(from string,
-                       paths, excludes types.Value,
-                       cc *collector.Collector, limit uint64) error {
+                      paths, excludes types.Value,
+                      cc *collector.Collector, limit uint64) error {
     r.paths    = paths
     r.excludes = excludes
     r.from = from
@@ -70,17 +71,17 @@ func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
         return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
     }
 
-    fmt.Println("scanner", "Check file for collecting: %s", absolutePath)
+    fmt.Println("finder", "Check file for collecting: %s", absolutePath)
 
-    // Create new state for comparison
     newState := state.New(fi, absolutePath, s.from)
 
     return newState, nil
 }
 
-func (r *Finder) Find() bool {
-    var paths []string
-
+func (r *Finder) Find() {
+    //var paths []string
+    r.getFiles()
+    /*
     files := r.getFiles()
     paths = getKeys(files)
 
@@ -95,7 +96,7 @@ func (r *Finder) Find() bool {
 
         case <-r.done:
             fmt.Println("Find aborted because scanner stopped.")
-            return true
+            return
 
         default:
 
@@ -111,7 +112,6 @@ func (r *Finder) Find() bool {
         //lastState := r.states.FindPrevious(newState)
 
         // Ignores all files which fall under ignore_older
-        /*
         if r.isIgnoreOlder(newState) {
             err := r.handleIgnoreOlder(lastState, newState)
             if err != nil {
@@ -120,10 +120,8 @@ func (r *Finder) Find() bool {
 
             continue
         }
-        */
 
         // Decides if previous state exists
-        /*
         if lastState.IsEmpty() {
 
             fmt.Println("scanner", "Start collector for new file: %s", newState.Source)
@@ -135,14 +133,12 @@ func (r *Finder) Find() bool {
         } else {
             r.collectExistingFile(newState, lastState)
         }
-        */
     }
+    */
 
-    return true
+    return
 }
 
-// startCollector starts a new collector with the given offset
-// In case the CollectorLimit is reached, an error is returned
 func (r *Finder) startCollector(state state.State, offset int64) error {
     if r.limit > 0 && r.jobs.Len() >= r.limit {
         //collectorSkipped.Add(1)
@@ -180,22 +176,23 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
     paths := r.paths.GetArray()
 
     for _, path := range paths {
-
+        //fmt.Println(path)
         matches, err := filepath.Glob(path.(string))
         if err != nil {
-            fmt.Println("glob(%s) failed: %v", path, err)
+            fmt.Printf("glob(%s) failed: %v\n", path, err)
             continue
         }
 
 //    OUTER:
         // Check any matched files to see if we need to start a collector
         for _, file := range matches {
-
              // check if the file is in the exclude_files list
-             if r.isFileExcluded(file) {
-                 fmt.Println("scanner", "Exclude file: %s", file)
-                 continue
-             }
+            /*
+            if r.isExcluded(file) {
+                fmt.Printf("Finder Exclude file: %s\n", file)
+                continue
+            }
+            */
 
             // Fetch Lstat File info to detected also symlinks
             fileInfo, err := os.Lstat(file)
@@ -215,6 +212,7 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
                 continue
             }
 
+fmt.Println("hhhhhhhhhhhhhhhhhh", file)
             // Fetch Stat file info which fetches the inode.
 								    // In case of a symlink, the original inode is fetched
             fileInfo, err = os.Stat(file)
@@ -241,11 +239,19 @@ func (r *Finder) getFiles() map[string]os.FileInfo {
     return files
 }
 
-// isFileExcluded checks if the given path should be excluded
-func (r *Finder) isFileExcluded(file string) bool {
-    /*
-    patterns := r.excludes
-    return len(patterns) > 0 && MatchAny(patterns, file)
-    */
-    return true
+func (r *Finder) isExcluded(file string) bool {
+    patterns := r.excludes.GetArray()
+    if len(patterns) > 0 {
+        for _, pattern := range patterns {
+            if matched, err := regexp.MatchString(pattern.(string), file); err != nil {
+                fmt.Println(err)
+            } else {
+                if matched {
+                    return matched
+                }
+            }
+        }
+    }
+
+    return false
 }

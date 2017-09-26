@@ -37,11 +37,11 @@ var (
     group     = command.New( module.Flag, "group",     "nginx",          "This option use to group" )
     Type      = command.New( module.Flag, "type",      "log",            "file type, this is use to find some question" )
     paths     = command.New( module.Flag, "paths",     nil,              "File path, its is manny option" )
-    excludes  = command.New( module.Flag, "paths",     nil,              "File path, its is manny option" )
+    excludes  = command.New( module.Flag, "excludes",   nil,              "File path, its is manny option" )
     codec     = command.New( plugin.Flag, "codec",     nil,              "codec method" )
     client    = command.New( plugin.Flag, "client",    nil,              "client method" )
-    frequency = command.New( module.Flag, "frequency", 10 * time.Second, "scan frequency method" )
-    limit     = command.New( module.Flag, "limit",     7,                "text scanner limit" )
+    frequency = command.New( module.Flag, "frequency", 3 * time.Second, "scan frequency method" )
+    limit     = command.New( module.Flag, "limit",     uint64(7),                "text finder limit" )
 )
 
 var commands = []command.Item{
@@ -125,9 +125,9 @@ func (f *file) Init() {
         fmt.Println(err)
         return
     }
-
+*/
     if value := frequency.GetValue(); value != nil {
-        f.frequency = value.GetUint64()
+        f.frequency = value.GetDuration()
     }
 
     limit := limit.GetValue()
@@ -137,56 +137,54 @@ func (f *file) Init() {
 
     finder := finder.New(f.log)
     if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
-                                       nil, limit.GetUint64()); err != nil {
+                                nil, limit.GetUint64()); err != nil {
         fmt.Println(err)
         return
     }
 
     f.finder = finder
-*/
+
     return
 }
 
 func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-/*
-    f.wg.Add(1)
-    //r.Print("Starting prospector of type: %v; id: %v ", p.config.Type, p.ID())
 
-    onceWg := sync.WaitGroup{}
-    onceWg.Add(1)
+    //f.wg.Add(1)
+    //r.Print("Starting finder of type: %v; id: %v ", p.config.Type, p.ID())
+
+    //onceWg := sync.WaitGroup{}
+    //onceWg.Add(1)
 
     // Add waitgroup to make sure prospectors finished
-    run := func() int {
+    run := func(finder *finder.Finder) error {
         defer func() {
-            onceWg.Done()
+            //onceWg.Done()
             close(f.done)
-            f.wg.Wait()
-            f.wg.Done()
+            //f.wg.Wait()
+            //f.wg.Done()
         }()
 
-        // Initial scan run
-        file.Scan()
+        // Initial finder run
+        finder.Find()
 
         for {
             select {
 
             case <-f.done:
-                //r.Print("Collector ticker stopped")
-                return
-
+                //r.Print("Finder ticker stopped")
+                return nil
             case <-time.After(f.frequency):
-                //r.Debug("collector", "Run collector")
-                file.Scan()
+                //r.Debug("finder", "Run finder")
+                finder.Find()
             }
         }
 
-        return state.Ok
+        return nil
     }
 
-    run(f.scanner)
-    */
+    run(f.finder)
 
     return
 }
