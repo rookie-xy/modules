@@ -3,7 +3,7 @@ package util
 import (
     "testing"
 
-    "github.com/rookie-xy/modules/agents/log/file/file"
+    "github.com/rookie-xy/modules/agents/file/file"
     "github.com/stretchr/testify/assert"
 )
 

@@ -2,7 +2,7 @@ package file
 
 import (
     "fmt"
-    "sync"
+    //"sync"
     "time"
 
     "github.com/rookie-xy/hubble/command"
@@ -11,12 +11,9 @@ import (
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
-    "github.com/rookie-xy/hubble/proxy"
-//    "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/hubble/factory"
 
-//    "github.com/rookie-xy/modules/agents/log/collector"
-    "github.com/rookie-xy/modules/agents/log/file/finder"
+    "github.com/rookie-xy/modules/agents/file/finder"
+    "github.com/rookie-xy/modules/agents/file/collector"
 )
 
 const Name  = "file"
@@ -24,7 +21,6 @@ const Name  = "file"
 type file struct {
     finder     *finder.Finder
     frequency   time.Duration
-//    client      proxy.Forward
     log         log.Log
     done        chan struct{}
 //    wg         *sync.WaitGroup
@@ -116,7 +112,6 @@ var commands = []command.Item{
 }
 
 func (f *file) Init() {
-/*
     group, Type := group.GetValue(), Type.GetValue()
     if group == nil || Type == nil {
         return
@@ -124,11 +119,11 @@ func (f *file) Init() {
 
     collector := collector.New(f.log)
     if err := collector.Init(group.GetString(), Type.GetString(),
-                                              codec, client); err != nil {
+                             codec.GetValue(), client.GetValue()); err != nil {
         fmt.Println(err)
         return
     }
-*/
+
     if value := frequency.GetValue(); value != nil {
         f.frequency = value.GetDuration()
     }
@@ -138,10 +133,9 @@ func (f *file) Init() {
         return
     }
 
-
     finder := finder.New(f.log)
     if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
-                                nil, limit.GetUint64()); err != nil {
+                                collector, limit.GetUint64()); err != nil {
         fmt.Println(err)
         return
     }
@@ -170,8 +164,7 @@ func (f *file) Main() {
             //f.wg.Done()
         }()
 
-        // Initial finder run
-        finder.Find(f.client)
+        finder.Find()
 
         for {
             select {
@@ -181,7 +174,7 @@ func (f *file) Main() {
                 return nil
             case <-time.After(f.frequency):
                 //r.Debug("finder", "Run finder")
-                finder.Find(f.client)
+                finder.Find()
             }
         }
 

@@ -12,10 +12,7 @@ import (
     "github.com/rookie-xy/hubble/types/value"
     "github.com/rookie-xy/hubble/configure"
 
-  _ "github.com/rookie-xy/modules/agents/log/file"
-  _ "github.com/rookie-xy/modules/agents/log/stdin"
-  _ "github.com/rookie-xy/modules/agents/fpm"
-  _ "github.com/rookie-xy/modules/agents/proc"
+  _ "github.com/rookie-xy/modules/agents/file"
 )
 
 const Name = module.Agents
