@@ -30,7 +30,6 @@ type Finder struct {
     sincedb     adapter.SinceDB
     done        chan struct{}
 
-    collector  *collector.Collector
     jobs       *job.Jobs
     limit       uint64
 }
@@ -43,22 +42,20 @@ func New(log log.Log) *Finder {
 }
 
 func (f *Finder) Init(from string,
-                      paths, excludes types.Value,
-                      cc *collector.Collector, limit uint64) error {
+                      paths, excludes types.Value, limit uint64) error {
     f.paths    = paths
     f.excludes = excludes
     f.from = from
-    f.collector = cc
     f.states = state.News()
 
     if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
         return err
     } else {
-        f.sincedb = adapter.AdapterSinceDB(client)
+        f.sincedb = adapter.ToSinceDB(client)
     }
 
     var states state.States
-    if v := f.sincedb.Find(); v != nil {
+    if v := f.sincedb.Get(); v != nil {
         if val := value.New(v); val != nil {
             if err := json.Unmarshal(val.GetBytes(), &states); err != nil {
             	fmt.Println(err)
@@ -236,6 +233,7 @@ func (r *Finder) Find() {
             fmt.Println("Find aborted because scanner stopped.")
             return
         default:
+
         }
 
         newState, err := getFileState(path, info, r)
@@ -269,13 +267,19 @@ func (f *Finder) startCollector(state state.State, offset int64) error {
     state.Finished = false
     state.Offset = offset
 
-    if err := f.collector.Setup(); err != nil {
+    collector := collector.New(f.log)
+    if err := collector.Init(group.GetString(), Type.GetString(),
+                                                codec, client); err != nil {
         return err
     }
 
-    f.collector.Update(state)
+    if err := collector.Setup(); err != nil {
+        return err
+    }
 
-    f.jobs.Start(f.collector)
+    collector.Update(state)
+
+    f.jobs.Start(collector)
 
     return nil
 }

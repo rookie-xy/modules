@@ -117,13 +117,6 @@ func (f *file) Init() {
         return
     }
 
-    collector := collector.New(f.log)
-    if err := collector.Init(group.GetString(), Type.GetString(),
-                             codec.GetValue(), client.GetValue()); err != nil {
-        fmt.Println(err)
-        return
-    }
-
     if value := frequency.GetValue(); value != nil {
         f.frequency = value.GetDuration()
     }
@@ -135,7 +128,7 @@ func (f *file) Init() {
 
     finder := finder.New(f.log)
     if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
-                                collector, limit.GetUint64()); err != nil {
+                                limit.GetUint64()); err != nil {
         fmt.Println(err)
         return
     }

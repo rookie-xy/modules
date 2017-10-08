@@ -3,35 +3,37 @@ package collector
 import (
 	"os"
    	"fmt"
-    "sync"
     "errors"
+    "bytes"
+    "bufio"
 
     "github.com/satori/go.uuid"
 
     "github.com/rookie-xy/hubble/log"
-    "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/proxy"
 
     "github.com/rookie-xy/modules/agents/file/state"
+	"github.com/rookie-xy/hubble/command"
+	"github.com/rookie-xy/hubble/factory"
+	"github.com/rookie-xy/modules/agents/file/message"
+	"github.com/rookie-xy/hubble/event"
+	"github.com/rookie-xy/modules/agents/file/source"
 )
 
 type Collector struct {
     id       uuid.UUID
-    source   Source
-
-    // shutdown handling
-    done      chan struct{}
-    stopOnce  sync.Once
-    stopWg   *sync.WaitGroup
+    source   source.Source
 
     // internal state
     state      state.State
     states    *state.States
     log        log.Log
+    Log       *source.Log
     codec      codec.Codec
     client     proxy.Forward
-    sincedb    proxy.Reverse
+    sincedb    proxy.Forward
+    message   *message.Message
 }
 
 func New(log log.Log) *Collector {
@@ -42,7 +44,36 @@ func New(log log.Log) *Collector {
 }
 
 func (c *Collector) Init(group, Type string,
-                         codec, client types.Value) error {
+                         codec, client *command.Command) error {
+    event := message.New()
+    if err := event.SetHeader("group", group); err != nil {
+        return err
+    }
+    if err := event.SetHeader("type", Type); err != nil {
+        return err
+    }
+    c.message = event
+
+	key := codec.GetFlag() + "." + codec.GetKey()
+    if codec, err := factory.Codec(key, c.log, codec.GetValue()); err != nil {
+        return err
+    } else {
+        c.codec = codec
+    }
+
+ 	key = client.GetFlag() + "." + client.GetKey()
+    if client, err := factory.Client(key, c.log, client.GetValue()); err != nil {
+        return err
+    } else {
+        c.client = client
+    }
+
+    if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
+        return err
+    } else {
+        c.sincedb = client
+    }
+
     return nil
 }
 
@@ -51,22 +82,101 @@ func (c *Collector) ID() uuid.UUID {
 }
 
 func (c *Collector) Run() error {
-	fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    return nil
+    scanner := bufio.NewScanner(c.log)
+	scanner.Split(c.codec.Decode)
+	id := c.state.Lno
+
+    for {
+        keep := scanner.Scan()
+        if !keep {
+            switch scanner.Err() {
+			case bufio.ErrTooLong:
+			case bufio.ErrFinalToken:
+			case bufio.ErrAdvanceTooFar:
+			case bufio.ErrNegativeAdvance:
+            }
+	    }
+	    id++
+
+	    message := message.New()
+	    message.Id = id
+	    content := scanner.Bytes()
+	    //message.Bytes = len(message.Content)
+        if c.state.Offset == 0 {
+            content = bytes.Trim(content, "\xef\xbb\xbf")
+        }
+        message.SetBody(content)
+
+        state := c.getState()
+        state.Offset += message.GetBodyLength()
+
+        event := event.New()
+   		if c.source.HasState() {
+			event.Set(state)
+		}
+
+        text := scanner.Text()
+
+        if !message.IsEmpty() {
+
+		}
+
+		if !c.Send(event) {
+		    return nil
+		}
+
+		c.state = state
+    }
 }
 
 func (c *Collector) Stop() {
 
 }
 
+func (c *Collector) Send(event event.Event) bool {
+    if err := c.client.Sender(event, false); err != nil {
+    	fmt.Errorf("send client error", err)
+        return false
+    }
+
+    if err := c.sincedb.Sender(event, false); err != nil {
+    	fmt.Errorf("send sincedb error", err)
+        return false
+    }
+
+    return true
+}
+
 func (c *Collector) Setup() error {
+    if err := c.openFile(); err != nil {
+        return err
+    }
+
+    log := source.New(c.log)
+	if err := log.Init(nil); err != nil {
+		return err
+	}
+	c.Log = log
+
     return nil
 }
 
+func (c *Collector) getState() state.State {
+	if !c.source.HasState() {
+		return state.State{}
+	}
+
+	state := c.state
+
+	// refreshes the values in State with the values from the harvester itself
+	//state.FileStateOS = file.GetOSState(h.state.Fileinfo)
+	return state
+}
+
 func ReadOpen(path string) (*os.File, error) {
-	flag := os.O_RDONLY
-	perm := os.FileMode(0)
-	return os.OpenFile(path, flag, perm)
+    flag := os.O_RDONLY
+    perm := os.FileMode(0)
+    return os.OpenFile(path, flag, perm)
 }
 
 type File struct {

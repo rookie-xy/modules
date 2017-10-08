@@ -25,19 +25,19 @@ func (d *Data) HasState() bool {
     return d.state != file.State{}
 }
 /*
-// GetEvent returns the event in the data object
-// In case meta data contains module and fileset data, the event is enriched with it
+// GetEvent returns the events in the data object
+// In case meta data contains module and fileset data, the events is enriched with it
 func (d *Data) GetEvent() beat.Event {
     return d.Event
 }
 
 // GetMetadata creates a common.MapStr containing the metadata to
-// be associated with the event.
+// be associated with the events.
 func (d *Data) GetMetadata() common.MapStr {
     return d.Event.Meta
 }
 
-// HasEvent returns true if the data object contains event data
+// HasEvent returns true if the data object contains events data
 func (d *Data) HasEvent() bool {
     return d.Event.Fields != nil
 }

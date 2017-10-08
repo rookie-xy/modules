@@ -19,7 +19,7 @@ var encodings = map[string]EncodingFactory{
 	"nop":   Plain,
 	"plain": Plain,
 
-	// utf8 (validate input) - shadow htmlindex utf8 codecs not validating input
+	// utf8 (validate source) - shadow htmlindex utf8 codecs not validating source
 	"unicode-1-1-utf-8": utf8Encoding,
 	"utf-8":             utf8Encoding,
 	"utf8":              utf8Encoding,
@@ -42,7 +42,7 @@ var encodings = map[string]EncodingFactory{
 // Plain file encoding not transforming any read bytes.
 var Plain = enc(encoding.Nop)
 
-// UTF-8 encoding copying input to output sequence replacing invalid UTF-8
+// UTF-8 encoding copying source to output sequence replacing invalid UTF-8
 // converted to '\uFFFD'.
 //
 // See: http://encoding.spec.whatwg.org/#replacement

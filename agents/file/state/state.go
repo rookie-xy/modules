@@ -10,6 +10,7 @@ type State struct {
     Finished   bool          `json:"-"` // harvester state
     Fileinfo   os.FileInfo   `json:"-"` // the file info
     Source     string        `json:"source"`
+    Lno        uint64        `json:"lno"`
     Offset     int64         `json:"offset"`
     Timestamp  time.Time     `json:"timestamp"`
     TTL        time.Duration `json:"ttl"`
