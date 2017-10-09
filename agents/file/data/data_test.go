@@ -1,19 +1,19 @@
-package util
+package data
 
 import (
     "testing"
 
-    "github.com/rookie-xy/modules/agents/file/file"
+    "github.com/rookie-xy/modules/agents/file/state"
     "github.com/stretchr/testify/assert"
 )
 
 func TestNewData(t *testing.T) {
-	data := NewData()
+	data := New()
 
 //	assert.False(t, data.HasEvent())
 	assert.False(t, data.HasState())
 
-	data.SetState(file.State{Source: "-"})
+	data.Set(state.State{Source: "-"})
 
 //	assert.False(t, data.HasEvent())
 	assert.True(t, data.HasState())

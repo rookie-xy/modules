@@ -1,24 +1,26 @@
 package collector
 
 import (
+    "io"
 	"os"
    	"fmt"
     "errors"
     "bytes"
-    "bufio"
 
     "github.com/satori/go.uuid"
 
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/proxy"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/factory"
+    "github.com/rookie-xy/hubble/valve"
 
     "github.com/rookie-xy/modules/agents/file/state"
-	"github.com/rookie-xy/hubble/command"
-	"github.com/rookie-xy/hubble/factory"
-	"github.com/rookie-xy/modules/agents/file/message"
-	"github.com/rookie-xy/hubble/event"
 	"github.com/rookie-xy/modules/agents/file/source"
+	"github.com/rookie-xy/modules/agents/file/scanner"
+	"github.com/rookie-xy/modules/agents/file/event"
+	"github.com/rookie-xy/modules/agents/file/data"
 )
 
 type Collector struct {
@@ -29,11 +31,11 @@ type Collector struct {
     state      state.State
     states    *state.States
     log        log.Log
-    Log       *source.Log
     codec      codec.Codec
     client     proxy.Forward
     sincedb    proxy.Forward
-    message   *message.Message
+    scanner   *scanner.Scanner
+    valve      valve.Valve
 }
 
 func New(log log.Log) *Collector {
@@ -45,6 +47,7 @@ func New(log log.Log) *Collector {
 
 func (c *Collector) Init(group, Type string,
                          codec, client *command.Command) error {
+                         	/*
     event := message.New()
     if err := event.SetHeader("group", group); err != nil {
         return err
@@ -53,6 +56,7 @@ func (c *Collector) Init(group, Type string,
         return err
     }
     c.message = event
+                         	*/
 
 	key := codec.GetFlag() + "." + codec.GetKey()
     if codec, err := factory.Codec(key, c.log, codec.GetValue()); err != nil {
@@ -82,46 +86,69 @@ func (c *Collector) ID() uuid.UUID {
 }
 
 func (c *Collector) Run() error {
-    scanner := bufio.NewScanner(c.log)
-	scanner.Split(c.codec.Decode)
-	id := c.state.Lno
-
     for {
-        keep := scanner.Scan()
+        message, keep := c.scanner.Scan()
         if !keep {
-            switch scanner.Err() {
-			case bufio.ErrTooLong:
-			case bufio.ErrFinalToken:
-			case bufio.ErrAdvanceTooFar:
-			case bufio.ErrNegativeAdvance:
+            switch c.scanner.Err() {
+			case io.EOF:
+				c.log.Info("End of file reached: %s. Closing because close_eof is enabled.", c.state.Source)
+			case source.ErrClosed:
+				c.log.Info("Reader was closed: %s. Closing.", c.state.Source)
+			case source.ErrRemoved:
+                c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.state.Source)
+			case source.ErrRenamed:
+				c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.state.Source)
+			case source.ErrTooLong:
+            case source.ErrInactive:
+            	c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.state.Source, c.config.CloseInactive)
+			case source.ErrFinalToken:
+			case source.ErrFileTruncate:
+                c.log.Info("File was truncated. Begin reading file from offset 0: %s", c.state.Source)
+				c.state.Offset = 0
+			case source.ErrAdvanceTooFar:
+			case source.ErrNegativeAdvance:
+			default:
+                c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.state.Source)
             }
-	    }
-	    id++
 
-	    message := message.New()
-	    message.Id = id
-	    content := scanner.Bytes()
-	    //message.Bytes = len(message.Content)
+            return nil
+	    }
+
         if c.state.Offset == 0 {
-            content = bytes.Trim(content, "\xef\xbb\xbf")
+            message.Content = bytes.Trim(message.Content, "\xef\xbb\xbf")
         }
-        message.SetBody(content)
 
         state := c.getState()
-        state.Offset += message.GetBodyLength()
+        state.Offset += int64(message.Bytes)
 
-        event := event.New()
+        data := data.New()
    		if c.source.HasState() {
-			event.Set(state)
+			data.Set(state)
 		}
 
-        text := scanner.Text()
+        if !message.IsEmpty() /*&& c.valve.Filter(c.scanner.Text())*/ {
+        	header := event.Header{
+        		"group": c.group,
+        		"type":  c.Type,
+			}
 
-        if !message.IsEmpty() {
+			data.Event = event.Event{
+				Magic: 0x0100,
+				Header: header,
+				Body: message,
+			}
+            /*
+			if c.fingerprint {
+				md5 := md5.New()
+				event.Footer{
+					CheckSum: md5.Sum([]byte(data.Event))
+				}
+			}
+            */
 
 		}
 
-		if !c.Send(event) {
+		if !c.Sender(data) {
 		    return nil
 		}
 
@@ -129,22 +156,22 @@ func (c *Collector) Run() error {
     }
 }
 
-func (c *Collector) Stop() {
-
-}
-
-func (c *Collector) Send(event event.Event) bool {
-    if err := c.client.Sender(event, false); err != nil {
+func (c *Collector) Sender(data *data.Data) bool {
+    if err := c.client.Sender(data.Event, false); err != nil {
     	fmt.Errorf("send client error", err)
         return false
     }
 
-    if err := c.sincedb.Sender(event, false); err != nil {
+    if err := c.sincedb.Sender(data.GetEvent(), false); err != nil {
     	fmt.Errorf("send sincedb error", err)
         return false
     }
 
     return true
+}
+
+func (c *Collector) Stop() {
+
 }
 
 func (c *Collector) Setup() error {
@@ -156,7 +183,12 @@ func (c *Collector) Setup() error {
 	if err := log.Init(nil); err != nil {
 		return err
 	}
-	c.Log = log
+
+    scanner := scanner.New(log)
+    if err := scanner.Init(c.codec); err != nil {
+    	return err
+	}
+    c.scanner = scanner
 
     return nil
 }
@@ -262,7 +294,7 @@ func (r *Collector) Update(fs state.State) {
     fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
     r.states.Update(r.state)
 
-//    d := util.NewData()
+//    d := data.NewData()
 //    d.SetState(r.state)
     //h.publishState(d)
 }
