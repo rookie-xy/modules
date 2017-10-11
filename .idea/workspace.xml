@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="38c81af8-45c7-4658-8dcb-0ac123f5abb4" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/file/collector/sender.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/file/configure/configure.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/agents/file/open/file.go" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/file/data/data.go" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/file/data/data_test.go" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/file/source/log.go" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/agents/file/source/source.go" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/collector/collector.go" afterPath="$PROJECT_DIR$/agents/file/collector/collector.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/event/event.go" afterPath="$PROJECT_DIR$/agents/file/event/event.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/finder/finder.go" afterPath="$PROJECT_DIR$/agents/file/finder/finder.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/main.go" afterPath="$PROJECT_DIR$/agents/file/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/scanner/message.go" afterPath="$PROJECT_DIR$/agents/file/scanner/message.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/scanner/scanner.go" afterPath="$PROJECT_DIR$/agents/file/scanner/scanner.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/agents/file/state/state.go" afterPath="$PROJECT_DIR$/agents/file/state/state.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plugins/main.go" afterPath="$PROJECT_DIR$/plugins/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/proxy/forward/events/batch.go" afterPath="$PROJECT_DIR$/proxy/forward/events/batch.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/proxy/forward/main.go" afterPath="$PROJECT_DIR$/proxy/forward/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/proxy/main.go" afterPath="$PROJECT_DIR$/proxy/main.go" />
-    </list>
+    <list default="true" id="38c81af8-45c7-4658-8dcb-0ac123f5abb4" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -34,11 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="collector.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="collector.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/agents/file/collector/collector.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
+            <state relative-caret-position="-36">
+              <caret line="61" column="39" lean-forward="true" selection-start-line="61" selection-start-column="39" selection-end-line="61" selection-end-column="39" />
               <folding>
                 <element signature="e#19#689#0" expanded="true" />
                 <marker date="1507712099680" expanded="true" signature="4042:4110" ph="{...}" />
@@ -47,11 +27,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="finder.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="finder.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/agents/file/finder/finder.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2574">
-              <caret line="160" column="21" lean-forward="false" selection-start-line="160" selection-start-column="21" selection-end-line="160" selection-end-column="21" />
+            <state relative-caret-position="432">
+              <caret line="263" column="17" lean-forward="false" selection-start-line="263" selection-start-column="17" selection-end-line="263" selection-end-column="17" />
               <folding>
                 <marker date="1507712808872" expanded="true" signature="7235:7533" ph="{...}" />
                 <marker date="1507712808872" expanded="true" signature="7278:7527" ph="{...}" />
@@ -364,7 +344,7 @@
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1867794" sideWeight="0.493994" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1867794" sideWeight="0.493994" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -644,7 +624,7 @@
         <state relative-caret-position="270">
           <caret line="15" column="6" lean-forward="false" selection-start-line="15" selection-start-column="6" selection-end-line="15" selection-end-column="6" />
           <folding>
-            <element signature="e#19#111#0" expanded="true" />
+            <element signature="e#19#111#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -654,7 +634,7 @@
         <state relative-caret-position="198">
           <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
           <folding>
-            <element signature="e#14#30#0" expanded="true" />
+            <element signature="e#14#30#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -735,17 +715,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/agents/file/collector/collector.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="78" column="14" lean-forward="false" selection-start-line="78" selection-start-column="14" selection-end-line="78" selection-end-column="14" />
-          <folding>
-            <element signature="e#19#689#0" expanded="true" />
-            <marker date="1507712099680" expanded="true" signature="4042:4110" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/agents/file/collector/sender.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="72">
@@ -764,14 +733,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/agents/file/finder/finder.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2574">
-          <caret line="160" column="21" lean-forward="false" selection-start-line="160" selection-start-column="21" selection-end-line="160" selection-end-column="21" />
+        <state relative-caret-position="432">
+          <caret line="263" column="17" lean-forward="false" selection-start-line="263" selection-start-column="17" selection-end-line="263" selection-end-column="17" />
           <folding>
             <marker date="1507712808872" expanded="true" signature="7235:7533" ph="{...}" />
             <marker date="1507712808872" expanded="true" signature="7278:7527" ph="{...}" />
             <marker date="1507712808872" expanded="true" signature="7366:7414" ph="{...}" />
             <marker date="1507712808872" expanded="true" signature="7420:7517" ph="{...}" />
             <marker date="1507712808872" expanded="true" signature="7449:7503" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/agents/file/collector/collector.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-36">
+          <caret line="61" column="39" lean-forward="true" selection-start-line="61" selection-start-column="39" selection-end-line="61" selection-end-column="39" />
+          <folding>
+            <element signature="e#19#689#0" expanded="true" />
+            <marker date="1507712099680" expanded="true" signature="4042:4110" ph="{...}" />
           </folding>
         </state>
       </provider>
