@@ -25,19 +25,19 @@ func (b *Batch) Enable() bool {
 	return true
 }
 
-func  (b *Batch) ID() string {
+func (b *Batch) ID() string {
 	return ""
 }
 
-func (b *Batch) Set() {
-	return
+func (b *Batch) GetHeader() types.SiMap {
+	return nil
 }
 
-func (b *Batch) Get() string {
-	return ""
+func (b *Batch) GetBody() event.Message {
+	return nil
 }
 
-func (b *Batch) Value() types.Value {
+func (b *Batch) GetFooter() []byte {
 	return nil
 }
 

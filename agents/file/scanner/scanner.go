@@ -2,18 +2,23 @@ package scanner
 
 import (
     "bufio"
-    "github.com/rookie-xy/modules/agents/file/source"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/modules/agents/file/state"
+    "github.com/rookie-xy/hubble/source"
 )
 
 type Scanner struct {
     *bufio.Scanner
-    id uint64
+    id      uint64
 }
 
-func New(log *source.Log) *Scanner {
-    return nil
+func New(s source.Source) *Scanner {
+    scanner := &Scanner{
+        Scanner: bufio.NewScanner(s),
+        id: 0,
+    }
+
+    return scanner
 }
 
 func (s *Scanner) Init(codec codec.Codec, state state.State) error {

@@ -3,10 +3,10 @@ package scanner
 import "time"
 
 type Message struct {
-    Id        uint64     `json:"id"`
-    Content  []byte      `json:"content"`
-    Bytes    int         `json:"bytes"`
-    Timestamp time.Time  `json:"timestamp"`
+    Id         uint64     `json:"id"`
+    Content    []byte     `json:"content"`
+    Bytes      int        `json:"bytes"`
+    Timestamp  time.Time  `json:"timestamp"`
 }
 
 func (m *Message) IsEmpty() bool {
@@ -19,4 +19,16 @@ func (m *Message) IsEmpty() bool {
     }
 
     return false
+}
+
+func (m *Message) ID() uint64 {
+    return m.Id
+}
+
+func (m *Message) GetContent() []byte {
+    return m.Content
+}
+
+func (m *Message) Json() string {
+    return ""
 }

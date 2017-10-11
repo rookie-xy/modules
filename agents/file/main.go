@@ -2,7 +2,6 @@ package file
 
 import (
     "fmt"
-    //"sync"
     "time"
 
     "github.com/rookie-xy/hubble/command"
@@ -13,7 +12,7 @@ import (
     "github.com/rookie-xy/hubble/plugin"
 
     "github.com/rookie-xy/modules/agents/file/finder"
-    "github.com/rookie-xy/modules/agents/file/collector"
+    "github.com/rookie-xy/modules/agents/file/configure"
 )
 
 const Name  = "file"
@@ -33,17 +32,26 @@ func New(log log.Log) module.Template {
 }
 
 var (
-    group     = command.New( module.Flag, "group",     "nginx",          "This option use to group" )
-    Type      = command.New( module.Flag, "type",      "log",            "file type, this is use to find some question" )
-    paths     = command.New( module.Flag, "paths",     nil,              "File path, its is manny option" )
-    excludes  = command.New( module.Flag, "excludes",   nil,              "File path, its is manny option" )
-    codec     = command.New( plugin.Flag, "codec",     nil,              "codec method" )
-    client    = command.New( plugin.Flag, "client",    nil,              "client method" )
-    frequency = command.New( module.Flag, "frequency", 3 * time.Second, "scan frequency method" )
-    limit     = command.New( module.Flag, "limit",     uint64(7),                "text finder limit" )
+    frequency = command.New( module.Flag, "frequency",  3 * time.Second,  "scan frequency method" )
+    group     = command.New( module.Flag, "group",     "nginx",     "This option use to group" )
+    Type      = command.New( module.Flag, "type",      "log",       "file type, this is use to find some question" )
+    paths     = command.New( module.Flag, "paths",     nil,         "File path, its is manny option" )
+    excludes  = command.New( module.Flag, "excludes",  nil,         "File path, its is manny option" )
+    limit     = command.New( module.Flag, "limit",      uint64(7),        "text finder limit" )
+    codec     = command.New( plugin.Flag, "codec",     nil,         "codec method" )
+    client    = command.New( plugin.Flag, "client",    nil,         "client method" )
+    source    = command.New( plugin.Flag, "source",    nil,         "source method" )
 )
 
 var commands = []command.Item{
+
+    { frequency,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
 
     { group,
       command.FILE,
@@ -77,6 +85,14 @@ var commands = []command.Item{
       0,
       nil },
 
+    { limit,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
     { codec,
       command.FILE,
       module.Agents,
@@ -93,15 +109,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { frequency,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { limit,
+    { source,
       command.FILE,
       module.Agents,
       command.SetObject,
@@ -117,18 +125,28 @@ func (f *file) Init() {
         return
     }
 
-    if value := frequency.GetValue(); value != nil {
-        f.frequency = value.GetDuration()
-    }
-
     limit := limit.GetValue()
     if limit == nil {
         return
     }
 
+    configure := configure.Configure{
+    	Group:    group.GetString(),
+    	Type:     Type.GetString(),
+        Paths:    paths.GetValue(),
+        Excludes: excludes.GetValue(),
+        Limit:    limit.GetUint64(),
+        Codec:    codec,
+        Client:   client,
+        Source:   source,
+    }
+
+    if value := frequency.GetValue(); value != nil {
+        f.frequency = value.GetDuration()
+    }
+
     finder := finder.New(f.log)
-    if err := finder.Init(Name, paths.GetValue(), excludes.GetValue(),
-                                limit.GetUint64()); err != nil {
+    if err := finder.Init(Name, &configure); err != nil {
         fmt.Println(err)
         return
     }
@@ -186,3 +204,100 @@ func (f *file) Exit(code int) {
 func init() {
     register.Module(module.Agents, Name, commands, New)
 }
+
+/*
+	min, max := min.GetValue(), max.GetValue()
+    factor   := factor.GetValue()
+
+    backoff := &configure.Backoff{
+        Min: min.GetDuration(),
+        Max: max.GetDuration(),
+        Factor: factor.GetInt(),
+    }
+
+    inactive, timeout := inactive.GetValue(), timeout.GetValue()
+    removed := removed.GetValue()
+    renamed := renamed.GetValue()
+    eof     := eof.GetValue()
+
+    log := &configure.Log{
+        Inactive: inactive.GetDuration(),
+        Timeout: timeout.GetDuration(),
+        Removed: removed.GetBool(),
+        Renamed: renamed.GetBool(),
+        EOF:eof.GetBool(),
+        Backoff: backoff,
+    }
+     { min,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+     { max,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+     { factor,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { inactive,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { timeout,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { removed,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { renamed,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { eof,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    min       = command.New( module.Flag, "min",        3 * time.Second,  "backoff min" )
+    max       = command.New( module.Flag, "min",        10 * time.Second, "backoff max" )
+    factor    = command.New( module.Flag, "factor",    37,          "backoff factor" )
+    inactive  = command.New( module.Flag, "inactive",   3 * time.Second,   "inactive" )
+    timeout   = command.New( module.Flag, "timeout",    3 * time.Second,   "timeout" )
+    removed   = command.New( module.Flag, "removed",   false,        "removed" )
+    renamed   = command.New( module.Flag, "renamed",   false,        "renamed" )
+    eof       = command.New( module.Flag, "eof",       false,        "eof" )
+*/

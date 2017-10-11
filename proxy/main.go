@@ -13,7 +13,6 @@ import (
     "github.com/rookie-xy/hubble/types/value"
 
   _ "github.com/rookie-xy/modules/proxy/forward"
-  _ "github.com/rookie-xy/modules/proxy/reverse"
 )
 
 const Name = module.Proxy

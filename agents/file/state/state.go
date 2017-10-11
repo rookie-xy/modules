@@ -37,7 +37,7 @@ func (r *State) ID() string {
     // not set when converting back from json
     if r.Id == "" {
         r.Id = r.Key.String()
-				}
+    }
 
     return r.Id
 }

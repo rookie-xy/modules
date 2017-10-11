@@ -97,36 +97,38 @@ func (r *forward) Init() {
     return
 }
 
-func (r *forward) Main() {
-    if r.client == nil || r.pipeline == nil {
+func (f *forward) Main() {
+    if f.client == nil || f.pipeline == nil {
         return
     }
 
     batch := false
-    if r.events.Enable() {
+    if f.events.Enable() {
     	batch = true
 	}
 
     fmt.Println("Start proxy forward module ...")
 
     for {
-        event, status := r.pipeline.Dequeue(10)
+        event, status := f.pipeline.Dequeue(10)
 
         switch status {
-
+/*
         case state.Ignore:
             continue
         case state.Busy:
             //TODO sleep
+*/
+        default:
         }
 
         if batch {
-            r.events.Put(event)
-            event = r.events
+            f.events.Put(event)
+            event = f.events
         }
 
-        if err := r.client.Sender(event, batch); err != nil {
-            if err = r.recall(event, r.pipeline, batch); err != nil {
+        if err := f.client.Sender(event, batch); err != nil {
+            if err = f.recall(event, f.pipeline, batch); err != nil {
                 fmt.Println("recall error ", err)
             }
         }

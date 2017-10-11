@@ -17,20 +17,25 @@ import (
     "github.com/rookie-xy/hubble/valve"
 
     "github.com/rookie-xy/modules/agents/file/state"
-	"github.com/rookie-xy/modules/agents/file/source"
 	"github.com/rookie-xy/modules/agents/file/scanner"
 	"github.com/rookie-xy/modules/agents/file/event"
-	"github.com/rookie-xy/modules/agents/file/data"
+	"github.com/rookie-xy/hubble/types"
+	"github.com/rookie-xy/modules/agents/file/configure"
+	"github.com/rookie-xy/hubble/source"
+	"github.com/rookie-xy/modules/agents/file/open"
 )
 
 type Collector struct {
-    id       uuid.UUID
-    source   source.Source
+   *configure.Configure
+
+    id         uuid.UUID
+    log        log.Log
 
     // internal state
     state      state.State
     states    *state.States
-    log        log.Log
+
+    source     source.Source
     codec      codec.Codec
     client     proxy.Forward
     sincedb    proxy.Forward
@@ -42,22 +47,11 @@ func New(log log.Log) *Collector {
     return &Collector{
         log: log,
         id:  uuid.NewV4(),
+        //fingerprint: false,
     }
 }
 
-func (c *Collector) Init(group, Type string,
-                         codec, client *command.Command) error {
-                         	/*
-    event := message.New()
-    if err := event.SetHeader("group", group); err != nil {
-        return err
-    }
-    if err := event.SetHeader("type", Type); err != nil {
-        return err
-    }
-    c.message = event
-                         	*/
-
+func (c *Collector) Init(codec *command.Command, client *command.Command) error {
 	key := codec.GetFlag() + "." + codec.GetKey()
     if codec, err := factory.Codec(key, c.log, codec.GetValue()); err != nil {
         return err
@@ -81,6 +75,28 @@ func (c *Collector) Init(group, Type string,
     return nil
 }
 
+func (c *Collector) Setup(source *command.Command) error {
+    file, err := c.openFile()
+    if err != nil {
+        return err
+    }
+
+	key := source.GetFlag() + "." + source.GetKey()
+
+    log, err := factory.Source(key, c.log, source.GetValue(), file)
+    if err != nil {
+        return err
+    }
+
+    scanner := scanner.New(log)
+    if err := scanner.Init(c.codec, c.state); err != nil {
+    	return err
+	}
+    c.scanner = scanner
+
+    return nil
+}
+
 func (c *Collector) ID() uuid.UUID {
     return c.id
 }
@@ -91,24 +107,24 @@ func (c *Collector) Run() error {
         if !keep {
             switch c.scanner.Err() {
 			case io.EOF:
-				c.log.Info("End of file reached: %s. Closing because close_eof is enabled.", c.state.Source)
+				//c.log.Info("End of file reached: %s. Closing because close_eof is enabled.", c.state.Source)
 			case source.ErrClosed:
-				c.log.Info("Reader was closed: %s. Closing.", c.state.Source)
+				//c.log.Info("Reader was closed: %s. Closing.", c.state.Source)
 			case source.ErrRemoved:
-                c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.state.Source)
+                //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.state.Source)
 			case source.ErrRenamed:
-				c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.state.Source)
+				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.state.Source)
 			case source.ErrTooLong:
             case source.ErrInactive:
-            	c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.state.Source, c.config.CloseInactive)
+            	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.state.Source, c.config.CloseInactive)
 			case source.ErrFinalToken:
 			case source.ErrFileTruncate:
-                c.log.Info("File was truncated. Begin reading file from offset 0: %s", c.state.Source)
+                //c.log.Info("File was truncated. Begin reading file from offset 0: %s", c.state.Source)
 				c.state.Offset = 0
 			case source.ErrAdvanceTooFar:
 			case source.ErrNegativeAdvance:
 			default:
-                c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.state.Source)
+                //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.state.Source)
             }
 
             return nil
@@ -121,34 +137,26 @@ func (c *Collector) Run() error {
         state := c.getState()
         state.Offset += int64(message.Bytes)
 
-        data := data.New()
-   		if c.source.HasState() {
-			data.Set(state)
+        event := event.Event{
+            File: state,
 		}
 
         if !message.IsEmpty() /*&& c.valve.Filter(c.scanner.Text())*/ {
-        	header := event.Header{
-        		"group": c.group,
-        		"type":  c.Type,
+			event.Header = types.SiMap{
+        		"group": c.Configure.Group,
+        		"type":  c.Configure.Type,
 			}
-
-			data.Event = event.Event{
-				Magic: 0x0100,
-				Header: header,
-				Body: message,
-			}
+			event.Body = message
             /*
 			if c.fingerprint {
-				md5 := md5.New()
-				event.Footer{
-					CheckSum: md5.Sum([]byte(data.Event))
+				event.Footer = event.Footer{
+				    CheckSum: nil,
 				}
 			}
             */
-
 		}
 
-		if !c.Sender(data) {
+		if !c.Publish(event) {
 		    return nil
 		}
 
@@ -156,48 +164,11 @@ func (c *Collector) Run() error {
     }
 }
 
-func (c *Collector) Sender(data *data.Data) bool {
-    if err := c.client.Sender(data.Event, false); err != nil {
-    	fmt.Errorf("send client error", err)
-        return false
-    }
-
-    if err := c.sincedb.Sender(data.GetEvent(), false); err != nil {
-    	fmt.Errorf("send sincedb error", err)
-        return false
-    }
-
-    return true
-}
-
 func (c *Collector) Stop() {
 
 }
 
-func (c *Collector) Setup() error {
-    if err := c.openFile(); err != nil {
-        return err
-    }
-
-    log := source.New(c.log)
-	if err := log.Init(nil); err != nil {
-		return err
-	}
-
-    scanner := scanner.New(log)
-    if err := scanner.Init(c.codec); err != nil {
-    	return err
-	}
-    c.scanner = scanner
-
-    return nil
-}
-
 func (c *Collector) getState() state.State {
-	if !c.source.HasState() {
-		return state.State{}
-	}
-
 	state := c.state
 
 	// refreshes the values in State with the values from the harvester itself
@@ -205,34 +176,29 @@ func (c *Collector) getState() state.State {
 	return state
 }
 
-func ReadOpen(path string) (*os.File, error) {
-    flag := os.O_RDONLY
-    perm := os.FileMode(0)
-    return os.OpenFile(path, flag, perm)
+func (r *Collector) Update(fs state.State) {
+    fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
+    r.states.Update(r.state)
+
+//    d := data.NewData()
+//    d.SetState(r.state)
+    //h.publishState(d)
 }
 
-type File struct {
-	*os.File
-}
-
-func (File) Continuable() bool { return true }
-func (File) HasState() bool    { return true }
-
-func (c *Collector) openFile() error {
-	f, err := ReadOpen(c.state.Source)
+func (c *Collector) openFile() (source.Source, error) {
+	f, err := open.ReadOpen(c.state.Source)
 	if err != nil {
-		return fmt.Errorf("Failed opening %s: %s", c.state.Source, err)
+		return nil, fmt.Errorf("Failed opening %s: %s", c.state.Source, err)
 	}
 
 	// Makes sure file handler is also closed on errors
 	err = c.validateFile(f)
 	if err != nil {
 		f.Close()
-		return err
+		return nil, err
 	}
 
-	c.source = File{File: f}
-	return nil
+    return open.File{File: f}, nil
 }
 
 func (c *Collector) validateFile(f *os.File) error {
@@ -284,17 +250,4 @@ func (c *Collector) initFileOffset(file *os.File) (int64, error) {
 	// get offset from file in case of encoding factory was required to read some data.
 	fmt.Printf("collector Setting offset for file based on seek: %s", c.state.Source)
 	return file.Seek(0, os.SEEK_CUR)
-}
-
-func (r *Collector) Update(fs state.State) {
-    if !r.source.HasState() {
-        return
-    }
-
-    fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
-    r.states.Update(r.state)
-
-//    d := data.NewData()
-//    d.SetState(r.state)
-    //h.publishState(d)
 }

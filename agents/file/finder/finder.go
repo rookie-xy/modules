@@ -3,8 +3,6 @@ package finder
 import (
     "fmt"
     "os"
-    "errors"
-    "regexp"
     "path/filepath"
     "encoding/json"
 
@@ -18,20 +16,18 @@ import (
 
     "github.com/rookie-xy/modules/agents/file/collector"
     "github.com/rookie-xy/modules/agents/file/state"
+    "github.com/rookie-xy/modules/agents/file/configure"
 )
 
 type Finder struct {
+    cfg        *configure.Configure
     log         log.Log
 
-    paths       types.Value
-    excludes    types.Value
     from        string
     states     *state.States
     sincedb     adapter.SinceDB
     done        chan struct{}
-
     jobs       *job.Jobs
-    limit       uint64
 }
 
 func New(log log.Log) *Finder {
@@ -41,17 +37,15 @@ func New(log log.Log) *Finder {
     }
 }
 
-func (f *Finder) Init(from string,
-                      paths, excludes types.Value, limit uint64) error {
-    f.paths    = paths
-    f.excludes = excludes
+func (f *Finder) Init(from string, cfg *configure.Configure) error {
     f.from = from
+	f.cfg = cfg
     f.states = state.News()
 
     if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
         return err
     } else {
-        f.sincedb = adapter.ToSinceDB(client)
+        f.sincedb = adapter.FileSinceDB(client)
     }
 
     var states state.States
@@ -66,12 +60,6 @@ func (f *Finder) Init(from string,
 
     if err := f.load(states.States); err != nil {
         return err
-    }
-
-    if limit > 0 {
-        f.limit = limit
-    } else {
-        return errors.New("limit is error")
     }
 
     return nil
@@ -103,7 +91,7 @@ func (f *Finder) update(state state.State) error {
 
 func (f *Finder) match(file string) bool {
     file = filepath.Clean(file)
-    paths := f.paths.GetArray()
+    paths := f.cfg.Paths.GetArray()
 
     for _, path := range paths {
         path := filepath.Clean(path.(string))
@@ -213,10 +201,10 @@ func getFileState(path string, fi os.FileInfo, s *Finder) (state.State, error) {
     return newState, nil
 }
 
-func (r *Finder) Find() {
+func (f *Finder) Find() {
     var paths []string
 
-    files := getFiles(r.paths)
+    files := getFiles(f.cfg.Paths)
     paths = getKeys(files)
 
     for i := 0; i < len(files); i++ {
@@ -229,30 +217,30 @@ func (r *Finder) Find() {
 
         select {
 
-        case <-r.done:
+        case <-f.done:
             fmt.Println("Find aborted because scanner stopped.")
             return
         default:
 
         }
 
-        newState, err := getFileState(path, info, r)
+        newState, err := getFileState(path, info, f)
         if err != nil {
             fmt.Println("Skipping file %s due to error %s", path, err)
         }
 
-        oldState := r.states.FindPrevious(newState)
+        oldState := f.states.FindPrevious(newState)
 
         // Decides if previous state exists
         if oldState.IsEmpty() {
             fmt.Println("finder", "Start collector for new file: %s", newState.Source)
-            err := r.startCollector(newState, 0)
+            err := f.startCollector(newState, 0)
             if err != nil {
                 fmt.Println("collector could not be started on new file: %s, Err: %s", newState.Source, err)
             }
 
         } else {
-            r.collectExistingFile(newState, oldState)
+            f.collectExistingFile(newState, oldState)
         }
     }
 
@@ -260,7 +248,7 @@ func (r *Finder) Find() {
 }
 
 func (f *Finder) startCollector(state state.State, offset int64) error {
-    if f.limit > 0 && f.jobs.Len() >= f.limit {
+    if f.cfg.Limit > 0 && f.jobs.Len() >= f.cfg.Limit {
         return fmt.Errorf("collector limit reached")
     }
 
@@ -268,12 +256,11 @@ func (f *Finder) startCollector(state state.State, offset int64) error {
     state.Offset = offset
 
     collector := collector.New(f.log)
-    if err := collector.Init(group.GetString(), Type.GetString(),
-                                                codec, client); err != nil {
+    if err := collector.Init(f.cfg.Codec, f.cfg.Client); err != nil {
         return err
     }
 
-    if err := collector.Setup(); err != nil {
+    if err := collector.Setup(f.cfg.Source); err != nil {
         return err
     }
 
@@ -296,6 +283,7 @@ func (r *Finder) Wait() {
 }
 
 func (r *Finder) isExcluded(file string) bool {
+	/*
     patterns := r.excludes.GetArray()
     if len(patterns) > 0 {
         for _, pattern := range patterns {
@@ -308,6 +296,7 @@ func (r *Finder) isExcluded(file string) bool {
             }
         }
     }
+	*/
 
     return false
 }
