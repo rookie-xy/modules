@@ -256,11 +256,7 @@ func (f *Finder) startCollector(state state.State, offset int64) error {
     state.Offset = offset
 
     collector := collector.New(f.log)
-    if err := collector.Init(f.cfg.Codec, f.cfg.Client); err != nil {
-        return err
-    }
-
-    if err := collector.Setup(f.cfg.Source); err != nil {
+    if err := collector.Init(f.cfg.Input, state); err != nil {
         return err
     }
 

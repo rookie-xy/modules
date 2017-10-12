@@ -5,6 +5,7 @@ import (
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/modules/agents/file/state"
     "github.com/rookie-xy/hubble/source"
+    "github.com/rookie-xy/hubble/input"
 )
 
 type Scanner struct {
@@ -12,7 +13,7 @@ type Scanner struct {
     id      uint64
 }
 
-func New(s source.Source) *Scanner {
+func New(s input.Input) *Scanner {
     scanner := &Scanner{
         Scanner: bufio.NewScanner(s),
         id: 0,

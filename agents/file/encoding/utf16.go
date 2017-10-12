@@ -17,10 +17,10 @@ const (
 	littleEndian
 )
 
-var ErrUnsupportedSourceTypeBOM = errors.New("source type not support by BOM based encoding")
+var ErrUnsupportedSourceTypeBOM = errors.New("file type not support by BOM based encoding")
 
 // utf16 BOM based encodings. Only seekable data sources are supported for
-// the need to check the optional Byte Order Marker being available in data source
+// the need to check the optional Byte Order Marker being available in data file
 // before configuring the actual decoder and encoder.
 var (
 	// BOM is required, as no fallback is specified

@@ -19,7 +19,7 @@ var encodings = map[string]EncodingFactory{
 	"nop":   Plain,
 	"plain": Plain,
 
-	// utf8 (validate source) - shadow htmlindex utf8 codecs not validating source
+	// utf8 (validate file) - shadow htmlindex utf8 codecs not validating file
 	"unicode-1-1-utf-8": utf8Encoding,
 	"utf-8":             utf8Encoding,
 	"utf8":              utf8Encoding,
@@ -33,7 +33,7 @@ var encodings = map[string]EncodingFactory{
 	"iso8859-8e": enc(charmap.ISO8859_8E),
 	"iso8859-8i": enc(charmap.ISO8859_8I),
 
-	// utf16 bom codecs (seekable data source required)
+	// utf16 bom codecs (seekable data file required)
 	"utf-16-bom":   utf16BOMRequired,
 	"utf-16be-bom": utf16BOMBigEndian,
 	"utf-16le-bom": utf16BOMLittleEndian,
@@ -42,7 +42,7 @@ var encodings = map[string]EncodingFactory{
 // Plain file encoding not transforming any read bytes.
 var Plain = enc(encoding.Nop)
 
-// UTF-8 encoding copying source to output sequence replacing invalid UTF-8
+// UTF-8 encoding copying file to output sequence replacing invalid UTF-8
 // converted to '\uFFFD'.
 //
 // See: http://encoding.spec.whatwg.org/#replacement

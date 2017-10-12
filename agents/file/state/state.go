@@ -9,7 +9,7 @@ type State struct {
     Id         string        `json:"-"` // local unique id to make comparison more efficient
     Finished   bool          `json:"-"` // harvester state
     Fileinfo   os.FileInfo   `json:"-"` // the file info
-    Source     string        `json:"source"`
+    Source     string        `json:"file"`
     Lno        uint64        `json:"lno"`
     Offset     int64         `json:"offset"`
     Timestamp  time.Time     `json:"timestamp"`

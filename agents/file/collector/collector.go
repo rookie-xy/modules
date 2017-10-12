@@ -2,18 +2,12 @@ package collector
 
 import (
     "io"
-	"os"
    	"fmt"
-    "errors"
     "bytes"
 
     "github.com/satori/go.uuid"
 
     "github.com/rookie-xy/hubble/log"
-    "github.com/rookie-xy/hubble/codec"
-    "github.com/rookie-xy/hubble/proxy"
-    "github.com/rookie-xy/hubble/command"
-    "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/valve"
 
     "github.com/rookie-xy/modules/agents/file/state"
@@ -21,8 +15,9 @@ import (
 	"github.com/rookie-xy/modules/agents/file/event"
 	"github.com/rookie-xy/hubble/types"
 	"github.com/rookie-xy/modules/agents/file/configure"
+	"github.com/rookie-xy/modules/agents/file/file"
+	"github.com/rookie-xy/hubble/input"
 	"github.com/rookie-xy/hubble/source"
-	"github.com/rookie-xy/modules/agents/file/open"
 )
 
 type Collector struct {
@@ -32,15 +27,14 @@ type Collector struct {
     log        log.Log
 
     // internal state
-    state      state.State
-    states    *state.States
+    state  state.State
+    states *state.States
 
-    source     source.Source
-    codec      codec.Codec
-    client     proxy.Forward
-    sincedb    proxy.Forward
-    scanner   *scanner.Scanner
-    valve      valve.Valve
+    source  source.Source
+    input   input.Input
+    scanner *scanner.Scanner
+
+    valve   valve.Valve
 }
 
 func New(log log.Log) *Collector {
@@ -51,47 +45,29 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(codec *command.Command, client *command.Command) error {
-	key := codec.GetFlag() + "." + codec.GetKey()
-    if codec, err := factory.Codec(key, c.log, codec.GetValue()); err != nil {
-        return err
-    } else {
-        c.codec = codec
-    }
-
- 	key = client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, c.log, client.GetValue()); err != nil {
-        return err
-    } else {
-        c.client = client
-    }
-
-    if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
-        return err
-    } else {
-        c.sincedb = client
-    }
-
-    return nil
-}
-
-func (c *Collector) Setup(source *command.Command) error {
-    file, err := c.openFile()
+func (c *Collector) Init(input input.Input, state state.State) error {
+	var err error
+    source, err := file.New(state)
     if err != nil {
         return err
     }
 
-	key := source.GetFlag() + "." + source.GetKey()
-
-    log, err := factory.Source(key, c.log, source.GetValue(), file)
-    if err != nil {
-        return err
-    }
-
-    scanner := scanner.New(log)
-    if err := scanner.Init(c.codec, c.state); err != nil {
+    if err := source.Init(); err != nil {
     	return err
 	}
+
+    if err := input.Init(source); err != nil {
+    	return err
+	}
+
+    scanner := scanner.New(input)
+    if err := scanner.Init(c.Codec, c.state); err != nil {
+    	return err
+	}
+
+	c.state   = state
+	c.source  = source
+	c.input   = input
     c.scanner = scanner
 
     return nil
@@ -185,69 +161,11 @@ func (r *Collector) Update(fs state.State) {
     //h.publishState(d)
 }
 
-func (c *Collector) openFile() (source.Source, error) {
-	f, err := open.ReadOpen(c.state.Source)
-	if err != nil {
-		return nil, fmt.Errorf("Failed opening %s: %s", c.state.Source, err)
-	}
 
-	// Makes sure file handler is also closed on errors
-	err = c.validateFile(f)
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-
-    return open.File{File: f}, nil
-}
-
-func (c *Collector) validateFile(f *os.File) error {
-	info, err := f.Stat()
-	if err != nil {
-		return fmt.Errorf("Failed getting stats for file %s: %s", c.state.Source, err)
-	}
-
-	if !info.Mode().IsRegular() {
-		return fmt.Errorf("Tried to open non regular file: %q %s", info.Mode(), info.Name())
-	}
-
-	// Compares the stat of the opened file to the state given by the prospector. Abort if not match.
-	if !os.SameFile(c.state.Fileinfo, info) {
-		return errors.New("file info is not identical with opened file. Aborting harvesting and retrying file later again")
-	}
-/*
-	c.encoding, err = c.encodingFactory(f)
-	if err != nil {
-
-		if err == transform.ErrShortSrc {
-			fmt.Printf("Initialising encoding for '%v' failed due to file being too short", f)
-		} else {
-			fmt.Printf("Initialising encoding for '%v' failed: %v", f, err)
-		}
-		return err
-	}
-*/
-
-	// get file offset. Only update offset if no error
-	offset, err := c.initFileOffset(f)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("collector Setting offset for file: %s. Offset: %d ", c.state.Source, offset)
-	c.state.Offset = offset
-
-	return nil
-}
-
-func (c *Collector) initFileOffset(file *os.File) (int64, error) {
-	// continue from last known offset
-	if c.state.Offset > 0 {
-		fmt.Printf("collector Set previous offset for file: %s. Offset: %d ", c.state.Source, c.state.Offset)
-		return file.Seek(c.state.Offset, os.SEEK_SET)
-	}
-
-	// get offset from file in case of encoding factory was required to read some data.
-	fmt.Printf("collector Setting offset for file based on seek: %s", c.state.Source)
-	return file.Seek(0, os.SEEK_CUR)
-}
+	/*
+    if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
+        return err
+    } else {
+        c.sincedb = client
+    }
+	*/

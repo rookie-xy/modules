@@ -3,6 +3,10 @@ package configure
 import (
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/source"
+    "github.com/rookie-xy/hubble/codec"
+    "github.com/rookie-xy/hubble/proxy"
+    "github.com/rookie-xy/hubble/input"
 )
 
 type Configure struct {
@@ -12,7 +16,7 @@ type Configure struct {
     Excludes  types.Value
     Limit     uint64
 
-    Source   *command.Command
-    Codec    *command.Command
-    Client   *command.Command
+    Input     input.Input
+    Codec     codec.Codec
+    Client    proxy.Forward
 }

@@ -9,7 +9,7 @@ import (
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/state"
 
-  _ "github.com/rookie-xy/plugins/source"
+  _ "github.com/rookie-xy/plugins/file"
   _ "github.com/rookie-xy/plugins/codec"
   _ "github.com/rookie-xy/plugins/client"
   _ "github.com/rookie-xy/plugins/pipeline"

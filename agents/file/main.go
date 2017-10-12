@@ -13,6 +13,7 @@ import (
 
     "github.com/rookie-xy/modules/agents/file/finder"
     "github.com/rookie-xy/modules/agents/file/configure"
+    "github.com/rookie-xy/hubble/factory"
 )
 
 const Name  = "file"
@@ -40,7 +41,7 @@ var (
     limit     = command.New( module.Flag, "limit",      uint64(7),        "text finder limit" )
     codec     = command.New( plugin.Flag, "codec",     nil,         "codec method" )
     client    = command.New( plugin.Flag, "client",    nil,         "client method" )
-    source    = command.New( plugin.Flag, "source",    nil,         "source method" )
+    input     = command.New( plugin.Flag, "input",     nil,         "input method" )
 )
 
 var commands = []command.Item{
@@ -109,7 +110,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { source,
+    { input,
       command.FILE,
       module.Agents,
       command.SetObject,
@@ -130,15 +131,33 @@ func (f *file) Init() {
         return
     }
 
+    key := codec.GetFlag() + "." + codec.GetKey()
+    codec, err := factory.Codec(key, f.log, codec.GetValue())
+    if err != nil {
+        return
+    }
+
+ 	key = client.GetFlag() + "." + client.GetKey()
+    client, err := factory.Client(key, f.log, client.GetValue())
+    if err != nil {
+        return
+    }
+
+	key = input.GetFlag() + "." + input.GetKey()
+    input, err := factory.Input(key, f.log, input.GetValue())
+    if err != nil {
+        return
+    }
+
     configure := configure.Configure{
     	Group:    group.GetString(),
     	Type:     Type.GetString(),
         Paths:    paths.GetValue(),
         Excludes: excludes.GetValue(),
         Limit:    limit.GetUint64(),
+        Input:    input,
         Codec:    codec,
         Client:   client,
-        Source:   source,
     }
 
     if value := frequency.GetValue(); value != nil {
@@ -204,100 +223,3 @@ func (f *file) Exit(code int) {
 func init() {
     register.Module(module.Agents, Name, commands, New)
 }
-
-/*
-	min, max := min.GetValue(), max.GetValue()
-    factor   := factor.GetValue()
-
-    backoff := &configure.Backoff{
-        Min: min.GetDuration(),
-        Max: max.GetDuration(),
-        Factor: factor.GetInt(),
-    }
-
-    inactive, timeout := inactive.GetValue(), timeout.GetValue()
-    removed := removed.GetValue()
-    renamed := renamed.GetValue()
-    eof     := eof.GetValue()
-
-    log := &configure.Log{
-        Inactive: inactive.GetDuration(),
-        Timeout: timeout.GetDuration(),
-        Removed: removed.GetBool(),
-        Renamed: renamed.GetBool(),
-        EOF:eof.GetBool(),
-        Backoff: backoff,
-    }
-     { min,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-     { max,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-     { factor,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { inactive,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { timeout,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { removed,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { renamed,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    { eof,
-      command.FILE,
-      module.Agents,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-    min       = command.New( module.Flag, "min",        3 * time.Second,  "backoff min" )
-    max       = command.New( module.Flag, "min",        10 * time.Second, "backoff max" )
-    factor    = command.New( module.Flag, "factor",    37,          "backoff factor" )
-    inactive  = command.New( module.Flag, "inactive",   3 * time.Second,   "inactive" )
-    timeout   = command.New( module.Flag, "timeout",    3 * time.Second,   "timeout" )
-    removed   = command.New( module.Flag, "removed",   false,        "removed" )
-    renamed   = command.New( module.Flag, "renamed",   false,        "renamed" )
-    eof       = command.New( module.Flag, "eof",       false,        "eof" )
-*/
