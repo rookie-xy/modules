@@ -4,7 +4,6 @@ import (
     "bufio"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/modules/agents/file/state"
-    "github.com/rookie-xy/hubble/source"
     "github.com/rookie-xy/hubble/input"
 )
 

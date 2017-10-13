@@ -15,29 +15,38 @@ type State struct {
     Timestamp  time.Time     `json:"timestamp"`
     TTL        time.Duration `json:"ttl"`
     Type       string        `json:"type"`
-    Key        Key
 }
 
 // NewState creates a new file state
-func New(fi os.FileInfo, path string, from string) State {
+func New() State {
     return State{
         Finished:    false,
-        Fileinfo:    fi,
-        Source:      path,
         Timestamp:   time.Now(),
         TTL:         -1, // By default, state does have an infinite ttl
-        Type:        from,
-        Key: GetOSState(fi),
+        Type:        "file",
     }
+}
+
+func (s *State) Init(fi os.FileInfo, path string, Type string) error {
+    s.Fileinfo = fi
+    s.Source = path
+    s.Type = Type
+
+    stat := GetOSState(fi)
+    s.Id = stat.String()
+
+    return nil
 }
 
 // ID returns a unique id for the state as a string
 func (r *State) ID() string {
     // Generate id on first request. This is needed as id is
     // not set when converting back from json
+    /*
     if r.Id == "" {
         r.Id = r.Key.String()
     }
+    */
 
     return r.Id
 }

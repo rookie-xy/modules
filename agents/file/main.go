@@ -14,6 +14,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/finder"
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/factory"
+    "github.com/rookie-xy/hubble/adapter"
 )
 
 const Name  = "file"
@@ -23,7 +24,6 @@ type file struct {
     frequency   time.Duration
     log         log.Log
     done        chan struct{}
-//    wg         *sync.WaitGroup
 }
 
 func New(log log.Log) module.Template {
@@ -42,6 +42,8 @@ var (
     codec     = command.New( plugin.Flag, "codec",     nil,         "codec method" )
     client    = command.New( plugin.Flag, "client",    nil,         "client method" )
     input     = command.New( plugin.Flag, "input",     nil,         "input method" )
+    output    = command.New( plugin.Flag, "output",    nil,         "output method" )
+    sincedb   = command.New( plugin.Flag, "sincedb",   nil,         "sincedb method" )
 )
 
 var commands = []command.Item{
@@ -118,6 +120,21 @@ var commands = []command.Item{
       0,
       nil },
 
+     { output,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { sincedb,
+      command.FILE,
+      module.Agents,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
 }
 
 func (f *file) Init() {
@@ -137,11 +154,6 @@ func (f *file) Init() {
         return
     }
 
- 	key = client.GetFlag() + "." + client.GetKey()
-    client, err := factory.Client(key, f.log, client.GetValue())
-    if err != nil {
-        return
-    }
 
 	key = input.GetFlag() + "." + input.GetKey()
     input, err := factory.Input(key, f.log, input.GetValue())
@@ -157,15 +169,35 @@ func (f *file) Init() {
         Limit:    limit.GetUint64(),
         Input:    input,
         Codec:    codec,
-        Client:   client,
+    }
+
+    if value := client.GetValue(); value != nil {
+        key = client.GetFlag() + "." + client.GetKey()
+        configure.Output, err = factory.Client(key, f.log, value)
+        if err != nil {
+            return
+        }
+
+    } else {
+        key = output.GetFlag() + "." + output.GetKey()
+        configure.Output, err = factory.Output(key, f.log, output.GetValue())
+        if err != nil {
+            return
+        }
     }
 
     if value := frequency.GetValue(); value != nil {
         f.frequency = value.GetDuration()
     }
 
+ 	key = sincedb.GetFlag() + "." + sincedb.GetKey()
+    client, err := factory.Forward(key)
+    if err != nil {
+        return
+    }
+
     finder := finder.New(f.log)
-    if err := finder.Init(Name, &configure); err != nil {
+    if err := finder.Init(&configure, adapter.FileSinceDB(client)); err != nil {
         fmt.Println(err)
         return
     }

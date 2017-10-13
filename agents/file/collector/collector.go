@@ -9,32 +9,33 @@ import (
 
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/valve"
+	"github.com/rookie-xy/hubble/types"
+	"github.com/rookie-xy/hubble/input"
+	"github.com/rookie-xy/hubble/source"
+	"github.com/rookie-xy/hubble/output"
 
     "github.com/rookie-xy/modules/agents/file/state"
 	"github.com/rookie-xy/modules/agents/file/scanner"
 	"github.com/rookie-xy/modules/agents/file/event"
-	"github.com/rookie-xy/hubble/types"
-	"github.com/rookie-xy/modules/agents/file/configure"
-	"github.com/rookie-xy/modules/agents/file/file"
-	"github.com/rookie-xy/hubble/input"
-	"github.com/rookie-xy/hubble/source"
+    "github.com/rookie-xy/modules/agents/file/configure"
+    "github.com/rookie-xy/modules/agents/file/file"
 )
 
 type Collector struct {
-   *configure.Configure
+    id        uuid.UUID
 
-    id         uuid.UUID
-    log        log.Log
+    state     state.State
+    states   *state.States
 
-    // internal state
-    state  state.State
-    states *state.States
+    conf     *configure.Configure
 
-    source  source.Source
-    input   input.Input
-    scanner *scanner.Scanner
+    source    source.Source
+    input     input.Input
+    scanner  *scanner.Scanner
+    valve     valve.Valve
+    output    output.Output
 
-    valve   valve.Valve
+    log       log.Log
 }
 
 func New(log log.Log) *Collector {
@@ -47,26 +48,22 @@ func New(log log.Log) *Collector {
 
 func (c *Collector) Init(input input.Input, state state.State) error {
 	var err error
-    source, err := file.New(state)
+    file, err := file.New(state)
     if err != nil {
         return err
     }
 
-    if err := source.Init(); err != nil {
-    	return err
-	}
-
-    if err := input.Init(source); err != nil {
+    if err := input.Init(file); err != nil {
     	return err
 	}
 
     scanner := scanner.New(input)
-    if err := scanner.Init(c.Codec, c.state); err != nil {
+    if err := scanner.Init(c.conf.Codec, state); err != nil {
     	return err
 	}
 
 	c.state   = state
-	c.source  = source
+	c.source  = file
 	c.input   = input
     c.scanner = scanner
 
@@ -113,14 +110,14 @@ func (c *Collector) Run() error {
         state := c.getState()
         state.Offset += int64(message.Bytes)
 
-        event := event.Event{
+        event := &event.Event{
             File: state,
 		}
 
         if !message.IsEmpty() /*&& c.valve.Filter(c.scanner.Text())*/ {
 			event.Header = types.SiMap{
-        		"group": c.Configure.Group,
-        		"type":  c.Configure.Type,
+        		"group": c.conf.Group,
+        		"type":  c.conf.Type,
 			}
 			event.Body = message
             /*

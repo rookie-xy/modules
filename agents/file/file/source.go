@@ -1,10 +1,8 @@
 package file
 
 import (
-	"os"
-	"github.com/rookie-xy/hubble/source"
-	"github.com/modules/agents/log/open"
 	"fmt"
+	"os"
 	"github.com/rookie-xy/modules/agents/file/state"
 	"errors"
 )
@@ -29,14 +27,19 @@ func New(state state.State) (*Source, error) {
 	}
 
     source := &Source{
-    	File: f,
     	state: state,
     }
+
+    if err := source.Validate(f); err != nil {
+    	return nil, err
+	}
+
+	source.File = f
 
     return source, nil
 }
 
-func (s *Source) Init() error {
+func (s *Source) Validate(f *os.File) error {
 	info, err := s.Stat()
 	if err != nil {
 		return fmt.Errorf("Failed getting stats for file %s: %s", s.state.Source, err)

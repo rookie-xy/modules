@@ -3,10 +3,10 @@ package configure
 import (
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/command"
-    "github.com/rookie-xy/hubble/source"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/input"
+    "github.com/rookie-xy/hubble/output"
 )
 
 type Configure struct {
@@ -18,5 +18,7 @@ type Configure struct {
 
     Input     input.Input
     Codec     codec.Codec
-    Client    proxy.Forward
+    Output    output.Output
+
+    Sincedb   command.Command
 }

@@ -9,11 +9,12 @@ import (
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/state"
 
-  _ "github.com/rookie-xy/plugins/file"
   _ "github.com/rookie-xy/plugins/codec"
   _ "github.com/rookie-xy/plugins/client"
   _ "github.com/rookie-xy/plugins/pipeline"
   _ "github.com/rookie-xy/plugins/valve"
+  _ "github.com/rookie-xy/plugins/input"
+  _ "github.com/rookie-xy/plugins/output"
 )
 
 var (
