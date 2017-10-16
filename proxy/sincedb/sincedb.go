@@ -1,4 +1,4 @@
-package forward
+package sincedb
 
 import (
     "fmt"
@@ -12,27 +12,21 @@ import (
     "github.com/rookie-xy/hubble/proxy"
     queue "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
-    "github.com/rookie-xy/modules/proxy/forward/events"
-    "github.com/rookie-xy/hubble/event"
-    "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/hubble/output"
+    //"github.com/rookie-xy/hubble/event"
+    //"github.com/rookie-xy/hubble/adapter"
 )
 
-const Name  = "forward"
+const Name  = "sincedb"
 
-type forward struct {
+type sincedb struct {
     log       log.Log
     pipeline  queue.Queue
     client    proxy.Forward
-    events   *events.Batch
-    sincedb   output.Output
 }
 
 var (
     pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
-    client    = command.New( plugin.Flag, "client.elasticsearch",    nil, "This option use to group" )
-    batch     = command.New( module.Flag, "events",    nil, "This option use to group" )
-    sincedb   = command.New( module.Flag, "sincedb",    nil, "This option use to group" )
+    client    = command.New( plugin.Flag, "client.sincedb",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
@@ -53,76 +47,47 @@ var commands = []command.Item{
       0,
       nil },
 
-    { batch,
-      command.FILE,
-      module.Proxy,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-
-    { sincedb,
-      command.FILE,
-      module.Proxy,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
 }
 
 func New(l log.Log) module.Template {
-    return &forward{
+    return &sincedb{
         log: l,
     }
 }
 
-func (r *forward) Init() {
+func (s *sincedb) Init() {
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, r.log, pipeline.GetValue())
+    pipeline, err := factory.Pipeline(key, s.log, pipeline.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
         return
     } else {
-        r.pipeline = pipeline
+        s.pipeline = pipeline
     }
 
     register.Queue(client.GetKey(), pipeline)
 
     key = client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, r.log, client.GetValue()); err != nil {
+    if client, err := factory.Client(key, s.log, client.GetValue()); err != nil {
         fmt.Println("client error ", err)
         return
     } else {
-        r.client = client
+        s.client = client
         register.Forword(key, client)
-    }
-
-    events := events.New(r.log)
-    if err := events.Init(batch.GetValue()); err != nil {
-        fmt.Println("events init error ", err)
-    	return
-    } else {
-        r.events = events
     }
 
     return
 }
 
-func (f *forward) Main() {
-    if f.client == nil || f.pipeline == nil {
+func (s *sincedb) Main() {
+    if s.client == nil || s.pipeline == nil {
         return
     }
-
-    batch := false
-    if f.events.Enable() {
-    	batch = true
-	}
 
     fmt.Println("Start proxy forward module ...")
 
     for {
-        event, status := f.pipeline.Dequeue(10)
+        event, status := s.pipeline.Dequeue(10)
 
         switch status {
 /*
@@ -134,27 +99,21 @@ func (f *forward) Main() {
         default:
         }
 
-        if batch {
-            f.events.Put(event)
-            event = f.events
-        }
 
-        if err := f.client.Sender(event, batch); err != nil {
-            if err = f.recall(event, f.pipeline, batch); err != nil {
+        if err := s.client.Sender(event, false); err != nil {
+            fmt.Println("recall error ", err)
+            return
+            /*
+            if err = s.recall(event, s.pipeline, batch); err != nil {
                 fmt.Println("recall error ", err)
                 return
             }
-            continue
-        }
-
-        if err := f.sincedb.Sender(event, batch); err != nil {
-            fmt.Println("sincedb sender error ", err)
-            return
+            */
         }
     }
 }
-
-func (r *forward) recall(e event.Event, Q queue.Queue, batch bool) error {
+/*
+func (s *sincedb) recall(e event.Event, Q queue.Queue, batch bool) error {
     if batch {
         events := adapter.ToEvents(e)
         for _, event := range events.Batch() {
@@ -168,8 +127,9 @@ func (r *forward) recall(e event.Event, Q queue.Queue, batch bool) error {
 
     return Q.Requeue(e)
 }
+*/
 
-func (r *forward) Exit(code int) {
+func (s *sincedb) Exit(code int) {
     // 退出
 }
 

@@ -93,7 +93,7 @@ func (c *Collector) Run() error {
 			case source.ErrFinalToken:
 			case source.ErrFileTruncate:
                 //c.log.Info("File was truncated. Begin reading file from offset 0: %s", c.state.Source)
-				c.state.Offset = 0
+				c.state["offset"] = 0
 			case source.ErrAdvanceTooFar:
 			case source.ErrNegativeAdvance:
 			default:
@@ -103,19 +103,21 @@ func (c *Collector) Run() error {
             return nil
 	    }
 
-        if c.state.Offset == 0 {
+        if c.state["offset"] == 0 {
             message.Content = bytes.Trim(message.Content, "\xef\xbb\xbf")
         }
 
         state := c.getState()
-        state.Offset += int64(message.Bytes)
+        offset := state["offset"].(int64)
+        offset += int64(message.Bytes)
+        state["offset"] = offset
 
         event := &event.Event{
             File: state,
 		}
 
         if !message.IsEmpty() /*&& c.valve.Filter(c.scanner.Text())*/ {
-			event.Header = types.SiMap{
+			event.Header = types.Map{
         		"group": c.conf.Group,
         		"type":  c.conf.Type,
 			}
@@ -150,7 +152,7 @@ func (c *Collector) getState() state.State {
 }
 
 func (r *Collector) Update(fs state.State) {
-    fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
+    fmt.Println("collector update state: %s, offset: %v", r.state["source"], r.state["offset"])
     r.states.Update(r.state)
 
 //    d := data.NewData()

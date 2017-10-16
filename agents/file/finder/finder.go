@@ -59,8 +59,9 @@ func (f *Finder) Init(conf *configure.Configure, db adapter.SinceDB) error {
 
 func (f *Finder) load(states []state.State) error {
     for _, state := range states {
-        if f.match(state.Source) {
-        	state.TTL = -1
+        source := state["source"].(string)
+        if f.match(source) {
+        	state["TTL"] = -1
 
         	if !state.Finished {
         	    return fmt.Errorf("Can only start a finder when all related " +

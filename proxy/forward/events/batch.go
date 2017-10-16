@@ -29,7 +29,7 @@ func (b *Batch) ID() string {
 	return ""
 }
 
-func (b *Batch) GetHeader() types.SiMap {
+func (b *Batch) GetHeader() types.Map {
 	return nil
 }
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/rookie-xy/modules/agents/file/state"
-	"errors"
+//	"errors"
 )
 
 type Source struct {
@@ -21,9 +21,9 @@ func ReadOpen(path string) (*os.File, error) {
 }
 
 func New(state state.State) (*Source, error) {
-	f, err := ReadOpen(state.Source)
+	f, err := ReadOpen(state["source"].(string))
 	if err != nil {
-		return nil, fmt.Errorf("Failed opening %s: %s", state.Source, err)
+		return nil, fmt.Errorf("Failed opening %s: %s", state["source"], err)
 	}
 
     source := &Source{
@@ -40,6 +40,7 @@ func New(state state.State) (*Source, error) {
 }
 
 func (s *Source) Validate(f *os.File) error {
+	/*
 	info, err := s.Stat()
 	if err != nil {
 		return fmt.Errorf("Failed getting stats for file %s: %s", s.state.Source, err)
@@ -62,11 +63,12 @@ func (s *Source) Validate(f *os.File) error {
 
 	fmt.Printf("collector Setting offset for file: %s. Offset: %d ", s.state.Source, offset)
 	s.state.Offset = offset
-
+    */
 	return nil
 }
 
 func (s *Source) initFileOffset(file *os.File) (int64, error) {
+	/*
 	// continue from last known offset
 	if s.state.Offset > 0 {
 		fmt.Printf("collector Set previous offset for file: %s. Offset: %d ", s.state.Source, s.state.Offset)
@@ -75,5 +77,6 @@ func (s *Source) initFileOffset(file *os.File) (int64, error) {
 
 	// get offset from file in case of encoding factory was required to read some data.
 	fmt.Printf("collector Setting offset for file based on seek: %s", s.state.Source)
+	*/
 	return file.Seek(0, os.SEEK_CUR)
 }

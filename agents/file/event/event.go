@@ -9,7 +9,7 @@ import (
 
 type Event struct {
     File      state.State
-    Header    types.SiMap      `json:"header"`
+    Header    types.Map        `json:"header"`
     Body     *scanner.Message  `json:"body"`
     Footer    Footer           `json:"footer"`
 }
@@ -26,7 +26,7 @@ func (e *Event) ID() string {
     return ""
 }
 
-func (e *Event) GetHeader() types.SiMap {
+func (e *Event) GetHeader() types.Map {
     return e.Header
 }
 

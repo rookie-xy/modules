@@ -128,7 +128,7 @@ func (r *Proxy) Exit(code int) {
 
 func (r *Proxy) Update(o types.Object) int {
     v := value.New(o)
-    if v.GetType() != types.Map {
+    if v.GetType() != types.MAP {
         return state.Error
     }
 
