@@ -16,6 +16,7 @@ import (
     //"github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/event"
+    "github.com/rookie-xy/modules/proxy/forward/events"
 )
 
 const Name  = "sincedb"
@@ -88,8 +89,6 @@ func (s *sincedb) Main() {
 
     fmt.Println("Start proxy forward module ...")
 
-    var events []event.Event
-
     for {
         event, status := s.pipeline.Dequeue(10)
 
@@ -103,38 +102,29 @@ func (s *sincedb) Main() {
         default:
         }
 
-        events = append(events, event)
-
-        if err := s.client.Senders(events); err != nil {
-            fmt.Println("recall error ", err)
-            return
-            /*
-            if err = s.recall(event, s.pipeline, batch); err != nil {
-                fmt.Println("recall error ", err)
-                return
+        if !s.client.Commit(event) {
+            if events, err := s.client.Sender(); err != nil {
+                if err := recall(events, s.pipeline); err != nil {
+                    fmt.Println("recall error ", err)
+                    return
+                }
             }
-            */
         }
     }
 }
-/*
-func (s *sincedb) recall(e event.Event, Q queue.Queue, batch bool) error {
-    if batch {
-        events := adapter.ToEvents(e)
-        for _, event := range events.Batch() {
-            if err := Q.Requeue(event); err != nil {
-                return err
-            }
-        }
 
-        return nil
+func recall(events []event.Event, Q queue.Queue) error {
+    for _, event := range events {
+        if err := Q.Requeue(event); err != nil {
+            return err
+        }
     }
 
-    return Q.Requeue(e)
+    return nil
 }
-*/
 
 func (s *sincedb) Exit(code int) {
+	s.client.Close()
     // 退出
 }
 
