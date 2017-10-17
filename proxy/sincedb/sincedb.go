@@ -14,6 +14,8 @@ import (
     "github.com/rookie-xy/hubble/plugin"
     //"github.com/rookie-xy/hubble/event"
     //"github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/event"
 )
 
 const Name  = "sincedb"
@@ -21,7 +23,7 @@ const Name  = "sincedb"
 type sincedb struct {
     log       log.Log
     pipeline  queue.Queue
-    client    proxy.Forward
+    client    adapter.SinceDB
 }
 
 var (
@@ -72,7 +74,7 @@ func (s *sincedb) Init() {
         fmt.Println("client error ", err)
         return
     } else {
-        s.client = client
+        s.client = adapter.FileSinceDB(client)
         register.Forword(key, client)
     }
 
@@ -85,6 +87,8 @@ func (s *sincedb) Main() {
     }
 
     fmt.Println("Start proxy forward module ...")
+
+    var events []event.Event
 
     for {
         event, status := s.pipeline.Dequeue(10)
@@ -99,8 +103,9 @@ func (s *sincedb) Main() {
         default:
         }
 
+        events = append(events, event)
 
-        if err := s.client.Sender(event, false); err != nil {
+        if err := s.client.Senders(events); err != nil {
             fmt.Println("recall error ", err)
             return
             /*
