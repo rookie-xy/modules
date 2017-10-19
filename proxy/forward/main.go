@@ -114,11 +114,6 @@ func (f *forward) Main() {
         return
     }
 
-    batch := false
-    if f.events.Enable() {
-    	batch = true
-	}
-
     fmt.Println("Start proxy forward module ...")
 
     for {
@@ -134,39 +129,19 @@ func (f *forward) Main() {
         default:
         }
 
-        if batch {
-            f.events.Put(event)
-            event = f.events
-        }
-
-        if err := f.client.Sender(event, batch); err != nil {
-            if err = f.recall(event, f.pipeline, batch); err != nil {
+        if err := f.client.Sender(event); err != nil {
+            if err = f.pipeline.Requeue(event); err != nil {
                 fmt.Println("recall error ", err)
                 return
             }
             continue
         }
 
-        if err := f.sincedb.Sender(event, batch); err != nil {
+        if err := f.sincedb.Sender(event); err != nil {
             fmt.Println("sincedb sender error ", err)
             return
         }
     }
-}
-
-func (r *forward) recall(e event.Event, Q queue.Queue, batch bool) error {
-    if batch {
-        events := adapter.ToEvents(e)
-        for _, event := range events.Batch() {
-            if err := Q.Requeue(event); err != nil {
-                return err
-            }
-        }
-
-        return nil
-    }
-
-    return Q.Requeue(e)
 }
 
 func (r *forward) Exit(code int) {
