@@ -169,6 +169,7 @@ func (f *file) Init() {
         Limit:    limit.GetUint64(),
         Input:    input,
         Codec:    codec,
+        Client:   true,
     }
 
     if value := client.GetValue(); value != nil {
@@ -179,6 +180,8 @@ func (f *file) Init() {
         }
 
     } else {
+    	configure.Client = false
+
         key = output.GetFlag() + "." + output.GetKey()
         configure.Output, err = factory.Output(key, f.log, output.GetValue())
         if err != nil {

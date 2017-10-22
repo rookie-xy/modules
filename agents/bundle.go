@@ -52,7 +52,7 @@ func New(log log.Log) module.Template {
 
 func (r *Agent) Update(o types.Object) int {
     v := value.New(o)
-    if v.GetType() != types.Map {
+    if v.GetType() != types.MAP {
         return state.Error
     }
 

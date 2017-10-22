@@ -19,6 +19,7 @@ import (
 	"github.com/rookie-xy/modules/agents/file/event"
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/modules/agents/file/file"
+	"github.com/rookie-xy/hubble/proxy"
 )
 
 type Collector struct {
@@ -33,8 +34,9 @@ type Collector struct {
     input     input.Input
     scanner  *scanner.Scanner
     valve     valve.Valve
-    output    output.Output
+    output    proxy.Forward
 
+    sincedb   proxy.Forward
     log       log.Log
 }
 
@@ -46,7 +48,7 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(input input.Input, state state.State) error {
+func (c *Collector) Init(input input.Input, output output.Output, state state.State) error {
 	var err error
     file, err := file.New(state)
     if err != nil {
@@ -66,6 +68,7 @@ func (c *Collector) Init(input input.Input, state state.State) error {
 	c.source  = file
 	c.input   = input
     c.scanner = scanner
+    c.output  = c.conf.Output.(output.Output).Connect()
 
     return nil
 }

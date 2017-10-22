@@ -12,13 +12,13 @@ import (
     "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/output"
+    "github.com/rookie-xy/hubble/pipeline"
 )
 
 const Name  = "forward"
 
 type forward struct {
     log       log.Log
-//    pipeline  queue.Queue
     client    proxy.Forward
     sincedb   output.Output
 }
@@ -80,33 +80,38 @@ func (f *forward) Main() {
         return
     }
 
+    var output output.Output
+
     fmt.Println("Start proxy forward module ...")
 
     for {
-        event, status := f.pipeline.Dequeue(10)
+    	conn := output.Accept()
 
-        switch status {
-/*
-        case state.Ignore:
-            continue
-        case state.Busy:
-            //TODO sleep
-*/
-        default:
-        }
+        handler := func(Q pipeline.Queue, forward proxy.Forward, sincedb output.Output) error {
+            for {
+                event, err := Q.Dequeue(10)
 
-        if err := f.client.Sender(event); err != nil {
-            if err = f.pipeline.Requeue(event); err != nil {
-                fmt.Println("recall error ", err)
-                return
+                switch err {
+
+                default:
+                }
+
+                if err := forward.Sender(event); err != nil {
+                    if err = Q.Requeue(event); err != nil {
+                        fmt.Println("recall error ", err)
+                        return err
+                    }
+                    continue
+                }
+
+                if err := sincedb.Sender(event); err != nil {
+                    fmt.Println("sincedb sender error ", err)
+                    return err
+                }
             }
-            continue
         }
 
-        if err := f.sincedb.Sender(event); err != nil {
-            fmt.Println("sincedb sender error ", err)
-            return
-        }
+        go handler(conn, f.client, f.sincedb)
     }
 }
 

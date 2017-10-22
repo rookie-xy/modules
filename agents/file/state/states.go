@@ -22,8 +22,6 @@ func (r *States) Update(state State) {
     defer r.Unlock()
 
     index, _ := r.findPrevious(state)
-    state["timestamp"] = time.Now()
-
     if index >= 0 {
         r.States[index] = state
     } else {
