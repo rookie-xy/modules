@@ -13,14 +13,19 @@ import (
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/pipeline"
+    "github.com/rookie-xy/modules/proxy/forward/worker"
+    "github.com/rookie-xy/hubble/job"
 )
 
 const Name  = "forward"
 
 type forward struct {
-    log       log.Log
-    client    proxy.Forward
-    sincedb   output.Output
+    log      log.Log
+
+    queue    pipeline.Queue
+
+    worker  *worker.Worker
+    jobs    *job.Jobs
 }
 
 var (
@@ -80,38 +85,15 @@ func (f *forward) Main() {
         return
     }
 
-    var output output.Output
-
     fmt.Println("Start proxy forward module ...")
 
     for {
-    	conn := output.Accept()
+        event, err := f.queue.Dequeue(10)
+        switch err {
 
-        handler := func(Q pipeline.Queue, forward proxy.Forward, sincedb output.Output) error {
-            for {
-                event, err := Q.Dequeue(10)
-
-                switch err {
-
-                default:
-                }
-
-                if err := forward.Sender(event); err != nil {
-                    if err = Q.Requeue(event); err != nil {
-                        fmt.Println("recall error ", err)
-                        return err
-                    }
-                    continue
-                }
-
-                if err := sincedb.Sender(event); err != nil {
-                    fmt.Println("sincedb sender error ", err)
-                    return err
-                }
-            }
         }
 
-        go handler(conn, f.client, f.sincedb)
+        f.jobs.Start(f.worker)
     }
 }
 
