@@ -15,6 +15,7 @@ import (
     "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/modules/proxy/forward/worker"
     "github.com/rookie-xy/hubble/job"
+    "strings"
 )
 
 const Name  = "forward"
@@ -31,12 +32,21 @@ type forward struct {
 var (
     batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
     client    = command.New( plugin.Flag, "client.elasticsearch",    nil, "This option use to group" )
-    sincedb   = command.New( module.Flag, "sincedb",    nil, "This option use to group" )
+    sinceDB   = command.New( module.Flag, "sincedb",    nil, "This option use to group" )
+    pipe      = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
 )
 
 var commands = []command.Item{
 
     { batch,
+      command.FILE,
+      module.Proxy,
+      command.SetObject,
+      state.Enable,
+      0,
+      nil },
+
+    { pipe,
       command.FILE,
       module.Proxy,
       command.SetObject,
@@ -52,7 +62,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { sincedb,
+    { sinceDB,
       command.FILE,
       module.Proxy,
       command.SetObject,
@@ -61,30 +71,49 @@ var commands = []command.Item{
       nil },
 }
 
-func New(l log.Log) module.Template {
+func New(log log.Log) module.Template {
     return &forward{
-        log: l,
+        log:    log,
+        worker: worker.New(log),
+        jobs:   job.New(log),
     }
 }
 
 func (r *forward) Init() {
-    key := client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, r.log, client.GetValue()); err != nil {
-        fmt.Println("client error ", err)
+    key := pipe.GetFlag() + "." + pipe.GetKey()
+    pipeline, err := factory.Pipeline(key, r.log, pipe.GetValue())
+    if err != nil {
+        fmt.Println("pipeline error ", err)
         return
     } else {
-        r.client = client
-        register.Forword(key, client)
+        r.queue = pipeline
     }
+
+    name := client.GetKey()
+    name = name[strings.LastIndex(name, ".") + 1:]
+
+    register.Queue(name, pipeline)
+
+    key = client.GetFlag() + "." + client.GetKey()
+    client, err := factory.Client(key, r.log, client.GetValue())
+    if err != nil {
+        fmt.Println("client error ", err)
+        return
+    }
+
+    key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
+    sinceDB, err := factory.Client(key, r.log, sinceDB.GetValue())
+    if err != nil {
+        fmt.Println("sincedb error ", err)
+        return
+    }
+
+    r.worker.Init(client, sinceDB)
 
     return
 }
 
 func (f *forward) Main() {
-    if f.client == nil || f.pipeline == nil {
-        return
-    }
-
     fmt.Println("Start proxy forward module ...")
 
     for {
@@ -93,6 +122,7 @@ func (f *forward) Main() {
 
         }
 
+        f.worker.Q = event.(pipeline.Queue)
         f.jobs.Start(f.worker)
     }
 }

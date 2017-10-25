@@ -13,7 +13,7 @@ import (
 type Worker struct {
     id        uuid.UUID
 
-    pipeline  pipeline.Queue
+    Q         pipeline.Queue
     client    proxy.Forward
     sinceDB   output.Output
 
@@ -25,6 +25,12 @@ func New(log log.Log) *Worker {
 		log: log,
 		id: uuid.NewV4(),
 	}
+}
+
+func (w *Worker) Init(f proxy.Forward, o output.Output) error {
+	w.client = f
+	w.sinceDB = o
+	return nil
 }
 
 func (w *Worker) ID() uuid.UUID {
@@ -56,7 +62,7 @@ func (w *Worker) Run() error {
 		}
 	}
 
-	return handle(w.pipeline, w.client, w.sinceDB)
+	return handle(w.Q, w.client, w.sinceDB)
 }
 
 func (w *Worker) Stop() {
