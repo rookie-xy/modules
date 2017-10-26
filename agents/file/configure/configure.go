@@ -6,7 +6,7 @@ import (
     "github.com/rookie-xy/hubble/codec"
 //    "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/input"
-    "github.com/rookie-xy/hubble/output"
+//    "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/proxy"
 )
 

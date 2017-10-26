@@ -68,6 +68,5 @@ func (w *Worker) Run() error {
 func (w *Worker) Stop() {
 	w.sinceDB.Close()
 	w.client.Close()
-	w.pipeline.Close()
 	return
 }

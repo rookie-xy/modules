@@ -32,3 +32,11 @@ func (m *Message) GetContent() []byte {
 func (m *Message) Json() string {
     return ""
 }
+
+func (m *Message) Off() {
+
+}
+
+func (m *Message) On() {
+
+}

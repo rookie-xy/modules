@@ -26,7 +26,7 @@ func (r *States) Update(state State) {
         r.States[index] = state
     } else {
         r.States = append(r.States, state)
-        fmt.Println("finder", "New state added for %s", state["source"])
+        fmt.Println("finder", "New state added for %s", state.Source)
     }
 }
 
@@ -57,16 +57,14 @@ func (r *States) Cleanup() int {
     states := r.States[:0]
 
     for _, state := range r.States {
-        finished := state["finished"].(bool)
-        ttl := state["TTL"].(time.Duration)
-        expired := (ttl > 0 && currentTime.Sub(state["timestamp"].(time.Time)) > ttl)
+        expired := (state.TTL > 0 && currentTime.Sub(state.Timestamp) > state.TTL)
 
-        if ttl == 0 || expired {
-            if finished {
-                fmt.Println("state", "State removed for %v because of older: %v", state["source"], ttl)
+        if state.TTL == 0 || expired {
+            if state.Finished {
+                fmt.Println("state", "State removed for %v because of older: %v", state.Source, state.TTL)
                 continue // drop state
             } else {
-                fmt.Println("State for %s should have been dropped, but couldn't as state is not finished.", state["source"])
+                fmt.Println("State for %s should have been dropped, but couldn't as state is not finished.", state.Source)
             }
         }
 

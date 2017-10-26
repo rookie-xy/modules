@@ -22,7 +22,7 @@ func New(s input.Input) *Scanner {
 }
 
 func (s *Scanner) Init(codec codec.Codec, state state.State) error {
-    s.id = state["lno"].(uint64)
+    s.id = state.Lno
     s.Split(codec.Decode)
     return nil
 }

@@ -3,7 +3,6 @@ package state
 import (
     "os"
     "time"
-    "github.com/rookie-xy/hubble/types"
 )
 
 type State struct {
@@ -18,7 +17,7 @@ type State struct {
     Type       string        `json:"type"`
 }
 
-// NewState creates a new file state
+// New creates a new file state
 func New() State {
     return State{
         Finished:    false,
@@ -28,7 +27,7 @@ func New() State {
     }
 }
 
-func (s State) Init(fi os.FileInfo, path string) error {
+func (s State) Init(fi os.FileInfo, path, Type string) error {
     return nil
 }
 
@@ -37,7 +36,7 @@ func (s State) ID() string {
     // Generate id on first request. This is needed as id is
     // not set when converting back from json
     if s.Id == "" {
-        s.Id = s.Key.String()
+        s.Id = s.Type
     }
 
     return s.Id

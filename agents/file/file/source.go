@@ -21,9 +21,9 @@ func ReadOpen(path string) (*os.File, error) {
 }
 
 func New(state state.State) (*Source, error) {
-	f, err := ReadOpen(state["source"].(string))
+	f, err := ReadOpen(state.Source)
 	if err != nil {
-		return nil, fmt.Errorf("Failed opening %s: %s", state["source"], err)
+		return nil, fmt.Errorf("Failed opening %s: %s", state.Source, err)
 	}
 
     source := &Source{
