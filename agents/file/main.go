@@ -15,6 +15,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/modules/proxy/sincedb"
 )
 
 const Name  = "file"
@@ -43,7 +44,7 @@ var (
     client    = command.New( plugin.Flag, "client",    nil,         "client method" )
     input     = command.New( plugin.Flag, "input",     nil,         "input method" )
     output    = command.New( plugin.Flag, "output",    nil,         "output method" )
-    sincedb   = command.New( plugin.Flag, "sincedb",   nil,         "sincedb method" )
+    sinceDB   = command.New( plugin.Flag, "sinceDB",   nil,         "sincedb method" )
 )
 
 var commands = []command.Item{
@@ -128,7 +129,7 @@ var commands = []command.Item{
       0,
       nil },
 
-    { sincedb,
+    { sinceDB,
       command.FILE,
       module.Agents,
       command.SetObject,
@@ -193,8 +194,8 @@ func (f *file) Init() {
         f.frequency = value.GetDuration()
     }
 
- 	key = sincedb.GetFlag() + "." + sincedb.GetKey()
-    client, err := factory.Forward(key)
+ 	key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
+    client, err := factory.Output(key)
     if err != nil {
         return
     }

@@ -29,7 +29,7 @@ type sincedb struct {
 
 var (
     pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
-    client    = command.New( plugin.Flag, "client.sincedb",    nil, "This option use to group" )
+    client    = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
@@ -103,7 +103,7 @@ func (s *sincedb) Main() {
         }
 
         if !s.client.Commit(event) {
-            if events, err := s.client.Sender(); err != nil {
+            if events, err := s.client.Senders(); err != nil {
                 if err := recall(events, s.pipeline); err != nil {
                     fmt.Println("recall error ", err)
                     return
