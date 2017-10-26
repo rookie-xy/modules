@@ -15,7 +15,9 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/modules/proxy/sincedb"
+    Output "github.com/rookie-xy/hubble/output"
+    "github.com/rookie-xy/hubble/types/value"
+    "github.com/rookie-xy/hubble/proxy"
 )
 
 const Name  = "file"
@@ -194,8 +196,9 @@ func (f *file) Init() {
         f.frequency = value.GetDuration()
     }
 
- 	key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
-    client, err := factory.Output(key)
+ 	key = sinceDB.GetFlag() + "." + Output.Name + "." + sinceDB.GetKey()
+ 	key2 := proxy.Name + "." + sinceDB.GetKey()
+    client, err := factory.Output(key, f.log, value.New(key2))
     if err != nil {
         return
     }
@@ -215,19 +218,9 @@ func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
 
-    //f.wg.Add(1)
-    //r.Print("Starting finder of type: %v; id: %v ", p.config.Type, p.ID())
-
-    //onceWg := sync.WaitGroup{}
-    //onceWg.Add(1)
-
-    // Add waitgroup to make sure prospectors finished
     run := func(finder *finder.Finder) error {
         defer func() {
-            //onceWg.Done()
             close(f.done)
-            //f.wg.Wait()
-            //f.wg.Done()
         }()
 
         finder.Find()

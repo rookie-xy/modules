@@ -9,14 +9,13 @@ import (
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/state"
-    "github.com/rookie-xy/hubble/proxy"
+//    "github.com/rookie-xy/hubble/proxy"
     queue "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
     //"github.com/rookie-xy/hubble/event"
     //"github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/event"
-    "github.com/rookie-xy/modules/proxy/forward/events"
 )
 
 const Name  = "sincedb"
