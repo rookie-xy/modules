@@ -1,13 +1,13 @@
-package sincedb
+package sinceDB
 
 import (
-    "fmt"
+//    "fmt"
 
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/factory"
+//    "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/state"
 //    "github.com/rookie-xy/hubble/proxy"
     queue "github.com/rookie-xy/hubble/pipeline"
@@ -18,7 +18,7 @@ import (
     "github.com/rookie-xy/hubble/event"
 )
 
-const Name  = "sincedb"
+const Name  = "sinceDB"
 
 type sincedb struct {
     log       log.Log
@@ -27,7 +27,7 @@ type sincedb struct {
 }
 
 var (
-    pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
+    pipeline  = command.New( plugin.Flag, "pipeline.channel",  nil, "This option use to group" )
     client    = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
 )
 
@@ -58,7 +58,9 @@ func New(l log.Log) module.Template {
 }
 
 func (s *sincedb) Init() {
+    /*
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
+    fmt.Println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ", key)
     pipeline, err := factory.Pipeline(key, s.log, pipeline.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
@@ -77,27 +79,27 @@ func (s *sincedb) Init() {
         s.client = adapter.FileSinceDB(client)
         register.Forword(key, client)
     }
+    */
 
     return
 }
 
 func (s *sincedb) Main() {
+    /*
     if s.client == nil || s.pipeline == nil {
         return
     }
 
-    fmt.Println("Start proxy forward module ...")
+    fmt.Println("Start proxy sinceDB module ...")
 
     for {
         event, status := s.pipeline.Dequeue(10)
 
         switch status {
-/*
-        case state.Ignore:
-            continue
-        case state.Busy:
-            //TODO sleep
-*/
+        //case state.Ignore:
+        //    continue
+        //case state.Busy:
+        //    //TODO sleep
         default:
         }
 
@@ -110,6 +112,7 @@ func (s *sincedb) Main() {
             }
         }
     }
+    */
 }
 
 func recall(events []event.Event, Q queue.Queue) error {

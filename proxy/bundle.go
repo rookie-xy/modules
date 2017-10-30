@@ -13,6 +13,7 @@ import (
     "github.com/rookie-xy/hubble/types/value"
 
   _ "github.com/rookie-xy/modules/proxy/forward"
+  _ "github.com/rookie-xy/modules/proxy/sinceDB"
 )
 
 const Name = module.Proxy
@@ -68,7 +69,7 @@ func (r *Proxy) Init() {
                 for iterator := it; iterator.Has(); iterator.Next() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
-
+                        fmt.Println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", name, key, iterm.Value)
                         if status := command.File(name, key, iterm.Value); status != state.Ok {
                             fmt.Println("command file error", status)
                             return state.Error
@@ -141,6 +142,7 @@ func (r *Proxy) Update(o types.Object) int {
 
         proxy.SetValue(val)
     }
+
 
     r.event <- 1
     return state.Ok

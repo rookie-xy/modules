@@ -7,7 +7,7 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/factory"
+ //   "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/state"
 //    "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/plugin"
@@ -15,7 +15,7 @@ import (
     "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/modules/proxy/forward/worker"
     "github.com/rookie-xy/hubble/job"
-    "strings"
+ //   "strings"
 )
 
 const Name  = "forward"
@@ -32,7 +32,7 @@ type forward struct {
 var (
     batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
     client    = command.New( plugin.Flag, "client.elasticsearch",    nil, "This option use to group" )
-    sinceDB   = command.New( module.Flag, "sincedb",    nil, "This option use to group" )
+    sinceDB   = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
     pipe      = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
 )
 
@@ -80,7 +80,9 @@ func New(log log.Log) module.Template {
 }
 
 func (r *forward) Init() {
+    /*
     key := pipe.GetFlag() + "." + pipe.GetKey()
+    fmt.Println("uuuuuuuuuuuuuuuuuuuuuuuuuuu: ", key)
     pipeline, err := factory.Pipeline(key, r.log, pipe.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
@@ -104,18 +106,19 @@ func (r *forward) Init() {
     key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
     sinceDB, err := factory.Client(key, r.log, sinceDB.GetValue())
     if err != nil {
-        fmt.Println("sincedb error ", err)
+        fmt.Println("sinceDB error ", err)
         return
     }
 
     r.worker.Init(client, sinceDB)
+    */
 
     return
 }
 
 func (f *forward) Main() {
     fmt.Println("Start proxy forward module ...")
-
+/*
     for {
         event, err := f.queue.Dequeue(10)
         switch err {
@@ -125,6 +128,7 @@ func (f *forward) Main() {
         f.worker.Q = event.(pipeline.Queue)
         f.jobs.Start(f.worker)
     }
+*/
 }
 
 func (r *forward) Exit(code int) {

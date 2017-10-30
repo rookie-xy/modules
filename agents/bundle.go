@@ -90,7 +90,8 @@ func (r *Agent) Init() {
                     }
 
                 } else {
-                    fmt.Println("proxy hava not init finish")
+                    // Debug
+                    // fmt.Println("proxy hava not init finish")
                     continue
                 }
             }

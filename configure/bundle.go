@@ -10,7 +10,8 @@ import (
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/log"
-    "github.com/rookie-xy/hubble/codec"
+//    "github.com/rookie-xy/hubble/codec"
+    "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/memento"
 
   _ "github.com/rookie-xy/modules/configure/local"
@@ -46,7 +47,7 @@ var commands = []command.Item{
 
 type Configure struct {
     log.Log
-    codec.Codec
+    adapter.ValueCodec
 
     observers  []observer.Observer
     event      chan types.Object
@@ -86,14 +87,16 @@ func (r *Configure) Notify(o types.Object) {
 
 func (r *Configure) update(o types.Object) {
     for _, observer := range r.observers {
+    	fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaa")
         if observer.Update(o) == state.Error {
+            fmt.Println("dddddddddddddddddddddddddddddddd")
             break
         }
     }
 }
 
 func (r *Configure) Update(o types.Object) int {
-    _, data, err := r.Decode(o.([]byte), true)
+    _, data, err := r.ValueDecode(o.([]byte), true)
     if err != nil {
         fmt.Println("error", data)
         return state.Error
@@ -122,7 +125,7 @@ func (r *Configure) Init() {
         return
 
     } else {
-        r.Codec = codec
+        r.ValueCodec = adapter.ToValueCodec(codec)
     }
 
     return

@@ -56,7 +56,7 @@ func (w *Worker) Run() error {
 			}
 
 			if err := sinceDB.Sender(event); err != nil {
-				fmt.Println("sincedb sender error ", err)
+				fmt.Println("sinceDB sender error ", err)
 				return err
 			}
 		}

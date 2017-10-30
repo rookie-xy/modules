@@ -163,9 +163,9 @@ func (r *Collector) Update(fs state.State) {
 
 
 	/*
-    if client, err := factory.Forward("plugin.client.sincedb"); err != nil {
+    if client, err := factory.Forward("plugin.client.sinceDB"); err != nil {
         return err
     } else {
-        c.sincedb = client
+        c.sinceDB = client
     }
 	*/

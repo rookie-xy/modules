@@ -46,7 +46,7 @@ var (
     client    = command.New( plugin.Flag, "client",    nil,         "client method" )
     input     = command.New( plugin.Flag, "input",     nil,         "input method" )
     output    = command.New( plugin.Flag, "output",    nil,         "output method" )
-    sinceDB   = command.New( plugin.Flag, "sinceDB",   nil,         "sincedb method" )
+    sinceDB   = command.New( plugin.Flag, "sinceDB",   nil,         "sinceDB method" )
 )
 
 var commands = []command.Item{
@@ -217,10 +217,10 @@ func (f *file) Init() {
 func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-
+/*
     run := func(finder *finder.Finder) error {
         defer func() {
-            close(f.done)
+            //close(f.done)
         }()
 
         finder.Find()
@@ -241,7 +241,7 @@ func (f *file) Main() {
     }
 
     run(f.finder)
-
+*/
     return
 }
 
