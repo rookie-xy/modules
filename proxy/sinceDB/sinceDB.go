@@ -7,8 +7,7 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
-//    "github.com/rookie-xy/hubble/factory"
-    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/factory"
 //    "github.com/rookie-xy/hubble/proxy"
     queue "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
@@ -16,6 +15,7 @@ import (
     //"github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/event"
+    "fmt"
 )
 
 const Name  = "sinceDB"
@@ -36,17 +36,15 @@ var commands = []command.Item{
     { pipeline,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { client,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 }
@@ -58,9 +56,7 @@ func New(l log.Log) module.Template {
 }
 
 func (s *sincedb) Init() {
-    /*
     key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    fmt.Println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrr: ", key)
     pipeline, err := factory.Pipeline(key, s.log, pipeline.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
@@ -79,13 +75,11 @@ func (s *sincedb) Init() {
         s.client = adapter.FileSinceDB(client)
         register.Forword(key, client)
     }
-    */
 
     return
 }
 
 func (s *sincedb) Main() {
-    /*
     if s.client == nil || s.pipeline == nil {
         return
     }
@@ -112,7 +106,6 @@ func (s *sincedb) Main() {
             }
         }
     }
-    */
 }
 
 func recall(events []event.Event, Q queue.Queue) error {

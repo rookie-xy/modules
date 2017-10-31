@@ -7,7 +7,6 @@ import (
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/state"
 
   _ "github.com/rookie-xy/plugins/codec"
   _ "github.com/rookie-xy/plugins/client"
@@ -16,6 +15,8 @@ import (
   _ "github.com/rookie-xy/plugins/input"
   _ "github.com/rookie-xy/plugins/output"
 )
+
+const Name = "dso"
 
 var (
     dso = command.New("-so", "plugin", paths, "You can dynamically load the plugin in DSO mode")
@@ -26,9 +27,8 @@ var commands = []command.Item{
     { dso,
       command.LINE,
       module.Plugins,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 }

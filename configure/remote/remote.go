@@ -4,7 +4,6 @@ import (
     "fmt"
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
-    "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/log"
 )
@@ -21,18 +20,16 @@ var commands = []command.Item{
     { client,
       command.LINE,
       module.Configure,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 
     { parameter,
       command.LINE,
       module.Configure,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 }

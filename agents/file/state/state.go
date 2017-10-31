@@ -27,12 +27,15 @@ func New() State {
     }
 }
 
-func (s State) Init(fi os.FileInfo, path, Type string) error {
+func (s *State) Init(fi os.FileInfo, path, Type string) error {
+    s.Fileinfo = fi
+    s.Source = path
+    s.Type = Type
     return nil
 }
 
 // ID returns a unique id for the state as a string
-func (s State) ID() string {
+func (s *State) ID() string {
     // Generate id on first request. This is needed as id is
     // not set when converting back from json
     if s.Id == "" {
@@ -44,11 +47,11 @@ func (s State) ID() string {
 
 // IsEqual compares the state to an other state supporing
 // stringer based on the unique string
-func (s State) IsEqual(c *State) bool {
+func (s *State) IsEqual(c *State) bool {
     return s.ID() == s.ID()
 }
 
 // IsEmpty returns true if the state is empty
-func (s State) IsEmpty() bool {
-    return s == State{}
+func (s *State) IsEmpty() bool {
+    return *s == State{}
 }

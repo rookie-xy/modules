@@ -27,9 +27,8 @@ var commands = []command.Item{
     { proxy,
       command.FILE,
       Name,
+      Name,
       nil,
-      state.Enable,
-      0,
       nil },
 
 }
@@ -55,9 +54,11 @@ func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
 
-    build := func(name string, i types.Iterator, load module.Load) int {
+    build := func(scope string, i types.Iterator, load module.Load) int {
         for iterator := i; iterator.Has(); iterator.Next() {
             iterm := iterator.Iterm()
+            name := iterm.Key.GetString()
+
 
             if v := iterm.Value; v != nil {
                 value := value.New(v)
@@ -69,8 +70,7 @@ func (r *Proxy) Init() {
                 for iterator := it; iterator.Has(); iterator.Next() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
-                        fmt.Println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", name, key, iterm.Value)
-                        if status := command.File(name, key, iterm.Value); status != state.Ok {
+                        if status := command.File(scope, name, key, iterm.Value); status != state.Ok {
                             fmt.Println("command file error", status)
                             return state.Error
                         }
@@ -78,7 +78,7 @@ func (r *Proxy) Init() {
                 }
             }
 
-            namespace := name + "." + iterm.Key.GetString()
+            namespace := scope + "." + name
             module := module.Setup(namespace, r.Log)
             if module != nil {
                 module.Init()

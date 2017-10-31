@@ -26,9 +26,8 @@ var commands = []command.Item{
     { agents,
       command.FILE,
       Name,
+      Name,
       nil,
-      state.Enable,
-      0,
       nil },
 
 }
@@ -85,7 +84,8 @@ func (r *Agent) Init() {
                         fmt.Println("agents init error")
                         return
                     } else {
-                        fmt.Println("agents init not error")
+                        // debug
+                        //fmt.Println("agents init not error")
                         break
                     }
 

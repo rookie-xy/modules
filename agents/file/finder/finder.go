@@ -180,17 +180,17 @@ func getPaths(files map[string]os.FileInfo) []string {
 
 func getState(path string, fi os.FileInfo, f *Finder) (state.State, error) {
     var err error
-    var absolute string
+    var absolutePath string
 
-    absolute, err = filepath.Abs(path)
+    absolutePath, err = filepath.Abs(path)
     if err != nil {
-        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolute, err)
+        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
     }
 
-    fmt.Println("finder", "Check file for collecting: %s", absolute)
+    fmt.Printf("Finder check file for collecting: %s\n", absolutePath)
 
     state := state.New()
-    if err := state.Init(fi, absolute, "file"); err != nil {
+    if err := state.Init(fi, absolutePath, "file"); err != nil {
         return state, err
     }
 
@@ -216,16 +216,16 @@ func (f *Finder) Find() {
 
         new, err := getState(path, info, f)
         if err != nil {
-            fmt.Println("Skipping file %s due to error %s", path, err)
+            fmt.Printf("Skipping file %s due to error %s\n", path, err)
         }
 
         old := f.states.FindPrevious(new)
 
         if old.IsEmpty() {
-            fmt.Println("finder", "Start collector for new file: %s", new.Source)
+            fmt.Printf("Finder start collector for new file: %s\n", new.Source)
             err := f.startCollector(new, 0, f.conf.Input)
             if err != nil {
-                fmt.Println("collector could not be started on new file: %s, Err: %s", new.Source, err)
+                fmt.Printf("collector could not be started on new file: %s, Err: %s\n", new.Source, err)
             }
 
         } else {

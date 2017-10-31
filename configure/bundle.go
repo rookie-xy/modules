@@ -16,6 +16,8 @@ import (
 
   _ "github.com/rookie-xy/modules/configure/local"
   _ "github.com/rookie-xy/modules/configure/remote"
+    "github.com/rookie-xy/hubble/plugin"
+    "github.com/rookie-xy/hubble/codec"
 )
 
 const Name  = module.Configure
@@ -30,17 +32,15 @@ var commands = []command.Item{
     { mode,
       command.LINE,
       module.Configure,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { style,
       command.LINE,
       module.Configure,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 }
@@ -87,9 +87,7 @@ func (r *Configure) Notify(o types.Object) {
 
 func (r *Configure) update(o types.Object) {
     for _, observer := range r.observers {
-    	fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaaaa")
         if observer.Update(o) == state.Error {
-            fmt.Println("dddddddddddddddddddddddddddddddd")
             break
         }
     }
@@ -117,10 +115,13 @@ func (r *Configure) Init() {
 
     value := style.GetValue()
     if value == nil {
+    	fmt.Println("style get value error")
         return
     }
 
-    if codec, err := factory.Codec(value.GetString(), r.Log, nil); err != nil {
+    pluginName := plugin.Flag + "." + codec.Name + "." + value.GetString()
+
+    if codec, err := factory.Codec(pluginName, r.Log, nil); err != nil {
         fmt.Println(err)
         return
 

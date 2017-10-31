@@ -11,7 +11,6 @@ import (
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/configure"
-    "github.com/rookie-xy/hubble/state"
 )
 
 const Name  = "local"
@@ -26,9 +25,8 @@ var commands = []command.Item{
     { file,
       command.LINE,
       module.Configure,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
 }

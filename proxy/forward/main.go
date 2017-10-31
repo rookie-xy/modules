@@ -7,8 +7,7 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
- //   "github.com/rookie-xy/hubble/factory"
-    "github.com/rookie-xy/hubble/state"
+    "github.com/rookie-xy/hubble/factory"
 //    "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/plugin"
 //    "github.com/rookie-xy/hubble/output"
@@ -16,6 +15,8 @@ import (
     "github.com/rookie-xy/modules/proxy/forward/worker"
     "github.com/rookie-xy/hubble/job"
  //   "strings"
+    "strings"
+    "github.com/rookie-xy/hubble/adapter"
 )
 
 const Name  = "forward"
@@ -31,7 +32,7 @@ type forward struct {
 
 var (
     batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
-    client    = command.New( plugin.Flag, "client.elasticsearch",    nil, "This option use to group" )
+    client    = command.New( plugin.Flag, "client.kafka",    nil, "This option use to group" )
     sinceDB   = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
     pipe      = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
 )
@@ -41,33 +42,29 @@ var commands = []command.Item{
     { batch,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { pipe,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { client,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { sinceDB,
       command.FILE,
       module.Proxy,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 }
 
@@ -79,16 +76,14 @@ func New(log log.Log) module.Template {
     }
 }
 
-func (r *forward) Init() {
-    /*
+func (f *forward) Init() {
     key := pipe.GetFlag() + "." + pipe.GetKey()
-    fmt.Println("uuuuuuuuuuuuuuuuuuuuuuuuuuu: ", key)
-    pipeline, err := factory.Pipeline(key, r.log, pipe.GetValue())
+    pipeline, err := factory.Pipeline(key, f.log, pipe.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
         return
     } else {
-        r.queue = pipeline
+        f.queue = pipeline
     }
 
     name := client.GetKey()
@@ -97,67 +92,42 @@ func (r *forward) Init() {
     register.Queue(name, pipeline)
 
     key = client.GetFlag() + "." + client.GetKey()
-    client, err := factory.Client(key, r.log, client.GetValue())
+    client, err := factory.Client(key, f.log, client.GetValue())
     if err != nil {
         fmt.Println("client error ", err)
         return
     }
 
     key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
-    sinceDB, err := factory.Client(key, r.log, sinceDB.GetValue())
+    sinceDB, err := factory.Client(key, f.log, sinceDB.GetValue())
     if err != nil {
         fmt.Println("sinceDB error ", err)
         return
     }
 
-    r.worker.Init(client, sinceDB)
-    */
+    f.worker.Init(client, sinceDB)
 
     return
 }
 
 func (f *forward) Main() {
     fmt.Println("Start proxy forward module ...")
-/*
     for {
+
         event, err := f.queue.Dequeue(10)
         switch err {
 
         }
 
-        f.worker.Q = event.(pipeline.Queue)
+        f.worker.Q = adapter.ToPipelineEvent(event)
         f.jobs.Start(f.worker)
     }
-*/
 }
 
-func (r *forward) Exit(code int) {
+func (f *forward) Exit(code int) {
     // 退出
 }
 
 func init() {
     register.Module(module.Proxy, Name, commands, New)
 }
-
-/*
-//    pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
-    { pipeline,
-      command.FILE,
-      module.Proxy,
-      command.SetObject,
-      state.Enable,
-      0,
-      nil },
-
-
-    key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, r.log, pipeline.GetValue())
-    if err != nil {
-        fmt.Println("pipeline error ", err)
-        return
-    } else {
-        r.pipeline = pipeline
-    }
-
-    register.Queue(client.GetKey(), pipeline)
-*/

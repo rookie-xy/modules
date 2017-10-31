@@ -8,7 +8,6 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/log"
-    "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/plugin"
 
     "github.com/rookie-xy/modules/agents/file/finder"
@@ -54,89 +53,78 @@ var commands = []command.Item{
     { frequency,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { group,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { Type,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { paths,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { excludes,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { limit,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { codec,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { client,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { input,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
      { output,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 
     { sinceDB,
       command.FILE,
       module.Agents,
+      Name,
       command.SetObject,
-      state.Enable,
-      0,
       nil },
 }
 
@@ -154,13 +142,15 @@ func (f *file) Init() {
     key := codec.GetFlag() + "." + codec.GetKey()
     codec, err := factory.Codec(key, f.log, codec.GetValue())
     if err != nil {
+    	fmt.Println("agent file codec: ", err)
         return
     }
 
 
-	key = input.GetFlag() + "." + input.GetKey()
-    input, err := factory.Input(key, f.log, input.GetValue())
+    pluginName := input.GetFlag() + "." + input.GetKey()
+    input, err := factory.Input(pluginName, f.log, input.GetValue())
     if err != nil {
+    	fmt.Println("agent file input: ", err)
         return
     }
 
@@ -179,15 +169,17 @@ func (f *file) Init() {
         key = client.GetFlag() + "." + client.GetKey()
         configure.Output, err = factory.Client(key, f.log, value)
         if err != nil {
+        	fmt.Println("agent file client: ", err)
             return
         }
 
     } else {
     	configure.Client = false
 
-        key = output.GetFlag() + "." + output.GetKey()
-        configure.Output, err = factory.Output(key, f.log, output.GetValue())
+        pluginName = output.GetFlag() + "." + output.GetKey()
+        configure.Output, err = factory.Output(pluginName, f.log, output.GetValue())
         if err != nil {
+            fmt.Println("agent file output: ", err)
             return
         }
     }
@@ -200,12 +192,13 @@ func (f *file) Init() {
  	key2 := proxy.Name + "." + sinceDB.GetKey()
     client, err := factory.Output(key, f.log, value.New(key2))
     if err != nil {
+        fmt.Println("agent file sinceDB: ", err)
         return
     }
 
     finder := finder.New(f.log)
     if err := finder.Init(&configure, adapter.FileSinceDB(client)); err != nil {
-        fmt.Println(err)
+        fmt.Println("agent file finder init: ", err)
         return
     }
 
@@ -217,7 +210,7 @@ func (f *file) Init() {
 func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-/*
+
     run := func(finder *finder.Finder) error {
         defer func() {
             //close(f.done)
@@ -241,7 +234,7 @@ func (f *file) Main() {
     }
 
     run(f.finder)
-*/
+
     return
 }
 
