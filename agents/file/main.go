@@ -175,13 +175,7 @@ func (f *file) Init() {
 
     } else {
     	configure.Client = false
-
-        pluginName = output.GetFlag() + "." + output.GetKey()
-        configure.Output, err = factory.Output(pluginName, f.log, output.GetValue())
-        if err != nil {
-            fmt.Println("agent file output: ", err)
-            return
-        }
+    	configure.Op = output
     }
 
     if value := frequency.GetValue(); value != nil {

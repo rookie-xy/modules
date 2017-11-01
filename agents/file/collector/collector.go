@@ -20,7 +20,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/modules/agents/file/file"
 	"github.com/rookie-xy/hubble/proxy"
-	"github.com/rookie-xy/hubble/codec"
+	"github.com/rookie-xy/hubble/factory"
 )
 
 type Collector struct {
@@ -49,8 +49,8 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(input input.Input, codec codec.Codec,
-	                     output output.Output, state state.State) error {
+func (c *Collector) Init(input input.Input, output output.Output,
+	                     state state.State, conf *configure.Configure) error {
 	var err error
     file, err := file.New(state)
     if err != nil {
@@ -62,15 +62,25 @@ func (c *Collector) Init(input input.Input, codec codec.Codec,
 	}
 
     scanner := scanner.New(input)
-    if err := scanner.Init(codec, state); err != nil {
+    if err := scanner.Init(conf.Codec, state); err != nil {
     	return err
 	}
 
+	c.conf    = conf
 	c.state   = state
 	c.source  = file
 	c.input   = input
     c.scanner = scanner
-    c.output  = output
+
+    pluginName := c.conf.Op.GetFlag() + "." + c.conf.Op.GetKey()
+    c.output, err = factory.Output(pluginName, c.log, c.conf.Op.GetValue())
+    if err != nil {
+        return err
+    }
+
+	if output != nil {
+		c.output = output
+	}
 
     return nil
 }

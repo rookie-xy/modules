@@ -23,5 +23,5 @@ type Configure struct {
     Codec     codec.Codec
     Output    proxy.Forward
 
-    Sincedb   command.Command
+    Op, Sincedb   *command.Command
 }
