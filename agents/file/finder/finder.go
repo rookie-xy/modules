@@ -245,7 +245,7 @@ func (f *Finder) startCollector(state state.State, offset int64, input input.Inp
     state.Offset = offset
 
     collector := collector.New(f.log)
-    if err := collector.Init(input, f.conf.Output, state); err != nil {
+    if err := collector.Init(input, f.conf.Codec, f.conf.Output, state); err != nil {
         return err
     }
 

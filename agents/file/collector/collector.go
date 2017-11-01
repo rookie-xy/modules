@@ -8,7 +8,7 @@ import (
     "github.com/satori/go.uuid"
 
     "github.com/rookie-xy/hubble/log"
-    "github.com/rookie-xy/hubble/valve"
+    "github.com/rookie-xy/hubble/filter"
 	"github.com/rookie-xy/hubble/types"
 	"github.com/rookie-xy/hubble/input"
 	"github.com/rookie-xy/hubble/source"
@@ -20,6 +20,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/modules/agents/file/file"
 	"github.com/rookie-xy/hubble/proxy"
+	"github.com/rookie-xy/hubble/codec"
 )
 
 type Collector struct {
@@ -33,7 +34,7 @@ type Collector struct {
     source    source.Source
     input     input.Input
     scanner  *scanner.Scanner
-    valve     valve.Valve
+    filter    filter.Filter
     output    proxy.Forward
 
     sincedb   proxy.Forward
@@ -48,7 +49,8 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(input input.Input, output output.Output, state state.State) error {
+func (c *Collector) Init(input input.Input, codec codec.Codec,
+	                     output output.Output, state state.State) error {
 	var err error
     file, err := file.New(state)
     if err != nil {
@@ -60,7 +62,7 @@ func (c *Collector) Init(input input.Input, output output.Output, state state.St
 	}
 
     scanner := scanner.New(input)
-    if err := scanner.Init(c.conf.Codec, state); err != nil {
+    if err := scanner.Init(codec, state); err != nil {
     	return err
 	}
 
@@ -68,7 +70,7 @@ func (c *Collector) Init(input input.Input, output output.Output, state state.St
 	c.source  = file
 	c.input   = input
     c.scanner = scanner
-//    c.output  = c.conf.Output.(output.Output).Connect()
+    c.output  = output
 
     return nil
 }
@@ -154,7 +156,7 @@ func (c *Collector) getState() state.State {
 
 func (r *Collector) Update(fs state.State) {
     fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
-    r.states.Update(r.state)
+    //r.states.Update(r.state)
 
 //    d := data.NewData()
 //    d.SetState(r.state)

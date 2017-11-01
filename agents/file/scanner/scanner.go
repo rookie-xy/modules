@@ -2,6 +2,8 @@ package scanner
 
 import (
     "bufio"
+    "errors"
+
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/modules/agents/file/state"
     "github.com/rookie-xy/hubble/input"
@@ -22,8 +24,13 @@ func New(s input.Input) *Scanner {
 }
 
 func (s *Scanner) Init(codec codec.Codec, state state.State) error {
+    if codec == nil {
+        return errors.New("state or codec is nil")
+    }
+
     s.id = state.Lno
     s.Split(codec.Decode)
+
     return nil
 }
 
