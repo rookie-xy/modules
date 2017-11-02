@@ -144,6 +144,8 @@ func (c *Collector) Run() error {
             */
 		}
 
+		fmt.Println("eventtttttttttttttttttttttttttttt: ", string(event.Body.Content))
+
 		if !c.Publish(event) {
 		    return nil
 		}
