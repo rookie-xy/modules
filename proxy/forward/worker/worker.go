@@ -8,6 +8,9 @@ import (
 	"github.com/rookie-xy/hubble/output"
 	"fmt"
 	"github.com/rookie-xy/hubble/pipeline"
+	"github.com/rookie-xy/hubble/adapter"
+	"github.com/rookie-xy/hubble/command"
+	"github.com/rookie-xy/hubble/event"
 )
 
 type Worker struct {
@@ -26,8 +29,15 @@ func New(log log.Log) *Worker {
 		id: uuid.NewV4(),
 	}
 }
-
+/*
 func (w *Worker) Init(f proxy.Forward, o output.Output) error {
+	w.client = f
+	w.sinceDB = o
+	return nil
+}
+*/
+
+func (w *Worker) Init(client, sinceDB *command.Command, event event.Event) error {
 	w.client = f
 	w.sinceDB = o
 	return nil
@@ -45,6 +55,10 @@ func (w *Worker) Run() error {
 
 			default:
 			}
+
+            body := adapter.ToFileEvent(event).GetBody()
+
+			fmt.Println("workerrrrrrrrrrrrrrrrrrrrrrrrrrrr ", string(body.GetContent()))
 
 			if err := client.Sender(event); err != nil {
 				if err = Q.Requeue(event); err != nil {

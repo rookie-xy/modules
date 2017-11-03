@@ -23,10 +23,9 @@ const Name  = "forward"
 
 type forward struct {
     log      log.Log
-
     queue    pipeline.Queue
-
-    worker  *worker.Worker
+    client, sinceDB *command.Command
+//    worker  *worker.Worker
     jobs    *job.Jobs
 }
 
@@ -71,7 +70,7 @@ var commands = []command.Item{
 func New(log log.Log) module.Template {
     return &forward{
         log:    log,
-        worker: worker.New(log),
+        //worker: worker.New(log),
         jobs:   job.New(log),
     }
 }
@@ -91,11 +90,16 @@ func (f *forward) Init() {
 
     register.Queue(name, pipeline)
 
+    f.client = client
+    f.sinceDB = sinceDB
+/*
     key = client.GetFlag() + "." + client.GetKey()
     client, err := factory.Client(key, f.log, client.GetValue())
     if err != nil {
         fmt.Println("client error ", err)
         return
+    } else {
+        client.Sender(nil)
     }
 
     key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
@@ -104,8 +108,9 @@ func (f *forward) Init() {
         fmt.Println("sinceDB error ", err)
         return
     }
+*/
 
-    f.worker.Init(client, sinceDB)
+    //f.worker.Init(client, sinceDB)
 
     return
 }
@@ -119,8 +124,16 @@ func (f *forward) Main() {
 
         }
 
-        f.worker.Q = adapter.ToPipelineEvent(event)
-        f.jobs.Start(f.worker)
+        worker := worker.New(f.log)
+        if err := worker.Init(f.client, f.sinceDB, event); err != nil {
+            fmt.Println(err)
+            return
+        }
+
+        f.jobs.Start(worker)
+
+        //f.worker.Q = adapter.ToPipelineEvent(event)
+        //f.jobs.Start(f.worker)
     }
 }
 
