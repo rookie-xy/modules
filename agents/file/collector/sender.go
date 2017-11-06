@@ -2,6 +2,7 @@ package collector
 
 import (
 	"github.com/rookie-xy/hubble/event"
+	"fmt"
 )
 
 func (c *Collector) Publish(event event.Event) bool {
@@ -10,7 +11,8 @@ func (c *Collector) Publish(event event.Event) bool {
 	}
 
 	if c.conf.Client {
-		return c.sincedb.Sender(event) == nil
+		fmt.Println("88888888888888888888888888888888888888")
+//		return c.sincedb.Sender(event) == nil
 	}
 
     return true

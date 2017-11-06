@@ -72,11 +72,13 @@ func (c *Collector) Init(input input.Input, output output.Output,
 	c.input   = input
     c.scanner = scanner
 
-    pluginName := c.conf.Op.GetFlag() + "." + c.conf.Op.GetKey()
-    c.output, err = factory.Output(pluginName, c.log, c.conf.Op.GetValue())
-    if err != nil {
-        return err
-    }
+    if c.conf.Op != nil {
+		pluginName := c.conf.Op.GetFlag() + "." + c.conf.Op.GetKey()
+		c.output, err = factory.Output(pluginName, c.log, c.conf.Op.GetValue())
+		if err != nil {
+			return err
+		}
+	}
 
 	if output != nil {
 		c.output = output

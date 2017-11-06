@@ -1,8 +1,10 @@
 package worker
 
 import (
-    "github.com/satori/go.uuid"
+	"sync"
 
+    "github.com/satori/go.uuid"
+    "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/log"
 	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/hubble/output"
@@ -14,6 +16,7 @@ import (
 )
 
 type Worker struct {
+    sync.Mutex
     id        uuid.UUID
 
     Q         pipeline.Queue
@@ -29,17 +32,29 @@ func New(log log.Log) *Worker {
 		id: uuid.NewV4(),
 	}
 }
+
+func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) error {
+    key := pclient.GetFlag() + "." + pclient.GetKey()
+    client, err := factory.Client(key, w.log, pclient.GetValue())
+    if err != nil {
+        return err
+    }
 /*
-func (w *Worker) Init(f proxy.Forward, o output.Output) error {
-	w.client = f
-	w.sinceDB = o
-	return nil
-}
+    key = psinceDB.GetFlag() + "." + psinceDB.GetKey()
+    sinceDB, err := factory.Client(key, w.log, psinceDB.GetValue())
+    if err != nil {
+        //fmt.Println("sinceDB error ", err)
+        //return
+        return err
+    } else {
+        sinceDB.Sender(nil)
+    }
 */
 
-func (w *Worker) Init(client, sinceDB *command.Command, event event.Event) error {
-	w.client = f
-	w.sinceDB = o
+	w.client = client
+//	w.sinceDB = sinceDB
+	w.Q = adapter.ToPipelineEvent(event)
+
 	return nil
 }
 
@@ -56,23 +71,20 @@ func (w *Worker) Run() error {
 			default:
 			}
 
-            body := adapter.ToFileEvent(event).GetBody()
-
-			fmt.Println("workerrrrrrrrrrrrrrrrrrrrrrrrrrrr ", string(body.GetContent()))
-
 			if err := client.Sender(event); err != nil {
 				if err = Q.Requeue(event); err != nil {
-					//w.log.Print("aaa")
+                    //w.log.Print("aaa")
 					fmt.Println("recall error ", err)
 					return err
 				}
 				continue
 			}
-
+/*
 			if err := sinceDB.Sender(event); err != nil {
 				fmt.Println("sinceDB sender error ", err)
 				return err
 			}
+*/
 		}
 	}
 

@@ -2,21 +2,18 @@ package forward
 
 import (
     "fmt"
+    "strings"
 
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
-//    "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/plugin"
-//    "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/pipeline"
-    "github.com/rookie-xy/modules/proxy/forward/worker"
     "github.com/rookie-xy/hubble/job"
- //   "strings"
-    "strings"
-    "github.com/rookie-xy/hubble/adapter"
+
+    "github.com/rookie-xy/modules/proxy/forward/worker"
 )
 
 const Name  = "forward"
@@ -24,9 +21,10 @@ const Name  = "forward"
 type forward struct {
     log      log.Log
     queue    pipeline.Queue
-    client, sinceDB *command.Command
-//    worker  *worker.Worker
     jobs    *job.Jobs
+
+    client  *command.Command
+    sinceDB *command.Command
 }
 
 var (
@@ -70,7 +68,6 @@ var commands = []command.Item{
 func New(log log.Log) module.Template {
     return &forward{
         log:    log,
-        //worker: worker.New(log),
         jobs:   job.New(log),
     }
 }
@@ -92,37 +89,19 @@ func (f *forward) Init() {
 
     f.client = client
     f.sinceDB = sinceDB
-/*
-    key = client.GetFlag() + "." + client.GetKey()
-    client, err := factory.Client(key, f.log, client.GetValue())
-    if err != nil {
-        fmt.Println("client error ", err)
-        return
-    } else {
-        client.Sender(nil)
-    }
-
-    key = sinceDB.GetFlag() + "." + sinceDB.GetKey()
-    sinceDB, err := factory.Client(key, f.log, sinceDB.GetValue())
-    if err != nil {
-        fmt.Println("sinceDB error ", err)
-        return
-    }
-*/
-
-    //f.worker.Init(client, sinceDB)
 
     return
 }
 
 func (f *forward) Main() {
     fmt.Println("Start proxy forward module ...")
-    for {
 
+    for {
         event, err := f.queue.Dequeue(10)
         switch err {
 
         }
+        fmt.Println("forwardddddddddddddddddddddddddddddddddddddddd")
 
         worker := worker.New(f.log)
         if err := worker.Init(f.client, f.sinceDB, event); err != nil {
@@ -131,9 +110,6 @@ func (f *forward) Main() {
         }
 
         f.jobs.Start(worker)
-
-        //f.worker.Q = adapter.ToPipelineEvent(event)
-        //f.jobs.Start(f.worker)
     }
 }
 
