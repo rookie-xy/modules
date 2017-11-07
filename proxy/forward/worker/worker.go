@@ -39,7 +39,7 @@ func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) err
     if err != nil {
         return err
     }
-/*
+
     key = psinceDB.GetFlag() + "." + psinceDB.GetKey()
     sinceDB, err := factory.Client(key, w.log, psinceDB.GetValue())
     if err != nil {
@@ -49,10 +49,9 @@ func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) err
     } else {
         sinceDB.Sender(nil)
     }
-*/
 
 	w.client = client
-//	w.sinceDB = sinceDB
+    w.sinceDB = sinceDB
 	w.Q = adapter.ToPipelineEvent(event)
 
 	return nil
@@ -79,12 +78,11 @@ func (w *Worker) Run() error {
 				}
 				continue
 			}
-/*
+
 			if err := sinceDB.Sender(event); err != nil {
 				fmt.Println("sinceDB sender error ", err)
 				return err
 			}
-*/
 		}
 	}
 
