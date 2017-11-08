@@ -11,27 +11,27 @@ import (
     "github.com/rookie-xy/hubble/filter"
 	"github.com/rookie-xy/hubble/types"
 	"github.com/rookie-xy/hubble/input"
-	"github.com/rookie-xy/hubble/source"
+     src "github.com/rookie-xy/hubble/source"
 	"github.com/rookie-xy/hubble/output"
+	"github.com/rookie-xy/hubble/models/file"
 
-    "github.com/rookie-xy/modules/agents/file/state"
 	"github.com/rookie-xy/modules/agents/file/scanner"
 	"github.com/rookie-xy/modules/agents/file/event"
     "github.com/rookie-xy/modules/agents/file/configure"
-    "github.com/rookie-xy/modules/agents/file/file"
 	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/hubble/factory"
+	"github.com/rookie-xy/modules/agents/file/source"
 )
 
 type Collector struct {
     id        uuid.UUID
 
-    state     state.State
-    states   *state.States
+    state     file.State
+    states   *file.States
 
     conf     *configure.Configure
 
-    source    source.Source
+    source    src.Source
     input     input.Input
     scanner  *scanner.Scanner
     filter    filter.Filter
@@ -50,9 +50,9 @@ func New(log log.Log) *Collector {
 }
 
 func (c *Collector) Init(input input.Input, output output.Output,
-	                     state state.State, conf *configure.Configure) error {
+	                     state file.State, conf *configure.Configure) error {
 	var err error
-    file, err := file.New(state)
+    file, err := source.New(state)
     if err != nil {
         return err
     }
@@ -97,24 +97,24 @@ func (c *Collector) Run() error {
         if !keep {
             switch c.scanner.Err() {
 			case io.EOF:
-				//c.log.Info("End of file reached: %s. Closing because close_eof is enabled.", c.state.Source)
-			case source.ErrClosed:
-				//c.log.Info("Reader was closed: %s. Closing.", c.state.Source)
-			case source.ErrRemoved:
-                //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.state.Source)
-			case source.ErrRenamed:
-				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.state.Source)
-			case source.ErrTooLong:
-            case source.ErrInactive:
-            	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.state.Source, c.config.CloseInactive)
-			case source.ErrFinalToken:
-			case source.ErrFileTruncate:
-                //c.log.Info("File was truncated. Begin reading file from offset 0: %s", c.state.Source)
+				//c.log.Info("End of source reached: %s. Closing because close_eof is enabled.", c.models.Source)
+			case src.ErrClosed:
+				//c.log.Info("Reader was closed: %s. Closing.", c.models.Source)
+			case src.ErrRemoved:
+                //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.models.Source)
+			case src.ErrRenamed:
+				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.models.Source)
+			case src.ErrTooLong:
+            case src.ErrInactive:
+            	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.models.Source, c.config.CloseInactive)
+			case src.ErrFinalToken:
+			case src.ErrFileTruncate:
+                //c.log.Info("File was truncated. Begin reading source from offset 0: %s", c.models.Source)
 				c.state.Offset = 0
-			case source.ErrAdvanceTooFar:
-			case source.ErrNegativeAdvance:
+			case src.ErrAdvanceTooFar:
+			case src.ErrNegativeAdvance:
 			default:
-                //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.state.Source)
+                //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.models.Source)
             }
 
             return nil
@@ -158,20 +158,19 @@ func (c *Collector) Stop() {
 
 }
 
-func (c *Collector) getState() state.State {
-	state := c.state
-
+func (c *Collector) getState() file.State {
+    state := c.state
 	// refreshes the values in State with the values from the harvester itself
-	//state.FileStateOS = file.GetOSState(h.state.Fileinfo)
+	state.FileStateOS = file.GetOSState(c.state.Fileinfo)
 	return state
 }
 
-func (r *Collector) Update(fs state.State) {
-    fmt.Println("collector update state: %s, offset: %v", r.state.Source, r.state.Offset)
-    //r.states.Update(r.state)
+func (r *Collector) Update(fs models.State) {
+    fmt.Println("collector update models: %s, offset: %v", r.state.Source, r.state.Offset)
+    //r.states.Update(r.models)
 
 //    d := data.NewData()
-//    d.SetState(r.state)
+//    d.SetState(r.models)
     //h.publishState(d)
 }
 

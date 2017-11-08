@@ -16,7 +16,7 @@ import (
 const Name  = "local"
 
 var (
-    file = command.New("-f", "file", "./usr/local/conf/hubble.yaml", "If you want to " +
+    file = command.New("-f", "source", "./usr/local/conf/hubble.yaml", "If you want to " +
                                      "get locally, you need to specify the prolocal path")
 )
 

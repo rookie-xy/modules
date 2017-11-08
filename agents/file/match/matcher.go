@@ -37,7 +37,7 @@ func MustCompileExact(pattern string) ExactMatcher {
 	return m
 }
 
-// CompileString matches a substring only, the file is not interpreted as
+// CompileString matches a substring only, the source is not interpreted as
 // regular expression
 func CompileString(in string) (Matcher, error) {
 	if in == "" {

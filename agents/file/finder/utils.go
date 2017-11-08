@@ -4,9 +4,9 @@ package finder
 
 // MatchAny checks if the text matches any of the regular expressions
 /*
-func MatchAny(matchers []match.Matcher, file string) bool {
+func MatchAny(matchers []match.Matcher, source string) bool {
     for _, m := range matchers {
-        if m.MatchString(file) {
+        if m.MatchString(source) {
             return true
         }
     }

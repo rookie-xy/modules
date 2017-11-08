@@ -23,8 +23,8 @@ import (
 const Name  = module.Configure
 
 var (
-    mode  = command.New( "-m", "mode",  "local", "Specifies how to obtain the configuration file" )
-    style = command.New( "-s", "style", "yaml", "Specifies the format of the configuration file" )
+    mode  = command.New( "-m", "mode",  "local", "Specifies how to obtain the configuration source" )
+    style = command.New( "-s", "style", "yaml", "Specifies the format of the configuration source" )
 )
 
 var commands = []command.Item{

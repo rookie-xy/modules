@@ -4,26 +4,25 @@ import (
     "fmt"
     "os"
     "path/filepath"
-    "encoding/json"
 
     "github.com/rookie-xy/hubble/types"
 
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/hubble/types/value"
 
     "github.com/rookie-xy/modules/agents/file/collector"
-    "github.com/rookie-xy/modules/agents/file/state"
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/output"
+    "github.com/rookie-xy/hubble/models/file"
+    "github.com/rookie-xy/modules/agents/file/id"
 )
 
 type Finder struct {
     conf    *configure.Configure
 
-    states  *state.States
+    states  *file.States
     jobs    *job.Jobs
     done     chan struct{}
 
@@ -37,31 +36,23 @@ func New(log log.Log) *Finder {
     }
 }
 
-func (f *Finder) Init(conf *configure.Configure, db adapter.SinceDB) error {
+func (f *Finder) Init(conf *configure.Configure, sinceDB adapter.SinceDB) error {
 	f.conf = conf
-    f.states = state.News()
+    f.states = file.News()
 
-    var states state.States
-    if v := db.Get(); v != nil {
-        if val := value.New(v); val != nil {
-            if err := json.Unmarshal(val.GetBytes(), &states); err != nil {
-            	fmt.Println(err)
-                return err
-            }
+    //var states models.States
+    if states := sinceDB.Load(); states != nil {
+        if err := f.load(states); err != nil {
+            return err
         }
-    }
-
-    if err := f.load(states.States); err != nil {
-        return err
     }
 
     return nil
 }
 
-func (f *Finder) load(states []state.State) error {
+func (f *Finder) load(states []file.State) error {
     for _, state := range states {
-        source := state.Source
-        if f.match(source) {
+        if f.match(state.Source) {
         	state.TTL = -1
 
         	if !state.Finished {
@@ -78,7 +69,11 @@ func (f *Finder) load(states []state.State) error {
     return nil
 }
 
-func (f *Finder) update(state state.State) error {
+func (f *Finder) update(state file.State) error {
+    if state.TTL != 0 {
+
+    }
+
 	f.states.Update(state)
     return nil
 }
@@ -118,10 +113,10 @@ func getFiles(v types.Value) map[string]os.FileInfo {
 //    OUTER:
         // Check any matched files to see if we need to start a collector
         for _, file := range matches {
-             // check if the file is in the exclude_files list
+             // check if the source is in the exclude_files list
             /*
-            if r.isExcluded(file) {
-                fmt.Printf("Finder Exclude file: %s\n", file)
+            if r.isExcluded(source) {
+                fmt.Printf("Finder Exclude source: %s\n", source)
                 continue
             }
             */
@@ -144,7 +139,7 @@ func getFiles(v types.Value) map[string]os.FileInfo {
                 continue
             }
 
-            // Fetch Stat file info which fetches the inode.
+            // Fetch Stat source info which fetches the inode.
 								    // In case of a symlink, the original inode is fetched
             fileInfo, err = os.Stat(file)
             if err != nil {
@@ -156,8 +151,8 @@ func getFiles(v types.Value) map[string]os.FileInfo {
             // It original is harvested by other scanner, states will potentially overwrite each other
             /*
                 for _, finfo := range paths {
-                    if os.SameFile(finfo, fileInfo) {
-                        fmt.Println("Same file found as symlink and originap. Skipping file: %s", file)
+                    if id.SameFile(finfo, fileInfo) {
+                        fmt.Println("Same source found as symlink and originap. Skipping source: %s", source)
 																				    continue OUTER
                     }
                 }
@@ -179,19 +174,19 @@ func getPaths(files map[string]os.FileInfo) []string {
     return keys
 }
 
-func getState(path string, fi os.FileInfo, f *Finder) (state.State, error) {
+func getState(path string, fi os.FileInfo, f *Finder) (file.State, error) {
     var err error
     var absolutePath string
 
     absolutePath, err = filepath.Abs(path)
     if err != nil {
-        return state.State{}, fmt.Errorf("could not fetch abs path for file %s: %s", absolutePath, err)
+        return file.State{}, fmt.Errorf("could not fetch abs path for source %s: %s", absolutePath, err)
     }
 
-    fmt.Printf("Finder check file for collecting: %s\n", absolutePath)
+    fmt.Printf("Finder check source for collecting: %s\n", absolutePath)
 
-    state := state.New()
-    if err := state.Init(fi, absolutePath, "file"); err != nil {
+    state := file.New()
+    if err := state.Init(id.GetID(fi).String(), fi, absolutePath, "source"); err != nil {
         return state, err
     }
 
@@ -217,16 +212,16 @@ func (f *Finder) Find() {
 
         new, err := getState(path, info, f)
         if err != nil {
-            fmt.Printf("Skipping file %s due to error %s\n", path, err)
+            fmt.Printf("Skipping source %s due to error %s\n", path, err)
         }
 
         old := f.states.FindPrevious(new)
 
         if old.IsEmpty() {
-            fmt.Printf("Finder start collector for new file: %s\n", new.Source)
+            fmt.Printf("Finder start collector for new source: %s\n", new.Source)
             err := f.startCollector(new, 0, f.conf.Input, f.conf.Output)
             if err != nil {
-                fmt.Printf("collector could not be started on new file: %s, Err: %s\n", new.Source, err)
+                fmt.Printf("collector could not be started on new source: %s, Err: %s\n", new.Source, err)
             }
 
         } else {
@@ -237,7 +232,7 @@ func (f *Finder) Find() {
     return
 }
 
-func (f *Finder) startCollector(state state.State, offset int64,
+func (f *Finder) startCollector(state file.State, offset int64,
                                 input input.Input, output output.Output) error {
     if f.conf.Limit > 0 && f.jobs.Len() >= f.conf.Limit {
         return fmt.Errorf("collector limit reached")
@@ -258,7 +253,7 @@ func (f *Finder) startCollector(state state.State, offset int64,
     return nil
 }
 
-func (r *Finder) collectExistingFile(newState, oldState state.State) {
+func (r *Finder) collectExistingFile(newState, oldState file.State) {
 }
 
 func (r *Finder) Stop() {
@@ -274,7 +269,7 @@ func (r *Finder) isExcluded(file string) bool {
     patterns := r.excludes.GetArray()
     if len(patterns) > 0 {
         for _, pattern := range patterns {
-            if matched, err := regexp.MatchString(pattern.(string), file); err != nil {
+            if matched, err := regexp.MatchString(pattern.(string), source); err != nil {
                 fmt.Println(err)
             } else {
                 if matched {

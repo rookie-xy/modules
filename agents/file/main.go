@@ -19,7 +19,7 @@ import (
     "github.com/rookie-xy/hubble/proxy"
 )
 
-const Name  = "file"
+const Name  = "source"
 
 type file struct {
     finder     *finder.Finder
@@ -37,7 +37,7 @@ func New(log log.Log) module.Template {
 var (
     frequency = command.New( module.Flag, "frequency",  3 * time.Second,  "scan frequency method" )
     group     = command.New( module.Flag, "group",     "nginx",     "This option use to group" )
-    Type      = command.New( module.Flag, "type",      "log",       "file type, this is use to find some question" )
+    Type      = command.New( module.Flag, "type",      "log",       "source type, this is use to find some question" )
     paths     = command.New( module.Flag, "paths",     nil,         "File path, its is manny option" )
     excludes  = command.New( module.Flag, "excludes",  nil,         "File path, its is manny option" )
     limit     = command.New( module.Flag, "limit",      uint64(7),        "text finder limit" )
@@ -142,7 +142,7 @@ func (f *file) Init() {
     key := codec.GetFlag() + "." + codec.GetKey()
     codec, err := factory.Codec(key, f.log, codec.GetValue())
     if err != nil {
-    	fmt.Println("agent file codec: ", err)
+    	fmt.Println("agent source codec: ", err)
         return
     }
 
@@ -150,7 +150,7 @@ func (f *file) Init() {
     pluginName := input.GetFlag() + "." + input.GetKey()
     input, err := factory.Input(pluginName, f.log, input.GetValue())
     if err != nil {
-    	fmt.Println("agent file input: ", err)
+    	fmt.Println("agent source input: ", err)
         return
     }
 
@@ -169,7 +169,7 @@ func (f *file) Init() {
         key = client.GetFlag() + "." + client.GetKey()
         configure.Output, err = factory.Client(key, f.log, value)
         if err != nil {
-        	fmt.Println("agent file client: ", err)
+        	fmt.Println("agent source client: ", err)
             return
         }
 
@@ -186,13 +186,13 @@ func (f *file) Init() {
  	key2 := proxy.Name + "." + sinceDB.GetKey()
     client, err := factory.Output(key, f.log, value.New(key2))
     if err != nil {
-        fmt.Println("agent file sinceDB: ", err)
+        fmt.Println("agent source sinceDB: ", err)
         return
     }
 
     finder := finder.New(f.log)
     if err := finder.Init(&configure, adapter.FileSinceDB(client)); err != nil {
-        fmt.Println("agent file finder init: ", err)
+        fmt.Println("agent source finder init: ", err)
         return
     }
 
@@ -202,7 +202,7 @@ func (f *file) Init() {
 }
 
 func (f *file) Main() {
-    fmt.Println("Start agent file module ...")
+    fmt.Println("Start agent source module ...")
     // 编写主要业务逻辑
 
     run := func(finder *finder.Finder) error {

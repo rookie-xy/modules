@@ -5,7 +5,7 @@ import (
     "errors"
 
     "github.com/rookie-xy/hubble/codec"
-    "github.com/rookie-xy/modules/agents/file/state"
+    "github.com/rookie-xy/modules/agents/file/models"
     "github.com/rookie-xy/hubble/input"
 )
 
@@ -23,9 +23,9 @@ func New(s input.Input) *Scanner {
     return scanner
 }
 
-func (s *Scanner) Init(codec codec.Codec, state state.State) error {
+func (s *Scanner) Init(codec codec.Codec, state models.State) error {
     if codec == nil {
-        return errors.New("state or codec is nil")
+        return errors.New("models or codec is nil")
     }
 
     s.id = state.Lno

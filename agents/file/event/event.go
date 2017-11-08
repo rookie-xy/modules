@@ -5,14 +5,14 @@ import (
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/adapter"
 //    "github.com/rookie-xy/hubble/event"
-    "github.com/rookie-xy/modules/agents/file/state"
+    "github.com/rookie-xy/modules/agents/file/models"
 )
 
 type Event struct {
-    File      state.State
-    Header    types.Map        `json:"header"`
-    Body     *scanner.Message  `json:"body"`
-    Footer    Footer           `json:"footer"`
+    File   models.State
+    Header types.Map        `json:"header"`
+    Body   *scanner.Message  `json:"body"`
+    Footer Footer           `json:"footer"`
 }
 
 type Footer struct {

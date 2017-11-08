@@ -71,7 +71,7 @@ func (r *Proxy) Init() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
                         if status := command.File(scope, name, key, iterm.Value); status != state.Ok {
-                            fmt.Println("command file error", status)
+                            fmt.Println("command source error", status)
                             return state.Error
                         }
                     }

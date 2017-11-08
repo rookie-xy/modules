@@ -90,9 +90,9 @@ func (s *sincedb) Main() {
         event, status := s.pipeline.Dequeue(10)
 
         switch status {
-        //case state.Ignore:
+        //case models.Ignore:
         //    continue
-        //case state.Busy:
+        //case models.Busy:
         //    //TODO sleep
         default:
         }
