@@ -37,6 +37,6 @@ func (m *Message) Off() {
 
 }
 
-func (m *Message) On() {
-
+func (m *Message) On() bool {
+    return true
 }

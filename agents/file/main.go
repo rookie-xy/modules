@@ -19,7 +19,7 @@ import (
     "github.com/rookie-xy/hubble/proxy"
 )
 
-const Name  = "source"
+const Name  = "file"
 
 type file struct {
     finder     *finder.Finder
@@ -145,7 +145,6 @@ func (f *file) Init() {
     	fmt.Println("agent source codec: ", err)
         return
     }
-
 
     pluginName := input.GetFlag() + "." + input.GetKey()
     input, err := factory.Input(pluginName, f.log, input.GetValue())

@@ -34,7 +34,7 @@ func New(state file.State) (*Source, error) {
 }
 
 func (s *Source) Validate(f *os.File) error {
-	info, err := s.Stat()
+	info, err := f.Stat()
 	if err != nil {
 		return fmt.Errorf("Failed getting stats for source %s: %s", s.state.Source, err)
 	}
@@ -49,7 +49,7 @@ func (s *Source) Validate(f *os.File) error {
 	}
 
 	// get source offset. Only update offset if no error
-	offset, err := s.offset(s.File)
+	offset, err := s.offset(f)
 	if err != nil {
 		return err
 	}

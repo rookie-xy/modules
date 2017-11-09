@@ -5,8 +5,8 @@ import (
     "errors"
 
     "github.com/rookie-xy/hubble/codec"
-    "github.com/rookie-xy/modules/agents/file/models"
     "github.com/rookie-xy/hubble/input"
+    "github.com/rookie-xy/hubble/models/file"
 )
 
 type Scanner struct {
@@ -23,7 +23,7 @@ func New(s input.Input) *Scanner {
     return scanner
 }
 
-func (s *Scanner) Init(codec codec.Codec, state models.State) error {
+func (s *Scanner) Init(codec codec.Codec, state file.State) error {
     if codec == nil {
         return errors.New("models or codec is nil")
     }

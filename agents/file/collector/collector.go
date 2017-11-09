@@ -2,7 +2,7 @@ package collector
 
 import (
     "io"
-   	"fmt"
+//   	"fmt"
     "bytes"
 
     "github.com/satori/go.uuid"
@@ -21,6 +21,7 @@ import (
 	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/hubble/factory"
 	"github.com/rookie-xy/modules/agents/file/source"
+	"fmt"
 )
 
 type Collector struct {
@@ -50,14 +51,14 @@ func New(log log.Log) *Collector {
 }
 
 func (c *Collector) Init(input input.Input, output output.Output,
-	                     state file.State, conf *configure.Configure) error {
+	                     state file.State, states *file.States, conf *configure.Configure) error {
 	var err error
-    file, err := source.New(state)
+    source, err := source.New(state)
     if err != nil {
         return err
     }
 
-    if err := input.Init(file); err != nil {
+    if err := input.Init(source); err != nil {
     	return err
 	}
 
@@ -68,7 +69,8 @@ func (c *Collector) Init(input input.Input, output output.Output,
 
 	c.conf    = conf
 	c.state   = state
-	c.source  = file
+	c.states  = states
+	c.source  = source
 	c.input   = input
     c.scanner = scanner
 
@@ -125,13 +127,13 @@ func (c *Collector) Run() error {
         }
 
         state := c.getState()
-        state.Offset = int64(message.Bytes)
+        state.Offset += int64(message.Bytes)
 
         event := &event.Event{
-            File: state,
+            State: state,
 		}
 
-        if !message.IsEmpty() /*&& c.valve.Filter(c.scanner.Text())*/ {
+        if !message.IsEmpty() /*&& c.filter.Handler(c.scanner.Text())*/ {
 			event.Header = types.Map{
         		"group": c.conf.Group,
         		"type":  c.conf.Type,
@@ -161,24 +163,10 @@ func (c *Collector) Stop() {
 func (c *Collector) getState() file.State {
     state := c.state
 	// refreshes the values in State with the values from the harvester itself
-	state.FileStateOS = file.GetOSState(c.state.Fileinfo)
 	return state
 }
 
-func (r *Collector) Update(fs models.State) {
-    fmt.Println("collector update models: %s, offset: %v", r.state.Source, r.state.Offset)
-    //r.states.Update(r.models)
-
-//    d := data.NewData()
-//    d.SetState(r.models)
-    //h.publishState(d)
+func (c *Collector) Update(fs file.State) {
+    fmt.Printf("collector update state: %s, offset: %v\n", c.state.Source, c.state.Offset)
+    c.states.Update(fs)
 }
-
-
-	/*
-    if client, err := factory.Forward("plugin.client.sinceDB"); err != nil {
-        return err
-    } else {
-        c.sinceDB = client
-    }
-	*/

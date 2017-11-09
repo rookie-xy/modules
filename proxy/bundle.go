@@ -54,7 +54,7 @@ func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
 
-    build := func(scope string, i types.Iterator, load module.Load) int {
+    build := func(scope string, i types.Iterator, load module.Load) error {
         for iterator := i; iterator.Has(); iterator.Next() {
             iterm := iterator.Iterm()
             name := iterm.Key.GetString()
@@ -70,9 +70,8 @@ func (r *Proxy) Init() {
                 for iterator := it; iterator.Has(); iterator.Next() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
-                        if status := command.File(scope, name, key, iterm.Value); status != state.Ok {
-                            fmt.Println("command source error", status)
-                            return state.Error
+                        if err := command.File(scope, name, key, iterm.Value); err != nil {
+                            return fmt.Errorf("command source error ", err)
                         }
                     }
                 }
@@ -84,20 +83,20 @@ func (r *Proxy) Init() {
                 module.Init()
 
             } else {
-                fmt.Printf("[%s] module setup error\n", name)
-                return state.Error
+                return fmt.Errorf("[%s] module setup error\n", name)
             }
 
             load(module)
         }
 
-        return state.Ok
+        return nil
     }
 
     if proxy := proxy.GetValue(); proxy != nil {
         iterator := proxy.GetIterator(nil)
         if iterator != nil {
-            if build(Name, iterator, r.Load) == state.Error {
+            if err := build(Name, iterator, r.Load); err != nil {
+                fmt.Println("proxy build error ", err)
                 return
             }
 

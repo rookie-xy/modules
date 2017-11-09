@@ -80,8 +80,8 @@ func (r *Agent) Init() {
         if iterator != nil {
             for {
                 if build := configure.Build; build != nil {
-                    if build(Name, iterator, r.Load) == state.Error {
-                        fmt.Println("agents init error")
+                    if err := build(Name, iterator, r.Load); err != nil {
+                        fmt.Println("agents init error: ", err)
                         return
                     } else {
                         // debug

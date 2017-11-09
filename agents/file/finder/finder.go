@@ -40,7 +40,6 @@ func (f *Finder) Init(conf *configure.Configure, sinceDB adapter.SinceDB) error 
 	f.conf = conf
     f.states = file.News()
 
-    //var states models.States
     if states := sinceDB.Load(); states != nil {
         if err := f.load(states); err != nil {
             return err
@@ -87,7 +86,7 @@ func (f *Finder) match(file string) bool {
 
         match, err := filepath.Match(path, file)
         if err != nil {
-            fmt.Printf("finder", "Error matching glob: %s", err)
+            fmt.Printf("finder", "Error matching glob: %s\n", err)
             continue
         }
 
@@ -186,7 +185,7 @@ func getState(path string, fi os.FileInfo, f *Finder) (file.State, error) {
     fmt.Printf("Finder check source for collecting: %s\n", absolutePath)
 
     state := file.New()
-    if err := state.Init(id.GetID(fi).String(), fi, absolutePath, "source"); err != nil {
+    if err := state.Init(id.GetID(fi).String(), fi, absolutePath, "file"); err != nil {
         return state, err
     }
 
@@ -242,7 +241,7 @@ func (f *Finder) startCollector(state file.State, offset int64,
     state.Offset = offset
 
     collector := collector.New(f.log)
-    if err := collector.Init(input, output, state, f.conf); err != nil {
+    if err := collector.Init(input, output, state, f.states, f.conf); err != nil {
         return err
     }
 

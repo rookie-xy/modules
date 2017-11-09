@@ -13,6 +13,7 @@ import (
 	"github.com/rookie-xy/hubble/adapter"
 	"github.com/rookie-xy/hubble/command"
 	"github.com/rookie-xy/hubble/event"
+	"github.com/rookie-xy/hubble/types/value"
 )
 
 type Worker struct {
@@ -40,11 +41,9 @@ func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) err
         return err
     }
 
-    key = psinceDB.GetFlag() + "." + psinceDB.GetKey()
-    sinceDB, err := factory.Client(key, w.log, psinceDB.GetValue())
+    key = psinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
+    sinceDB, err := factory.Output(key, w.log, value.New(psinceDB.GetKey()))
     if err != nil {
-        //fmt.Println("sinceDB error ", err)
-        //return
         return err
     } else {
         sinceDB.Sender(nil)

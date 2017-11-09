@@ -4,15 +4,14 @@ import (
     "github.com/rookie-xy/modules/agents/file/scanner"
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/adapter"
-//    "github.com/rookie-xy/hubble/event"
-    "github.com/rookie-xy/modules/agents/file/models"
+    "github.com/rookie-xy/hubble/models/file"
 )
 
 type Event struct {
-    File   models.State
-    Header types.Map        `json:"header"`
+    State    file.State
+    Header   types.Map       `json:"header"`
     Body   *scanner.Message  `json:"body"`
-    Footer Footer           `json:"footer"`
+    Footer   Footer          `json:"footer"`
 }
 
 type Footer struct {
@@ -27,6 +26,10 @@ func (e *Event) ID() string {
     return ""
 }
 
+func (e *Event) GetState() file.State {
+    return e.State
+}
+
 func (e *Event) GetHeader() types.Map {
     return e.Header
 }
@@ -39,10 +42,11 @@ func (e *Event) GetFooter() []byte {
     return nil
 }
 
+
 func (e *Event) Off() {
 
 }
 
-func (e *Event) On() {
-
+func (e *Event) On() bool {
+    return true
 }
