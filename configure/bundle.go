@@ -4,7 +4,6 @@ import (
     "fmt"
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
-    "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/observer"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
@@ -87,22 +86,21 @@ func (r *Configure) Notify(o types.Object) {
 
 func (r *Configure) update(o types.Object) {
     for _, observer := range r.observers {
-        if observer.Update(o) == state.Error {
+        if observer.Update(o) != nil {
             break
         }
     }
 }
 
-func (r *Configure) Update(o types.Object) int {
+func (r *Configure) Update(o types.Object) error {
     _, data, err := r.ValueDecode(o.([]byte), true)
     if err != nil {
-        fmt.Println("error", data)
-        return state.Error
+        return fmt.Errorf("error", data)
     }
 
     r.event <- data
 
-    return state.Ok
+    return nil
 }
 
 func (r *Configure) Init() {

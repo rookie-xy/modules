@@ -14,7 +14,6 @@ import (
     "github.com/rookie-xy/modules/agents/file/collector"
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/input"
-    "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/models/file"
     "github.com/rookie-xy/modules/agents/file/id"
 )
@@ -218,7 +217,7 @@ func (f *Finder) Find() {
 
         if old.IsEmpty() {
             fmt.Printf("Finder start collector for new source: %s\n", new.Source)
-            err := f.startCollector(new, 0, f.conf.Input, f.conf.Output)
+            err := f.startCollector(new, 0, f.conf.Input)
             if err != nil {
                 fmt.Printf("collector could not be started on new source: %s, Err: %s\n", new.Source, err)
             }
@@ -231,8 +230,7 @@ func (f *Finder) Find() {
     return
 }
 
-func (f *Finder) startCollector(state file.State, offset int64,
-                                input input.Input, output output.Output) error {
+func (f *Finder) startCollector(state file.State, offset int64, input input.Input) error {
     if f.conf.Limit > 0 && f.jobs.Len() >= f.conf.Limit {
         return fmt.Errorf("collector limit reached")
     }
@@ -241,7 +239,7 @@ func (f *Finder) startCollector(state file.State, offset int64,
     state.Offset = offset
 
     collector := collector.New(f.log)
-    if err := collector.Init(input, output, state, f.states, f.conf); err != nil {
+    if err := collector.Init(input, state, f.states, f.conf); err != nil {
         return err
     }
 

@@ -7,7 +7,6 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/types/value"
     "github.com/rookie-xy/hubble/configure"
@@ -49,24 +48,23 @@ func New(log log.Log) module.Template {
     return new
 }
 
-func (r *Agent) Update(o types.Object) int {
+func (r *Agent) Update(o types.Object) error {
     v := value.New(o)
     if v.GetType() != types.MAP {
-        return state.Error
+        return fmt.Errorf("type is no equeal map")
     }
 
     if value := v.GetMap(); value != nil {
         val, exist := value[Name]
         if !exist {
-            fmt.Println("Not found agents configure")
-            return state.Error
+            return fmt.Errorf("Not found agents configure")
         }
 
         agents.SetValue(val)
     }
 
     r.event <- 1
-    return state.Ok
+    return nil
 }
 
 func (r *Agent) Init() {

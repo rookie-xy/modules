@@ -22,6 +22,7 @@ import (
 	"github.com/rookie-xy/hubble/factory"
 	"github.com/rookie-xy/modules/agents/file/source"
 	"fmt"
+	"github.com/rookie-xy/hubble/types/value"
 )
 
 type Collector struct {
@@ -38,20 +39,23 @@ type Collector struct {
     filter    filter.Filter
     output    proxy.Forward
 
-    sincedb   proxy.Forward
+    sinceDB   proxy.Forward
     log       log.Log
+
+    client    bool
 }
 
 func New(log log.Log) *Collector {
     return &Collector{
         log: log,
         id:  uuid.NewV4(),
+        client: true,
         //fingerprint: false,
     }
 }
 
-func (c *Collector) Init(input input.Input, output output.Output,
-	                     state file.State, states *file.States, conf *configure.Configure) error {
+func (c *Collector) Init(input input.Input, state file.State,
+	                     states *file.States, conf *configure.Configure) error {
 	var err error
     source, err := source.New(state)
     if err != nil {
@@ -74,17 +78,31 @@ func (c *Collector) Init(input input.Input, output output.Output,
 	c.input   = input
     c.scanner = scanner
 
-    if c.conf.Op != nil {
-		pluginName := c.conf.Op.GetFlag() + "." + c.conf.Op.GetKey()
-		c.output, err = factory.Output(pluginName, c.log, c.conf.Op.GetValue())
+    if c.conf.Output != nil {
+		pluginName := c.conf.Output.GetFlag() + "." + c.conf.Output.GetKey()
+		fmt.Printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: %s\n", pluginName)
+		c.output, err = factory.Output(pluginName, c.log, c.conf.Output.GetValue())
 		if err != nil {
 			return err
 		}
+
+		c.client = false
+
+	} else {
+	    key := c.conf.Client.GetFlag() + "." + c.conf.Client.GetKey()
+        c.output, err = factory.Client(key, c.log, c.conf.Client.GetValue())
+        if err != nil {
+            return err
+        }
+
+        key = c.conf.SinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
+        c.sinceDB, err = factory.Output(key, c.log, value.New(c.conf.SinceDB.GetKey()))
+        if err != nil {
+            return err
+        }
 	}
 
-	if output != nil {
-		c.output = output
-	}
+
 
     return nil
 }
@@ -148,7 +166,7 @@ func (c *Collector) Run() error {
             */
 		}
 
-		if !c.Publish(event) {
+        if !c.Publish(event) {
 		    return nil
 		}
 

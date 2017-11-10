@@ -7,7 +7,6 @@ import (
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/state"
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/configure"
     "github.com/rookie-xy/hubble/types/value"
@@ -71,7 +70,7 @@ func (r *Proxy) Init() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
                         if err := command.File(scope, name, key, iterm.Value); err != nil {
-                            return fmt.Errorf("command source error ", err)
+                            return fmt.Errorf("command file error ", err)
                         }
                     }
                 }
@@ -126,17 +125,16 @@ func (r *Proxy) Exit(code int) {
     return
 }
 
-func (r *Proxy) Update(o types.Object) int {
+func (r *Proxy) Update(o types.Object) error {
     v := value.New(o)
     if v.GetType() != types.MAP {
-        return state.Error
+        return fmt.Errorf("TYPE is not equal map")
     }
 
     if value := v.GetMap(); value != nil {
         val, exist := value[Name]
         if !exist {
-            fmt.Println("Not found proxy configure")
-            return state.Error
+            return fmt.Errorf("Not found proxy configure")
         }
 
         proxy.SetValue(val)
@@ -144,7 +142,7 @@ func (r *Proxy) Update(o types.Object) int {
 
 
     r.event <- 1
-    return state.Ok
+    return nil
 }
 
 func (r *Proxy) Load(m module.Template) {

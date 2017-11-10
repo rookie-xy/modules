@@ -7,7 +7,6 @@ import (
 //    "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/input"
 //    "github.com/rookie-xy/hubble/output"
-    "github.com/rookie-xy/hubble/proxy"
 )
 
 type Configure struct {
@@ -17,11 +16,10 @@ type Configure struct {
     Excludes  types.Value
     Limit     uint64
 
-    Client    bool
-
     Input     input.Input
     Codec     codec.Codec
-    Output    proxy.Forward
 
-    Op, Sincedb   *command.Command
+    Client    *command.Command
+    Output    *command.Command
+    SinceDB   *command.Command
 }

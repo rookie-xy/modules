@@ -16,7 +16,6 @@ import (
     "github.com/rookie-xy/hubble/adapter"
     Output "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/types/value"
-    "github.com/rookie-xy/hubble/proxy"
 )
 
 const Name  = "file"
@@ -45,7 +44,7 @@ var (
     client    = command.New( plugin.Flag, "client",    nil,         "client method" )
     input     = command.New( plugin.Flag, "input",     nil,         "input method" )
     output    = command.New( plugin.Flag, "output",    nil,         "output method" )
-    sinceDB   = command.New( plugin.Flag, "sinceDB",   nil,         "sinceDB method" )
+    sinceDB   = command.New( plugin.Flag, "client.sinceDB",   nil,         "sinceDB method" )
 )
 
 var commands = []command.Item{
@@ -158,12 +157,38 @@ func (f *file) Init() {
     	Type:     Type.GetString(),
         Paths:    paths.GetValue(),
         Excludes: excludes.GetValue(),
-        Limit:    limit.GetUint64(),
         Input:    input,
         Codec:    codec,
-        Client:   true,
     }
 
+    if limit, err := limit.GetUint64(); err != nil {
+        fmt.Println(err)
+        return
+    } else {
+        configure.Limit = limit
+    }
+
+    if value := client.GetValue(); value != nil {
+   	    configure.Client = command.New(
+            client.GetFlag(),
+            client.GetKey(),
+            client.GetObject(),
+           "")
+
+        configure.SinceDB = command.New(
+            sinceDB.GetFlag(),
+            sinceDB.GetKey(),
+            sinceDB.GetObject(),
+           "")
+    } else {
+   	    configure.Output = command.New(
+            output.GetFlag(),
+            output.GetKey(),
+            output.GetObject(),
+           "")
+    }
+
+/*
     if value := client.GetValue(); value != nil {
         key = client.GetFlag() + "." + client.GetKey()
         configure.Output, err = factory.Client(key, f.log, value)
@@ -173,25 +198,29 @@ func (f *file) Init() {
         }
 
     } else {
-    	configure.Client = false
-    	configure.Op = output
+
     }
+*/
 
     if value := frequency.GetValue(); value != nil {
-        f.frequency = value.GetDuration()
+        if duration, err := value.GetDuration(); err != nil {
+        	fmt.Println(err)
+        	return
+        } else {
+            f.frequency = duration
+        }
     }
 
- 	key = sinceDB.GetFlag() + "." + Output.Name + "." + sinceDB.GetKey()
- 	key2 := proxy.Name + "." + sinceDB.GetKey()
-    client, err := factory.Output(key, f.log, value.New(key2))
+ 	key = sinceDB.GetFlag() + "." + Output.Name + "." + "sinceDB"
+    sinceDB, err := factory.Output(key, f.log, value.New(sinceDB.GetKey()))
     if err != nil {
-        fmt.Println("agent source sinceDB: ", err)
+        fmt.Println("agent file sinceDB: ", err)
         return
     }
 
     finder := finder.New(f.log)
-    if err := finder.Init(&configure, adapter.FileSinceDB(client)); err != nil {
-        fmt.Println("agent source finder init: ", err)
+    if err := finder.Init(&configure, adapter.FileSinceDB(sinceDB)); err != nil {
+        fmt.Println("agent file finder init: ", err)
         return
     }
 
@@ -201,7 +230,7 @@ func (f *file) Init() {
 }
 
 func (f *file) Main() {
-    fmt.Println("Start agent source module ...")
+    fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
 
     run := func(finder *finder.Finder) error {

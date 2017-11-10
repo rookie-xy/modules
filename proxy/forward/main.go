@@ -20,11 +20,14 @@ const Name  = "forward"
 
 type forward struct {
     log      log.Log
+
     queue    pipeline.Queue
     jobs    *job.Jobs
 
     client  *command.Command
     sinceDB *command.Command
+
+    name     string
 }
 
 var (
@@ -87,14 +90,24 @@ func (f *forward) Init() {
 
     register.Queue(name, pipeline)
 
-    f.client = client
-    f.sinceDB = sinceDB
+    f.name = name
+    f.client = command.New(
+        client.GetFlag(),
+        client.GetKey(),
+       nil,
+       "")
+
+    f.sinceDB = command.New(
+        sinceDB.GetFlag(),
+        sinceDB.GetKey(),
+       nil,
+       "")
 
     return
 }
 
 func (f *forward) Main() {
-    fmt.Println("Start proxy forward module ...")
+    fmt.Println("Start proxy forward module ... ", f.name, f.client.GetKey())
 
     for {
         event, err := f.queue.Dequeue(10)
