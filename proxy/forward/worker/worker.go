@@ -63,7 +63,7 @@ func (w *Worker) ID() uuid.UUID {
 func (w *Worker) Run() error {
 	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output) error {
 		for {
-			event, err := Q.Dequeue(10)
+			event, err := Q.Dequeue()
 			switch err {
 
 			default:

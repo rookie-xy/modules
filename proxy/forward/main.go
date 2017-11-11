@@ -102,7 +102,7 @@ func (f *forward) Main() {
     fmt.Println("Start proxy forward module ... ", f.name, f.client.GetKey())
 
     for {
-        event, err := f.queue.Dequeue(10)
+        event, err := f.queue.Dequeue()
         switch err {
 
         }

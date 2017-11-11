@@ -11,10 +11,7 @@ import (
 //    "github.com/rookie-xy/hubble/proxy"
     queue "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
-    //"github.com/rookie-xy/hubble/event"
-    //"github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/hubble/event"
     "fmt"
     "github.com/rookie-xy/modules/proxy/sinceDB/utils"
 )
@@ -118,8 +115,10 @@ func (s *sincedb) Main() {
 
         if events != nil {
             for _, event := range events {
-                fileEvent := adapter.ToFileEvent(event)
-                fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
+                if event != nil {
+                    fileEvent := adapter.ToFileEvent(event)
+                    fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
+                }
             }
         }
 
