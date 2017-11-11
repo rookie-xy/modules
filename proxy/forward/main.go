@@ -31,20 +31,12 @@ type forward struct {
 }
 
 var (
-    batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
     client    = command.New( plugin.Flag, "client.kafka",    nil, "This option use to group" )
     sinceDB   = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
     pipe      = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
 )
 
 var commands = []command.Item{
-
-    { batch,
-      command.FILE,
-      module.Proxy,
-      Name,
-      command.SetObject,
-      nil },
 
     { pipe,
       command.FILE,
@@ -132,3 +124,14 @@ func (f *forward) Exit(code int) {
 func init() {
     register.Module(module.Proxy, Name, commands, New)
 }
+
+/*
+    batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
+    { batch,
+      command.FILE,
+      module.Proxy,
+      Name,
+      command.SetObject,
+      nil },
+
+*/

@@ -16,24 +16,36 @@ import (
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/event"
     "fmt"
+    "github.com/rookie-xy/modules/proxy/sinceDB/utils"
 )
 
 const Name  = "sinceDB"
 
 type sincedb struct {
     log       log.Log
+
     pipeline  queue.Queue
     client    adapter.SinceDB
+
+    batch     int
 }
 
 var (
     pipeline  = command.New( plugin.Flag, "pipeline.channel",  nil, "This option use to group" )
+    batch     = command.New( module.Flag, "batch",    64, "This option use to group" )
     client    = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
 
     { pipeline,
+      command.FILE,
+      module.Proxy,
+      Name,
+      command.SetObject,
+      nil },
+
+    { batch,
       command.FILE,
       module.Proxy,
       Name,
@@ -76,6 +88,12 @@ func (s *sincedb) Init() {
         register.Forword(key, client)
     }
 
+    if value := batch.GetValue(); value != nil {
+        if batch, err := value.GetInt(); err != nil {
+            s.batch = batch
+        }
+    }
+
     return
 }
 
@@ -87,9 +105,8 @@ func (s *sincedb) Main() {
     fmt.Println("Start proxy sinceDB module ...")
 
     for {
-        event, status := s.pipeline.Dequeue(10)
-
-        switch status {
+        events, err := s.pipeline.Dequeues(s.batch)
+        switch err {
         //case models.Ignore:
         //    continue
         //case models.Busy:
@@ -97,25 +114,24 @@ func (s *sincedb) Main() {
         default:
         }
 
-        if !s.client.Commit(event) {
-            if events, err := s.client.Senders(); err != nil {
-                if err := recall(events, s.pipeline); err != nil {
+        fmt.Println("CYCLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+
+        if events != nil {
+            for _, event := range events {
+                fileEvent := adapter.ToFileEvent(event)
+                fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
+            }
+        }
+
+        if events != nil {
+            if err := s.client.Senders(events); err != nil {
+                if err := utils.Recall(events, s.pipeline); err != nil {
                     fmt.Println("recall error ", err)
                     return
                 }
             }
         }
     }
-}
-
-func recall(events []event.Event, Q queue.Queue) error {
-    for _, event := range events {
-        if err := Q.Requeue(event); err != nil {
-            return err
-        }
-    }
-
-    return nil
 }
 
 func (s *sincedb) Exit(code int) {

@@ -148,7 +148,7 @@ func (c *Collector) Run() error {
         state.Offset += int64(message.Bytes)
 
         event := &event.Event{
-            State: state,
+            Footer: state,
 		}
 
         if !message.IsEmpty() /*&& c.filter.Handler(c.scanner.Text())*/ {

@@ -7,6 +7,7 @@ import (
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
+    "github.com/rookie-xy/modules/agents/file/message"
 )
 
 type Scanner struct {
@@ -39,9 +40,9 @@ func (s *Scanner) ID() uint64 {
     return s.id
 }
 
-func (s *Scanner) Scan() (*Message, bool) {
+func (s *Scanner) Scan() (*message.Message, bool) {
     if s.Scanner.Scan() {
-        message := &Message{
+        message := &message.Message{
             Id:      s.ID(),
             Content: s.Bytes(),
         }
