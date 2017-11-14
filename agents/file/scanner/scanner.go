@@ -8,6 +8,7 @@ import (
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
     "github.com/rookie-xy/modules/agents/file/message"
+    "fmt"
 )
 
 type Scanner struct {
@@ -25,8 +26,8 @@ func New(s input.Input) *Scanner {
 }
 
 func (s *Scanner) Init(codec codec.Codec, state file.State) error {
-    if codec == nil {
-        return errors.New("models or codec is nil")
+    if codec == nil || state.IsEmpty() {
+        return errors.New("state is empty or codec is nil")
     }
 
     s.id = state.Lno
@@ -48,6 +49,7 @@ func (s *Scanner) Scan() (*message.Message, bool) {
         }
 
         message.Bytes = len(message.Content)
+        fmt.Println(string(message.Content))
         return message, true
     }
 

@@ -1,10 +1,12 @@
 package collector
 
 import (
-	"github.com/rookie-xy/hubble/event"
+	"github.com/rookie-xy/modules/agents/file/event"
 )
 
-func (c *Collector) Publish(event event.Event) bool {
+func (c *Collector) Publish(event *event.Event) bool {
+	c.states.Update(event.Footer)
+
 	if c.client {
 	    if err := c.output.Sender(event); err != nil {
             return false

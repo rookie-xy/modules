@@ -2,10 +2,8 @@ package finder
 
 import (
     "fmt"
-    "os"
     "path/filepath"
 
-    "github.com/rookie-xy/hubble/types"
 
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
@@ -15,7 +13,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
-    "github.com/rookie-xy/modules/agents/file/id"
+	"github.com/rookie-xy/modules/agents/file/finder/utils"
 )
 
 type Finder struct {
@@ -68,8 +66,8 @@ func (f *Finder) load(states []file.State) error {
 }
 
 func (f *Finder) update(state file.State) error {
-    if state.TTL != 0 {
-
+    if f.conf.Expire > 0 && state.TTL != 0 {
+    	state.TTL = f.conf.Expire
     }
 
 	f.states.Update(state)
@@ -85,7 +83,7 @@ func (f *Finder) match(file string) bool {
 
         match, err := filepath.Match(path, file)
         if err != nil {
-            fmt.Printf("finder", "Error matching glob: %s\n", err)
+            fmt.Printf("Finder error matching glob: %s\n", err)
             continue
         }
 
@@ -97,103 +95,9 @@ func (f *Finder) match(file string) bool {
     return false
 }
 
-func getFiles(v types.Value) map[string]os.FileInfo {
-    files := map[string]os.FileInfo{}
-    paths := v.GetArray()
-
-    for _, path := range paths {
-        matches, err := filepath.Glob(path.(string))
-        if err != nil {
-            fmt.Printf("glob(%s) failed: %v\n", path, err)
-            continue
-        }
-
-//    OUTER:
-        // Check any matched files to see if we need to start a collector
-        for _, file := range matches {
-             // check if the source is in the exclude_files list
-            /*
-            if r.isExcluded(source) {
-                fmt.Printf("Finder Exclude source: %s\n", source)
-                continue
-            }
-            */
-
-            // Fetch Lstat File info to detected also symlinks
-            fileInfo, err := os.Lstat(file)
-            if err != nil {
-                fmt.Println("scanner", "lstat(%s) failed: %s", file, err)
-                continue
-            }
-
-            if fileInfo.IsDir() {
-                fmt.Println("scanner", "Skipping directory: %s", file)
-                continue
-            }
-
-            isSymlink := fileInfo.Mode() & os.ModeSymlink > 0
-            if isSymlink {
-                fmt.Println("scanner", "File %s skipped as it is a symlink.", file)
-                continue
-            }
-
-            // Fetch Stat source info which fetches the inode.
-								    // In case of a symlink, the original inode is fetched
-            fileInfo, err = os.Stat(file)
-            if err != nil {
-                fmt.Println("scanner", "stat(%s) failed: %s", file, err)
-                continue
-            }
-
-            // If symlink is enabled, it is checked that original is not part of same scanner
-            // It original is harvested by other scanner, states will potentially overwrite each other
-            /*
-                for _, finfo := range paths {
-                    if id.SameFile(finfo, fileInfo) {
-                        fmt.Println("Same source found as symlink and originap. Skipping source: %s", source)
-																				    continue OUTER
-                    }
-                }
-                */
-
-            files[file] = fileInfo
-        }
-    }
-
-    return files
-}
-
-func getPaths(files map[string]os.FileInfo) []string {
-    keys := make([]string, 0)
-    for file := range files {
-        keys = append(keys, file)
-    }
-
-    return keys
-}
-
-func getState(path string, fi os.FileInfo, f *Finder) (file.State, error) {
-    var err error
-    var absolutePath string
-
-    absolutePath, err = filepath.Abs(path)
-    if err != nil {
-        return file.State{}, fmt.Errorf("could not fetch abs path for source %s: %s", absolutePath, err)
-    }
-
-    fmt.Printf("Finder check source for collecting: %s\n", absolutePath)
-
-    state := file.New()
-    if err := state.Init(id.GetID(fi).String(), fi, absolutePath, "file"); err != nil {
-        return state, err
-    }
-
-    return state, nil
-}
-
 func (f *Finder) Find() {
-    files := getFiles(f.conf.Paths)
-    paths := getPaths(files)
+    files := utils.GetFiles(f.conf.Paths)
+    paths := utils.GetPaths(files)
 
     for i := 0; i < len(files); i++ {
         path := paths[i]
@@ -208,7 +112,7 @@ func (f *Finder) Find() {
 
         }
 
-        new, err := getState(path, info, f)
+        new, err := utils.GetState(path, info)
         if err != nil {
             fmt.Printf("Skipping source %s due to error %s\n", path, err)
         }
@@ -216,14 +120,13 @@ func (f *Finder) Find() {
         old := f.states.FindPrevious(new)
 
         if old.IsEmpty() {
-            fmt.Printf("Finder start collector for new source: %s\n", new.Source)
             err := f.startCollector(new, 0, f.conf.Input)
             if err != nil {
-                fmt.Printf("collector could not be started on new source: %s, Err: %s\n", new.Source, err)
+                fmt.Printf("Collector could not be started on new source: %s, Err: %s\n", new.Source, err)
             }
 
         } else {
-            f.collectExistingFile(new, old)
+            f.keepCollector(new, old)
         }
     }
 
@@ -250,18 +153,70 @@ func (f *Finder) startCollector(state file.State, offset int64, input input.Inpu
     return nil
 }
 
-func (r *Finder) collectExistingFile(newState, oldState file.State) {
+func (f *Finder) keepCollector(new, old file.State) {
+ 	fmt.Printf("Finder Update existing file for collecting: %s, offset: %v\n", new.Source, old.Offset)
+
+	// No collector is running for the file, start a new collector
+	// It is important here that only the size is checked and not modification time, as modification time could be incorrect on windows
+	// https://blogs.technet.microsoft.com/asiasupp/2010/12/14/file-date-modified-property-are-not-updating-while-modifying-a-file-without-closing-it/
+	if old.Finished && new.Fileinfo.Size() > old.Offset {
+		// Resume harvesting of an old file we've stopped harvesting from
+		// This could also be an issue with force_close_older that a new collector is started after each scan but not needed?
+		// One problem with comparing modTime is that it is in seconds, and scans can happen more then once a second
+		fmt.Printf("Finder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
+		err := f.startCollector(new, old.Offset, f.conf.Input)
+		if err != nil {
+            fmt.Printf("Collector could not be started on existing file: %s, Err: %s\n", new.Source, err)
+		}
+		return
+	}
+
+	// File size was reduced -> truncated file
+	if old.Finished && new.Fileinfo.Size() < old.Offset {
+		fmt.Printf("Finder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
+		err := f.startCollector(new, 0, f.conf.Input)
+		if err != nil {
+			fmt.Printf("Collector could not be started on truncated file: %s, Err: %s\n", new.Source, err)
+		}
+		return
+	}
+
+	// Check if file was renamed
+	if old.Source != "" && old.Source != new.Source {
+		// This does not start a new collector as it is assume that the older collector is still running
+		// or no new lines were detected. It sends only an event status update to make sure the new name is persisted.
+		fmt.Printf("Finder file rename was detected: %s -> %s, Current offset: %v\n", old.Source, new.Source, old.Offset)
+
+		if old.Finished {
+			fmt.Printf("Finder updating state for renamed file: %s -> %s, Current offset: %v\n", old.Source, new.Source, old.Offset)
+			// Update state because of file rotation
+			old.Source = new.Source
+			err := f.update(old)
+			if err != nil {
+				fmt.Printf("File rotation state update error: %s\n", err)
+			}
+		} else {
+			fmt.Println("Finder file rename detected but collector not finished yet.")
+		}
+	}
+
+	if !old.Finished {
+		// Nothing to do. Collector is still running and file was not renamed
+		fmt.Printf("Finder collector for file is still running: %s\n", new.Source)
+	} else {
+		fmt.Printf("Finder file didn't change: %s\n", new.Source)
+    }
 }
 
-func (r *Finder) Stop() {
+func (f *Finder) Stop() {
 
 }
 
-func (r *Finder) Wait() {
+func (f *Finder) Wait() {
 
 }
 
-func (r *Finder) isExcluded(file string) bool {
+func (f *Finder) isExcluded(file string) bool {
 	/*
     patterns := r.excludes.GetArray()
     if len(patterns) > 0 {

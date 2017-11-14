@@ -5,6 +5,7 @@ import (
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/input"
+    "time"
 )
 
 type Configure struct {
@@ -13,6 +14,7 @@ type Configure struct {
     Paths     types.Value
     Excludes  types.Value
     Limit     uint64
+    Expire    time.Duration
 
     Input     input.Input
     Codec     codec.Codec

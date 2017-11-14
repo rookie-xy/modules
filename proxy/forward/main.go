@@ -19,26 +19,26 @@ import (
 const Name  = "forward"
 
 type forward struct {
-    log      log.Log
+    log        log.Log
 
-    queue    pipeline.Queue
-    jobs    *job.Jobs
+    pipeline   pipeline.Queue
+    jobs      *job.Jobs
 
-    client  *command.Command
-    sinceDB *command.Command
+    client    *command.Command
+    sinceDB   *command.Command
 
-    name     string
+    name       string
 }
 
 var (
     client    = command.New( plugin.Flag, "client.kafka",    nil, "This option use to group" )
     sinceDB   = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
-    pipe      = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
+    Pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
 )
 
 var commands = []command.Item{
 
-    { pipe,
+    { Pipeline,
       command.FILE,
       module.Proxy,
       Name,
@@ -68,13 +68,13 @@ func New(log log.Log) module.Template {
 }
 
 func (f *forward) Init() {
-    key := pipe.GetFlag() + "." + pipe.GetKey()
-    pipeline, err := factory.Pipeline(key, f.log, pipe.GetValue())
+    key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
+    pipeline, err := factory.Pipeline(key, f.log, Pipeline.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
         return
     } else {
-        f.queue = pipeline
+        f.pipeline = pipeline
     }
 
     name := client.GetKey()
@@ -102,10 +102,17 @@ func (f *forward) Main() {
     fmt.Println("Start proxy forward module ... ", f.name, f.client.GetKey())
 
     for {
-        event, err := f.queue.Dequeue()
+        event, err := f.pipeline.Dequeue()
         switch err {
 
+        case pipeline.ErrClosed:
+        case pipeline.ErrEmpty:
+
+        default:
+
         }
+
+        fmt.Println("WORKERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
 
         worker := worker.New(f.log)
         if err := worker.Init(f.client, f.sinceDB, event); err != nil {

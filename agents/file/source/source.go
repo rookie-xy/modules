@@ -45,7 +45,7 @@ func (s *Source) Validate(f *os.File) error {
 
 	// Compares the stat of the opened source to the models given by the prospector. Abort if not match.
 	if !os.SameFile(s.state.Fileinfo, info) {
-		return errors.New("source info is not identical with opened source. Aborting harvesting and retrying source later again")
+		return errors.New("Source info is not identical with opened source. Aborting harvesting and retrying source later again")
 	}
 
 	// get source offset. Only update offset if no error
@@ -54,7 +54,7 @@ func (s *Source) Validate(f *os.File) error {
 		return err
 	}
 
-	fmt.Printf("collector Setting offset for source: %s. Offset: %d ", s.state.Source, offset)
+	fmt.Printf("Collector setting offset for source: %s. offset: %d\n", s.state.Source, offset)
 	s.state.Offset = offset
 
 	return nil
@@ -63,12 +63,12 @@ func (s *Source) Validate(f *os.File) error {
 func (s *Source) offset(file *os.File) (int64, error) {
 	// continue from last known offset
 	if s.state.Offset > 0 {
-		fmt.Printf("collector Set previous offset for source: %s. Offset: %d ", s.state.Source, s.state.Offset)
+		fmt.Printf("Collector set previous offset for source: %s. Offset: %d\n", s.state.Source, s.state.Offset)
 		return file.Seek(s.state.Offset, os.SEEK_SET)
 	}
 
 	// get offset from source in case of encoding factory was required to read some data.
-	fmt.Printf("collector Setting offset for source based on seek: %s", s.state.Source)
+	fmt.Printf("Collector setting offset for source based on seek: %s\n", s.state.Source)
 
 	return file.Seek(0, os.SEEK_CUR)
 }

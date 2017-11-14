@@ -8,8 +8,7 @@ import (
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
-//    "github.com/rookie-xy/hubble/proxy"
-    queue "github.com/rookie-xy/hubble/pipeline"
+    "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/adapter"
     "fmt"
@@ -21,21 +20,21 @@ const Name  = "sinceDB"
 type sincedb struct {
     log       log.Log
 
-    pipeline  queue.Queue
+    pipeline  pipeline.Queue
     client    adapter.SinceDB
 
     batch     int
 }
 
 var (
-    pipeline  = command.New( plugin.Flag, "pipeline.channel",  nil, "This option use to group" )
+    Pipeline  = command.New( plugin.Flag, "pipeline.channel",  nil, "This option use to group" )
     batch     = command.New( module.Flag, "batch",    64, "This option use to group" )
     client    = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
 )
 
 var commands = []command.Item{
 
-    { pipeline,
+    { Pipeline,
       command.FILE,
       module.Proxy,
       Name,
@@ -65,8 +64,8 @@ func New(l log.Log) module.Template {
 }
 
 func (s *sincedb) Init() {
-    key := pipeline.GetFlag() + "." + pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, s.log, pipeline.GetValue())
+    key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
+    pipeline, err := factory.Pipeline(key, s.log, Pipeline.GetValue())
     if err != nil {
         fmt.Println("pipeline error ", err)
         return
@@ -104,22 +103,12 @@ func (s *sincedb) Main() {
     for {
         events, err := s.pipeline.Dequeues(s.batch)
         switch err {
-        //case models.Ignore:
+
+        case pipeline.ErrClosed:
         //    continue
-        //case models.Busy:
+        case pipeline.ErrEmpty:
         //    //TODO sleep
         default:
-        }
-
-        fmt.Println("CYCLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
-
-        if events != nil {
-            for _, event := range events {
-                if event != nil {
-                    fileEvent := adapter.ToFileEvent(event)
-                    fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
-                }
-            }
         }
 
         if events != nil {
@@ -141,3 +130,15 @@ func (s *sincedb) Exit(code int) {
 func init() {
     register.Module(module.Proxy, Name, commands, New)
 }
+
+        /*
+        if events != nil {
+            for _, event := range events {
+            	// why? event is nil?
+                if event != nil {
+                    fileEvent := adapter.ToFileEvent(event)
+                    fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
+                }
+            }
+        }
+        */

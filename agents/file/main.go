@@ -188,20 +188,6 @@ func (f *file) Init() {
            "")
     }
 
-/*
-    if value := client.GetValue(); value != nil {
-        key = client.GetFlag() + "." + client.GetKey()
-        configure.Output, err = factory.Client(key, f.log, value)
-        if err != nil {
-        	fmt.Println("agent source client: ", err)
-            return
-        }
-
-    } else {
-
-    }
-*/
-
     if value := frequency.GetValue(); value != nil {
         if duration, err := value.GetDuration(); err != nil {
         	fmt.Println(err)

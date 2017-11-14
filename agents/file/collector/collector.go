@@ -2,7 +2,7 @@ package collector
 
 import (
     "io"
-//   	"fmt"
+   	"fmt"
     "bytes"
 
     "github.com/satori/go.uuid"
@@ -21,7 +21,6 @@ import (
 	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/hubble/factory"
 	"github.com/rookie-xy/modules/agents/file/source"
-	"fmt"
 	"github.com/rookie-xy/hubble/types/value"
 )
 
@@ -50,7 +49,6 @@ func New(log log.Log) *Collector {
         log: log,
         id:  uuid.NewV4(),
         client: true,
-        //fingerprint: false,
     }
 }
 
@@ -80,7 +78,6 @@ func (c *Collector) Init(input input.Input, state file.State,
 
     if c.conf.Output != nil {
 		pluginName := c.conf.Output.GetFlag() + "." + c.conf.Output.GetKey()
-		fmt.Printf("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: %s\n", pluginName)
 		c.output, err = factory.Output(pluginName, c.log, c.conf.Output.GetValue())
 		if err != nil {
 			return err
@@ -102,8 +99,6 @@ func (c *Collector) Init(input input.Input, state file.State,
         }
 	}
 
-
-
     return nil
 }
 
@@ -117,26 +112,39 @@ func (c *Collector) Run() error {
         if !keep {
             switch c.scanner.Err() {
 			case io.EOF:
-				//c.log.Info("End of source reached: %s. Closing because close_eof is enabled.", c.models.Source)
+				//c.log.Info("End of source reached: %s. Closing because close_eof is enabled.", c.file.Source)
+				fmt.Printf("End of source reached: %s. Closing because close_eof is enabled.\n", c.state.Source)
 			case src.ErrClosed:
-				//c.log.Info("Reader was closed: %s. Closing.", c.models.Source)
+				//c.log.Info("Reader was closed: %s. Closing.", c.file.Source)
+				fmt.Printf("Reader was closed: %s. Closing.\n", c.state.Source)
 			case src.ErrRemoved:
-                //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.models.Source)
+                //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.file.Source)
+                fmt.Printf("File was removed: %s. Closing because close_removed is enabled.\n", c.state.Source)
 			case src.ErrRenamed:
-				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.models.Source)
+				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.file.Source)
+				fmt.Printf("File was renamed: %s. Closing because close_renamed is enabled.\n", c.state.Source)
 			case src.ErrTooLong:
+				fmt.Printf("File was too long: %s.\n", c.state.Source)
             case src.ErrInactive:
-            	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.models.Source, c.config.CloseInactive)
+            	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.file.Source, c.config.CloseInactive)
+            	fmt.Printf("File is inactive: %s. Closing because close_inactive of %v reached.\n", c.state.Source, c.conf.Expire)
 			case src.ErrFinalToken:
+				fmt.Printf("File was FinalToken: %s.\n", c.state.Source)
 			case src.ErrFileTruncate:
-                //c.log.Info("File was truncated. Begin reading source from offset 0: %s", c.models.Source)
+                //c.log.Info("File was truncated. Begin reading source from offset 0: %s", c.file.Source)
 				c.state.Offset = 0
+				fmt.Printf("File was truncated. Begin reading source from offset 0: %s\n", c.state.Source)
 			case src.ErrAdvanceTooFar:
+				fmt.Printf("File was AdvanceTooFar: %s\n", c.state.Source)
 			case src.ErrNegativeAdvance:
+				fmt.Printf("File was NegativeAdvance: %s\n", c.state.Source)
 			default:
-                //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.models.Source)
+                //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.file.Source)
+                fmt.Printf("Read line error: %s; File: %s\n", c.scanner.Err(), c.state.Source)
             }
 
+         state := c.getState()
+fmt.Println("AAAAAAAAAAAAAAAAAERRRRRRRRRRRRRRRRRRRRRRRRR ", state.Id, state.Source)
             return nil
 	    }
 
@@ -145,28 +153,25 @@ func (c *Collector) Run() error {
         }
 
         state := c.getState()
-        state.Offset += int64(message.Bytes)
+        state.Offset += int64(message.Bytes) + 1 // add one because \n
+        state.Lno = message.ID()
+
+        fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII ", state.Id, state.Source)
 
         event := &event.Event{
             Footer: state,
 		}
 
-        if !message.IsEmpty() /*&& c.filter.Handler(c.scanner.Text())*/ {
+        if !message.IsEmpty() /*&& c.filter.Handler(string(message.Bytes))*/ {
 			event.Header = types.Map{
         		"group": c.conf.Group,
         		"type":  c.conf.Type,
 			}
 			event.Body = message
-            /*
-			if c.fingerprint {
-				event.Footer = event.Footer{
-				    CheckSum: nil,
-				}
-			}
-            */
 		}
 
         if !c.Publish(event) {
+        	fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ", state.Id, state.Source)
 		    return nil
 		}
 
