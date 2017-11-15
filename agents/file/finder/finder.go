@@ -14,6 +14,8 @@ import (
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
 	"github.com/rookie-xy/modules/agents/file/finder/utils"
+	"github.com/rookie-xy/hubble/codec"
+	"github.com/rookie-xy/hubble/prototype"
 )
 
 type Finder struct {
@@ -22,6 +24,9 @@ type Finder struct {
     states  *file.States
     jobs    *job.Jobs
     done     chan struct{}
+
+    codec    codec.Codec
+    input    input.Input
 
     log      log.Log
 }
@@ -33,9 +38,13 @@ func New(log log.Log) *Finder {
     }
 }
 
-func (f *Finder) Init(conf *configure.Configure, sinceDB adapter.SinceDB) error {
+func (f *Finder) Init(input input.Input, codec codec.Codec,
+	                  conf *configure.Configure, sinceDB adapter.SinceDB) error {
 	f.conf = conf
     f.states = file.News()
+
+    f.codec = codec
+    f.input = input
 
     if states := sinceDB.Load(); states != nil {
         if err := f.load(states); err != nil {
@@ -120,7 +129,7 @@ func (f *Finder) Find() {
         old := f.states.FindPrevious(new)
 
         if old.IsEmpty() {
-            err := f.startCollector(new, 0, f.conf.Input)
+            err := f.startCollector(new, 0)
             if err != nil {
                 fmt.Printf("Collector could not be started on new source: %s, Err: %s\n", new.Source, err)
             }
@@ -133,7 +142,7 @@ func (f *Finder) Find() {
     return
 }
 
-func (f *Finder) startCollector(state file.State, offset int64, input input.Input) error {
+func (f *Finder) startCollector(state file.State, offset int64) error {
     if f.conf.Limit > 0 && f.jobs.Len() >= f.conf.Limit {
         return fmt.Errorf("collector limit reached")
     }
@@ -141,8 +150,11 @@ func (f *Finder) startCollector(state file.State, offset int64, input input.Inpu
     state.Finished = false
     state.Offset = offset
 
+    input := prototype.Input(f.input)
+    codec := prototype.Codec(f.codec)
+
     collector := collector.New(f.log)
-    if err := collector.Init(input, state, f.states, f.conf); err != nil {
+    if err := collector.Init(input, codec, state, f.states, f.conf); err != nil {
         return err
     }
 
@@ -164,7 +176,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 		// This could also be an issue with force_close_older that a new collector is started after each scan but not needed?
 		// One problem with comparing modTime is that it is in seconds, and scans can happen more then once a second
 		fmt.Printf("Finder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
-		err := f.startCollector(new, old.Offset, f.conf.Input)
+		err := f.startCollector(new, old.Offset)
 		if err != nil {
             fmt.Printf("Collector could not be started on existing file: %s, Err: %s\n", new.Source, err)
 		}
@@ -174,7 +186,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 	// File size was reduced -> truncated file
 	if old.Finished && new.Fileinfo.Size() < old.Offset {
 		fmt.Printf("Finder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
-		err := f.startCollector(new, 0, f.conf.Input)
+		err := f.startCollector(new, 0)
 		if err != nil {
 			fmt.Printf("Collector could not be started on truncated file: %s, Err: %s\n", new.Source, err)
 		}

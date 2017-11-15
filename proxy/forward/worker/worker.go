@@ -80,11 +80,6 @@ func (w *Worker) Run() error {
 				}
 				continue
 			}
-/*
-			fileEvent := adapter.ToFileEvent(event)
-			fileState := fileEvent.GetFooter()
-			fmt.Println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ", fileState.Source, fileState.Offset)
-*/
 
 			if err := sinceDB.Sender(event); err != nil {
 				fmt.Println("sinceDB sender error ", err)

@@ -112,8 +112,6 @@ func (f *forward) Main() {
 
         }
 
-        fmt.Println("WORKERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-
         worker := worker.New(f.log)
         if err := worker.Init(f.client, f.sinceDB, event); err != nil {
             fmt.Println(err)

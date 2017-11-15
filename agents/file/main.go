@@ -157,8 +157,6 @@ func (f *file) Init() {
     	Type:     Type.GetString(),
         Paths:    paths.GetValue(),
         Excludes: excludes.GetValue(),
-        Input:    input,
-        Codec:    codec,
     }
 
     if limit, err := limit.GetUint64(); err != nil {
@@ -205,7 +203,7 @@ func (f *file) Init() {
     }
 
     finder := finder.New(f.log)
-    if err := finder.Init(&configure, adapter.FileSinceDB(sinceDB)); err != nil {
+    if err := finder.Init(input, codec, &configure, adapter.FileSinceDB(sinceDB)); err != nil {
         fmt.Println("agent file finder init: ", err)
         return
     }
@@ -241,7 +239,9 @@ func (f *file) Main() {
         return nil
     }
 
-    run(f.finder)
+    if err := run(f.finder); err != nil {
+        fmt.Println(err)
+    }
 
     return
 }

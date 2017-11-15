@@ -22,6 +22,7 @@ import (
 	"github.com/rookie-xy/hubble/factory"
 	"github.com/rookie-xy/modules/agents/file/source"
 	"github.com/rookie-xy/hubble/types/value"
+	"github.com/rookie-xy/hubble/codec"
 )
 
 type Collector struct {
@@ -52,7 +53,7 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(input input.Input, state file.State,
+func (c *Collector) Init(input input.Input, codec codec.Codec, state file.State,
 	                     states *file.States, conf *configure.Configure) error {
 	var err error
     source, err := source.New(state)
@@ -65,7 +66,7 @@ func (c *Collector) Init(input input.Input, state file.State,
 	}
 
     scanner := scanner.New(input)
-    if err := scanner.Init(conf.Codec, state); err != nil {
+    if err := scanner.Init(codec, state); err != nil {
     	return err
 	}
 
@@ -143,8 +144,6 @@ func (c *Collector) Run() error {
                 fmt.Printf("Read line error: %s; File: %s\n", c.scanner.Err(), c.state.Source)
             }
 
-         state := c.getState()
-fmt.Println("AAAAAAAAAAAAAAAAAERRRRRRRRRRRRRRRRRRRRRRRRR ", state.Id, state.Source)
             return nil
 	    }
 
@@ -155,8 +154,6 @@ fmt.Println("AAAAAAAAAAAAAAAAAERRRRRRRRRRRRRRRRRRRRRRRRR ", state.Id, state.Sour
         state := c.getState()
         state.Offset += int64(message.Bytes) + 1 // add one because \n
         state.Lno = message.ID()
-
-        fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII ", state.Id, state.Source)
 
         event := &event.Event{
             Footer: state,
@@ -171,7 +168,6 @@ fmt.Println("AAAAAAAAAAAAAAAAAERRRRRRRRRRRRRRRRRRRRRRRRR ", state.Id, state.Sour
 		}
 
         if !c.Publish(event) {
-        	fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ", state.Id, state.Source)
 		    return nil
 		}
 
