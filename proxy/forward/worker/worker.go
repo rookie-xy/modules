@@ -61,15 +61,26 @@ func (w *Worker) ID() uuid.UUID {
 }
 
 func (w *Worker) Run() error {
+	fmt.Println("WOZAIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output) error {
+
+		keep := true
+
 		for {
 			event, err := Q.Dequeue()
 			switch err {
 
 			case pipeline.ErrClosed:
+				fmt.Println("CHANNELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL CLOSE")
+				keep = false
+
 			case pipeline.ErrEmpty:
 
 			default:
+			}
+
+			if !keep {
+				break
 			}
 
 			if err := client.Sender(event); err != nil {
@@ -86,6 +97,9 @@ func (w *Worker) Run() error {
 				return err
 			}
 		}
+
+		w.Stop()
+		return nil
 	}
 
 	return handle(w.Q, w.client, w.sinceDB)

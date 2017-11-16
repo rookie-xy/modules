@@ -127,7 +127,6 @@ func (f *Finder) Find() {
         }
 
         old := f.states.FindPrevious(new)
-
         if old.IsEmpty() {
             err := f.startCollector(new, 0)
             if err != nil {
@@ -166,7 +165,7 @@ func (f *Finder) startCollector(state file.State, offset int64) error {
 }
 
 func (f *Finder) keepCollector(new, old file.State) {
- 	fmt.Printf("Finder Update existing file for collecting: %s, offset: %v\n", new.Source, old.Offset)
+ 	fmt.Printf("Finder Update existing file for collecting: %s, offset: %v, finish:%v, newFileSize:%d\n", new.Source, old.Offset, old.Finished, new.Fileinfo.Size())
 
 	// No collector is running for the file, start a new collector
 	// It is important here that only the size is checked and not modification time, as modification time could be incorrect on windows
@@ -175,7 +174,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 		// Resume harvesting of an old file we've stopped harvesting from
 		// This could also be an issue with force_close_older that a new collector is started after each scan but not needed?
 		// One problem with comparing modTime is that it is in seconds, and scans can happen more then once a second
-		fmt.Printf("Finder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
+		fmt.Printf("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhFinder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
 		err := f.startCollector(new, old.Offset)
 		if err != nil {
             fmt.Printf("Collector could not be started on existing file: %s, Err: %s\n", new.Source, err)
@@ -227,6 +226,7 @@ func (f *Finder) Stop() {
 func (f *Finder) Wait() {
 
 }
+
 
 func (f *Finder) isExcluded(file string) bool {
 	/*

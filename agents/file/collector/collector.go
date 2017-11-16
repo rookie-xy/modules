@@ -108,6 +108,11 @@ func (c *Collector) ID() uuid.UUID {
 }
 
 func (c *Collector) Run() error {
+	defer func() {
+		c.Stop()
+		c.clean()
+	}()
+
     for {
         message, keep := c.scanner.Scan()
         if !keep {
@@ -143,6 +148,8 @@ func (c *Collector) Run() error {
                 //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.file.Source)
                 fmt.Printf("Read line error: %s; File: %s\n", c.scanner.Err(), c.state.Source)
             }
+
+            c.output.Close()
 
             return nil
 	    }
@@ -181,7 +188,7 @@ func (c *Collector) Stop() {
 
 func (c *Collector) getState() file.State {
     state := c.state
-	// refreshes the values in State with the values from the harvester itself
+	// refreshes the values in State with the values from the collector itself
 	return state
 }
 
@@ -189,3 +196,28 @@ func (c *Collector) Update(fs file.State) {
     fmt.Printf("collector update state: %s, offset: %v\n", c.state.Source, c.state.Offset)
     c.states.Update(fs)
 }
+
+func (c *Collector) clean() {
+	// Mark collector as finished
+	c.state.Finished = true
+
+	fmt.Printf("collector stopping collector for file: %s\n", c.state.Source)
+	defer fmt.Printf("collector collector cleanup finished for file: %s\n", c.state.Source)
+
+	// Make sure file is closed as soon as collector exits
+	// If file was never opened, it can't be closed
+	if c.source != nil {
+
+		// close file handler
+		c.source.Close()
+
+		fmt.Printf("collector Closing file: %s\n", c.state.Source)
+
+		// On completion, push offset so we can continue where we left off if we relaunch on the same file
+		// Only send offset if file object was created successfully
+		//c.SendStateUpdate()
+	} else {
+		fmt.Printf("Stopping collector, NOT closing file as file info not available: %s\n", c.state.Source)
+	}
+}
+

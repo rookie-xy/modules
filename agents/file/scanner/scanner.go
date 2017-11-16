@@ -8,7 +8,6 @@ import (
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
     "github.com/rookie-xy/modules/agents/file/message"
-    "fmt"
 )
 
 type Scanner struct {
@@ -49,7 +48,6 @@ func (s *Scanner) Scan() (*message.Message, bool) {
         }
 
         message.Bytes = len(message.Content)
-        fmt.Println(string(message.Content))
         return message, true
     }
 
