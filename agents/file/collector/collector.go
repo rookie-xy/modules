@@ -23,6 +23,7 @@ import (
 	"github.com/rookie-xy/modules/agents/file/source"
 	"github.com/rookie-xy/hubble/types/value"
 	"github.com/rookie-xy/hubble/codec"
+	"github.com/rookie-xy/modules/agents/file/id"
 )
 
 type Collector struct {
@@ -189,6 +190,7 @@ func (c *Collector) Stop() {
 func (c *Collector) getState() file.State {
     state := c.state
 	// refreshes the values in State with the values from the collector itself
+	state.ID = id.New(c.state.Fileinfo)
 	return state
 }
 
@@ -215,7 +217,7 @@ func (c *Collector) clean() {
 
 		// On completion, push offset so we can continue where we left off if we relaunch on the same file
 		// Only send offset if file object was created successfully
-		//c.SendStateUpdate()
+		c.Update(c.state)
 	} else {
 		fmt.Printf("Stopping collector, NOT closing file as file info not available: %s\n", c.state.Source)
 	}

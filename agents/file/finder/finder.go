@@ -184,7 +184,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 
 	// File size was reduced -> truncated file
 	if old.Finished && new.Fileinfo.Size() < old.Offset {
-		fmt.Printf("Finder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
+		fmt.Printf("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrFinder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
 		err := f.startCollector(new, 0)
 		if err != nil {
 			fmt.Printf("Collector could not be started on truncated file: %s, Err: %s\n", new.Source, err)

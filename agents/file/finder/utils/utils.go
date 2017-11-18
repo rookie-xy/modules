@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"fmt"
 
-	"github.com/rookie-xy/modules/agents/file/id"
 	"github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/models/file"
 )
@@ -97,7 +96,7 @@ func GetState(path string, fi os.FileInfo) (file.State, error) {
     fmt.Printf("Finder check source for collecting: %s\n", absolutePath)
 
     state := file.New()
-    if err := state.Init(id.GetID(fi).String(), fi, absolutePath, "file"); err != nil {
+    if err := state.Init(absolutePath, fi); err != nil {
         return state, err
     }
 
