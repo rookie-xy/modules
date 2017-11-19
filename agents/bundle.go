@@ -17,7 +17,7 @@ import (
 const Name = module.Agents
 
 var (
-    agents = command.New(module.Flag, Name, nil, "inputs may be many")
+    agents = command.New(module.Flag, Name, nil, "agents may be many")
 )
 
 var commands = []command.Item{
@@ -72,6 +72,8 @@ func (r *Agent) Init() {
     <-r.event
     fmt.Println("agents init")
 
+    r.Exit(0)
+
     if agents := agents.GetValue(); agents != nil {
 
         iterator := agents.GetIterator(nil)
@@ -115,14 +117,11 @@ func (r *Agent) Main() {
 }
 
 func (r *Agent) Exit(code int) {
-    /*
-    for _, module := range r.children {
-        module.Exit()
+    if n := len(r.children); n > 0 {
+        for _, child := range r.children {
+            child.Exit(code)
+        }
     }
-
-    //r.cycle.Quit()
-    return
-    */
 }
 
 func (r *Agent) Load(m module.Template) {

@@ -220,13 +220,12 @@ func (f *Finder) keepCollector(new, old file.State) {
 }
 
 func (f *Finder) Stop() {
+	close(f.done)
 
+	if length := f.jobs.Len(); length > 0 {
+		f.jobs.Stop()
+	}
 }
-
-func (f *Finder) Wait() {
-
-}
-
 
 func (f *Finder) isExcluded(file string) bool {
 	/*

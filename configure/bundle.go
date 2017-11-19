@@ -79,8 +79,6 @@ func (r *Configure) Notify(o types.Object) {
     if o != nil {
         r.update(o)
     }
-
-    //fmt.Println(r.data)
     return
 }
 
@@ -141,6 +139,7 @@ func (r *Configure) Main() {
         select {
 
         case e := <- r.event:
+            // 先通知在reload
             r.Notify(e)
 
         default:
@@ -152,16 +151,17 @@ func (r *Configure) Main() {
 }
 
 func (r *Configure) Exit(code int) {
-    for _, module := range r.children {
-        module.Exit(code)
+	if num := len(r.children); num > 0 {
+        for _, module := range r.children {
+            module.Exit(code)
+        }
     }
-
-    //r.cycle.Quit()
-    return
 }
 
 func (r *Configure) Load(m module.Template) {
-    r.children = append(r.children, m)
+    if m != nil {
+        r.children = append(r.children, m)
+    }
 }
 
 func init() {

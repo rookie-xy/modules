@@ -228,6 +228,7 @@ func (f *file) Main() {
             select {
 
             case <-f.done:
+                finder.Stop()
                 //r.Print("Finder ticker stopped")
                 return nil
             case <-time.After(f.frequency):
@@ -247,7 +248,7 @@ func (f *file) Main() {
 }
 
 func (f *file) Exit(code int) {
-    // 退出
+	close(f.done)
 }
 
 func init() {

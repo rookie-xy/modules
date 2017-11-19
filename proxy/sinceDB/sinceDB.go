@@ -105,9 +105,10 @@ func (s *sincedb) Main() {
         switch err {
 
         case pipeline.ErrClosed:
-        //    continue
+            fmt.Println("sinceDB proxy close ...")
+            return
+
         case pipeline.ErrEmpty:
-        //    //TODO sleep
         default:
         }
 
@@ -123,8 +124,8 @@ func (s *sincedb) Main() {
 }
 
 func (s *sincedb) Exit(code int) {
+    s.pipeline.Close()
 	s.client.Close()
-    // 退出
 }
 
 func init() {

@@ -106,6 +106,9 @@ func (f *forward) Main() {
         switch err {
 
         case pipeline.ErrClosed:
+        	fmt.Println("forwarder close ...")
+        	return
+
         case pipeline.ErrEmpty:
 
         default:
@@ -123,20 +126,13 @@ func (f *forward) Main() {
 }
 
 func (f *forward) Exit(code int) {
-    // 退出
+    if length := f.jobs.Len(); length > 0 {
+        f.jobs.Stop()
+    }
+
+    f.pipeline.Close()
 }
 
 func init() {
     register.Module(module.Proxy, Name, commands, New)
 }
-
-/*
-    batch     = command.New( module.Flag, "batch",    nil, "This option use to group" )
-    { batch,
-      command.FILE,
-      module.Proxy,
-      Name,
-      command.SetObject,
-      nil },
-
-*/

@@ -33,13 +33,13 @@ var commands = []command.Item{
 
 type local struct {
     log.Log
+   *configure.Configure
 
     name      string
     size      int64
 
-   *configure.Configure
-
     watcher  *fsnotify.Watcher
+    done      chan struct{}
 }
 
 func New(log log.Log) module.Template {
@@ -96,7 +96,6 @@ func (r *local) Main() {
     local, err := os.OpenFile(r.name, os.O_RDWR, 0777)
     if err != nil {
         fmt.Println(err)
-    //    r.Print("OpenFile error")
     }
 
     char = make([]byte, r.size)
@@ -127,16 +126,17 @@ func (r *local) Main() {
             }
 
         case err := <-r.watcher.Errors:
-            r.Print(err)
+            //r.Print(err)
+            fmt.Println(err)
+
+        case <-r.done:
+        	return
         }
     }
-
-    return
 }
 
 func (r *local) Exit(code int) {
-    //r.cycle.Quit()
-    return
+	close(r.done)
 }
 
 func init() {

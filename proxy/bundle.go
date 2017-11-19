@@ -53,6 +53,8 @@ func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
 
+    r.Exit(0)
+
     build := func(scope string, i types.Iterator, load module.Load) error {
         for iterator := i; iterator.Has(); iterator.Next() {
             iterm := iterator.Iterm()
@@ -122,7 +124,11 @@ func (r *Proxy) Main() {
 }
 
 func (r *Proxy) Exit(code int) {
-    return
+    if n := len(r.children); n > 0 {
+        for _, child := range r.children {
+            child.Exit(code)
+        }
+    }
 }
 
 func (r *Proxy) Update(o types.Object) error {
@@ -139,7 +145,6 @@ func (r *Proxy) Update(o types.Object) error {
 
         proxy.SetValue(val)
     }
-
 
     r.event <- 1
     return nil
