@@ -48,6 +48,7 @@ type Configure struct {
     log.Log
     adapter.ValueCodec
 
+    reload     bool
     observers  []observer.Observer
     event      chan types.Object
     children   []module.Template
@@ -57,6 +58,7 @@ func New(log log.Log) module.Template {
     new := &Configure{
         Log: log,
         event: make(chan types.Object, 1),
+        reload: false,
     }
 
     register.Subject(Name, new)
@@ -76,8 +78,31 @@ func (r *Configure) Attach(o observer.Observer) {
 }
 
 func (r *Configure) Notify(o types.Object) {
+    if obslen := len(r.observers); o != nil && obslen > 0 {
+        for _, observer := range r.observers {
+            if observer.Update(o) != nil {
+                break
+            }
+        }
+
+        if r.reload {
+            Init(r.observers)
+            Main(r.observers)
+        }
+    }
+
+    return
+}
+
+/*
+func (r *Configure) Notify(o types.Object) {
     if o != nil {
         r.update(o)
+    }
+
+    if r.reload {
+
+        //reload()
     }
     return
 }
@@ -89,6 +114,7 @@ func (r *Configure) update(o types.Object) {
         }
     }
 }
+*/
 
 func (r *Configure) Update(o types.Object) error {
     _, data, err := r.ValueDecode(o.([]byte), true)
@@ -97,7 +123,16 @@ func (r *Configure) Update(o types.Object) error {
     }
 
     r.event <- data
+    return nil
+}
 
+func (r *Configure) Reload(o types.Object) error {
+    _, data, err := r.ValueDecode(o.([]byte), true)
+    if err != nil {
+        return fmt.Errorf("error", data)
+    }
+
+    r.event <- data
     return nil
 }
 
@@ -128,6 +163,9 @@ func (r *Configure) Init() {
     return
 }
 
+// 两件事情：
+// 1. 解析配置，
+// 2. 加载配置，如果是第一次启动则加载配置，如果是跟新配置，则reload所有组件
 func (r *Configure) Main() {
     // 启动各个子模块组件
     for _, child := range r.children {

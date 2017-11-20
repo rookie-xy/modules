@@ -49,7 +49,6 @@ func New(log log.Log) module.Template {
     }
 
     register.Subject(module.Configure + "." + Name, new.Configure)
-
     return new
 }
 

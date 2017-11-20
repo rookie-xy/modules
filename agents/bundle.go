@@ -32,6 +32,7 @@ var commands = []command.Item{
 }
 
 type Agent struct {
+    exit chan struct{}
     log.Log
     event chan int
     children []module.Template
@@ -67,12 +68,19 @@ func (r *Agent) Update(o types.Object) error {
     return nil
 }
 
+func (r *Agent) ReInit() {
+    r.Exit(0)
+    r.Init()
+}
+
+func (r *Agent) ReMain() {
+	go r.Main()
+}
+
 func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
     fmt.Println("agents init")
-
-    r.Exit(0)
 
     if agents := agents.GetValue(); agents != nil {
 
@@ -82,6 +90,7 @@ func (r *Agent) Init() {
                 if build := configure.Build; build != nil {
                     if err := build(Name, iterator, r.Load); err != nil {
                         fmt.Println("agents init error: ", err)
+                        r.Exit(0)
                         return
                     } else {
                         // debug
@@ -112,7 +121,10 @@ func (r *Agent) Main() {
     }
 
     for ;; {
-        select {}
+        select {
+        case <-r.exit:
+            return
+        }
     }
 }
 
@@ -122,10 +134,14 @@ func (r *Agent) Exit(code int) {
             child.Exit(code)
         }
     }
+
+    close(r.exit)
 }
 
 func (r *Agent) Load(m module.Template) {
-    r.children = append(r.children, m)
+    if m != nil {
+        r.children = append(r.children, m)
+    }
 }
 
 func init() {
