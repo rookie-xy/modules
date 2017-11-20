@@ -132,6 +132,7 @@ func (r *Configure) Reload(o types.Object) error {
         return fmt.Errorf("error", data)
     }
 
+    r.reload = true
     r.event <- data
     return nil
 }
