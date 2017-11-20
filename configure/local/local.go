@@ -121,7 +121,8 @@ func (r *local) Main() {
 
         case event := <-r.watcher.Events:
             if event.Op & fsnotify.Write == fsnotify.Write {
-                r.Notify(char)
+                //r.Notify(char)
+                r.Reload(char)
             }
 
         case err := <-r.watcher.Errors:

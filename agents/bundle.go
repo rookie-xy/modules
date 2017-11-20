@@ -68,15 +68,6 @@ func (r *Agent) Update(o types.Object) error {
     return nil
 }
 
-func (r *Agent) ReInit() {
-    r.Exit(0)
-    r.Init()
-}
-
-func (r *Agent) ReMain() {
-	go r.Main()
-}
-
 func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event

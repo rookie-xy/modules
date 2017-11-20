@@ -79,15 +79,18 @@ func (r *Configure) Attach(o observer.Observer) {
 
 func (r *Configure) Notify(o types.Object) {
     if obslen := len(r.observers); o != nil && obslen > 0 {
-        for _, observer := range r.observers {
-            if observer.Update(o) != nil {
+        for _, configure := range r.observers {
+            if configure.Update(o) != nil {
                 break
             }
-        }
 
-        if r.reload {
-            Init(r.observers)
-            Main(r.observers)
+            if r.reload {
+                if module := adapter.ToModuleObserver(configure); module != nil {
+                   	module.Exit(0)
+                    module.Init()
+                    module.Main()
+                }
+            }
         }
     }
 
