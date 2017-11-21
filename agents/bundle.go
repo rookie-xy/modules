@@ -12,7 +12,6 @@ import (
     "github.com/rookie-xy/hubble/configure"
 
   _ "github.com/rookie-xy/modules/agents/file"
-    "sync"
 )
 
 const Name = module.Agents
