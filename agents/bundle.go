@@ -12,6 +12,7 @@ import (
     "github.com/rookie-xy/hubble/configure"
 
   _ "github.com/rookie-xy/modules/agents/file"
+    "sync"
 )
 
 const Name = module.Agents
@@ -32,10 +33,11 @@ var commands = []command.Item{
 }
 
 type Agent struct {
-    exit chan struct{}
     log.Log
-    event chan int
-    children []module.Template
+
+    event     chan int
+    children  []module.Template
+    done      chan struct{}
 }
 
 func New(log log.Log) module.Template {
@@ -94,7 +96,7 @@ func (r *Agent) Init() {
                     // fmt.Println("proxy hava not init finish")
                     continue
                 }
-            }
+           }
         }
     }
 
@@ -103,30 +105,41 @@ func (r *Agent) Init() {
 
 func (r *Agent) Main() {
     fmt.Println("Start agent modules ...")
-    if len(r.children) < 1 {
+
+    if len(r.children) > 0 {
+        for i, child := range r.children {
+            if child != nil {
+                go child.Main()
+            } else {
+                fmt.Println("error")
+                if i > 0 {
+                    r.Exit(0)
+                }
+                return
+            }
+        }
+    } else {
+        fmt.Println("ERROR")
         return
     }
 
-    for _, child := range r.children {
-        go child.Main()
-    }
-
-    for ;; {
+    for {
         select {
-        case <-r.exit:
+        case <-r.done:
+            fmt.Println("agent module exit")
             return
         }
     }
 }
 
 func (r *Agent) Exit(code int) {
+    defer close(r.done)
+
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
             child.Exit(code)
         }
     }
-
-    close(r.exit)
 }
 
 func (r *Agent) Load(m module.Template) {

@@ -11,7 +11,7 @@ import (
     "github.com/rookie-xy/hubble/filter"
 	"github.com/rookie-xy/hubble/types"
 	"github.com/rookie-xy/hubble/input"
-     src "github.com/rookie-xy/hubble/source"
+  . "github.com/rookie-xy/hubble/source"
 	"github.com/rookie-xy/hubble/output"
 	"github.com/rookie-xy/hubble/models/file"
 
@@ -34,7 +34,7 @@ type Collector struct {
 
     conf     *configure.Configure
 
-    source    src.Source
+    source    Source
     input     input.Input
     scanner  *scanner.Scanner
     filter    filter.Filter
@@ -121,29 +121,29 @@ func (c *Collector) Run() error {
 			case io.EOF:
 				//c.log.Info("End of source reached: %s. Closing because close_eof is enabled.", c.file.Source)
 				fmt.Printf("End of source reached: %s. Closing because close_eof is enabled.\n", c.state.Source)
-			case src.ErrClosed:
+			case ErrClosed:
 				//c.log.Info("Reader was closed: %s. Closing.", c.file.Source)
 				fmt.Printf("Reader was closed: %s. Closing.\n", c.state.Source)
-			case src.ErrRemoved:
+			case ErrRemoved:
                 //c.log.Info("File was removed: %s. Closing because close_removed is enabled.", c.file.Source)
                 fmt.Printf("File was removed: %s. Closing because close_removed is enabled.\n", c.state.Source)
-			case src.ErrRenamed:
+			case ErrRenamed:
 				//c.log.Info("File was renamed: %s. Closing because close_renamed is enabled.", c.file.Source)
 				fmt.Printf("File was renamed: %s. Closing because close_renamed is enabled.\n", c.state.Source)
-			case src.ErrTooLong:
+			case ErrTooLong:
 				fmt.Printf("File was too long: %s.\n", c.state.Source)
-            case src.ErrInactive:
+            case ErrInactive:
             	//c.log.Info("File is inactive: %s. Closing because close_inactive of %v reached.", c.file.Source, c.config.CloseInactive)
             	fmt.Printf("File is inactive: %s. Closing because close_inactive of %v reached.\n", c.state.Source, c.conf.Expire)
-			case src.ErrFinalToken:
+			case ErrFinalToken:
 				fmt.Printf("File was FinalToken: %s.\n", c.state.Source)
-			case src.ErrFileTruncate:
+			case ErrFileTruncate:
                 //c.log.Info("File was truncated. Begin reading source from offset 0: %s", c.file.Source)
 				c.state.Offset = 0
 				fmt.Printf("File was truncated. Begin reading source from offset 0: %s\n", c.state.Source)
-			case src.ErrAdvanceTooFar:
+			case ErrAdvanceTooFar:
 				fmt.Printf("File was AdvanceTooFar: %s\n", c.state.Source)
-			case src.ErrNegativeAdvance:
+			case ErrNegativeAdvance:
 				fmt.Printf("File was NegativeAdvance: %s\n", c.state.Source)
 			default:
                 //c.log.Err("Read line error: %s; File: ", c.scanner.Err(), c.file.Source)

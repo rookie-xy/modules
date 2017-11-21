@@ -34,8 +34,9 @@ var commands = []command.Item{
 
 type Proxy struct {
     log.Log
-    event    chan int
-    children []module.Template
+    event     chan int
+    children  []module.Template
+    done      chan struct{}
 }
 
 func New(log log.Log) module.Template {
@@ -45,15 +46,12 @@ func New(log log.Log) module.Template {
     }
 
     register.Observer(Name, new)
-
     return new
 }
 
 func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
-
-    r.Exit(0)
 
     build := func(scope string, i types.Iterator, load module.Load) error {
         for iterator := i; iterator.Has(); iterator.Next() {
@@ -110,23 +108,41 @@ func (r *Proxy) Init() {
 
 func (r *Proxy) Main() {
     fmt.Println("Start proxy modules ...")
-    if len(r.children) < 1 {
+
+    if len(r.children) > 0 {
+        for i, child := range r.children {
+            if child != nil {
+                go child.Main()
+            } else {
+                fmt.Println("error")
+                if i > 0 {
+                    r.Exit(0)
+                }
+                return
+            }
+        }
+    } else {
+        fmt.Println("ERROR")
         return
     }
 
-    for _, child := range r.children {
-        go child.Main()
-    }
-
-    for ;; {
-        select {}
+    for {
+        select {
+        case <-r.done:
+            fmt.Println("proxy module exit")
+            return
+        }
     }
 }
 
 func (r *Proxy) Exit(code int) {
+    defer close(r.done)
+
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
-            child.Exit(code)
+            if child != nil {
+                child.Exit(code)
+            }
         }
     }
 }

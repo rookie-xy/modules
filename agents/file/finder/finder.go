@@ -137,8 +137,6 @@ func (f *Finder) Find() {
             f.keepCollector(new, old)
         }
     }
-
-    return
 }
 
 func (f *Finder) startCollector(state file.State, offset int64) error {
@@ -158,9 +156,7 @@ func (f *Finder) startCollector(state file.State, offset int64) error {
     }
 
     collector.Update(state)
-
     f.jobs.Start(collector)
-
     return nil
 }
 
@@ -174,7 +170,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 		// Resume harvesting of an old file we've stopped harvesting from
 		// This could also be an issue with force_close_older that a new collector is started after each scan but not needed?
 		// One problem with comparing modTime is that it is in seconds, and scans can happen more then once a second
-		fmt.Printf("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhFinder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
+		fmt.Printf("Finder Resuming collecting of file: %s, offset: %d, new size: %d\n", new.Source, old.Offset, new.Fileinfo.Size())
 		err := f.startCollector(new, old.Offset)
 		if err != nil {
             fmt.Printf("Collector could not be started on existing file: %s, Err: %s\n", new.Source, err)
@@ -184,7 +180,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 
 	// File size was reduced -> truncated file
 	if old.Finished && new.Fileinfo.Size() < old.Offset {
-		fmt.Printf("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrFinder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
+		fmt.Printf("Finder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n", new.Source, new.Fileinfo.Size())
 		err := f.startCollector(new, 0)
 		if err != nil {
 			fmt.Printf("Collector could not be started on truncated file: %s, Err: %s\n", new.Source, err)
@@ -220,7 +216,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 }
 
 func (f *Finder) Stop() {
-	close(f.done)
+	defer close(f.done)
 
 	if length := f.jobs.Len(); length > 0 {
 		f.jobs.Stop()

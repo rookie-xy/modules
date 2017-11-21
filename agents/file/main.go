@@ -243,8 +243,6 @@ func (f *file) Main() {
     if err := run(f.finder); err != nil {
         fmt.Println(err)
     }
-
-    return
 }
 
 func (f *file) Exit(code int) {

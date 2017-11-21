@@ -78,7 +78,11 @@ func (r *Configure) Attach(o observer.Observer) {
 }
 
 func (r *Configure) Notify(o types.Object) {
+
     if obslen := len(r.observers); o != nil && obslen > 0 {
+
+        var mains []func()
+
         for _, configure := range r.observers {
             if configure.Update(o) != nil {
                 break
@@ -88,36 +92,21 @@ func (r *Configure) Notify(o types.Object) {
                 if module := adapter.ToModuleObserver(configure); module != nil {
                    	module.Exit(0)
                     module.Init()
-                    module.Main()
+
+                    mains = append(mains, module.Main)
                 }
             }
         }
-    }
 
-    return
-}
-
-/*
-func (r *Configure) Notify(o types.Object) {
-    if o != nil {
-        r.update(o)
-    }
-
-    if r.reload {
-
-        //reload()
-    }
-    return
-}
-
-func (r *Configure) update(o types.Object) {
-    for _, observer := range r.observers {
-        if observer.Update(o) != nil {
-            break
+        if length := len(mains); length > 0 {
+        	for _, main := range mains {
+                go main()
+			}
         }
     }
+
+    return
 }
-*/
 
 func (r *Configure) Update(o types.Object) error {
     _, data, err := r.ValueDecode(o.([]byte), true)
@@ -209,3 +198,27 @@ func (r *Configure) Load(m module.Template) {
 func init() {
     register.Module(module.Worker, Name, commands, New)
 }
+
+
+/*
+func (r *Configure) Notify(o types.Object) {
+    if o != nil {
+        r.update(o)
+    }
+
+    if r.reload {
+
+        //reload()
+    }
+    return
+}
+
+func (r *Configure) update(o types.Object) {
+    for _, observer := range r.observers {
+        if observer.Update(o) != nil {
+            break
+        }
+    }
+}
+*/
+
