@@ -23,7 +23,6 @@ import (
 	"github.com/rookie-xy/modules/agents/file/source"
 	"github.com/rookie-xy/hubble/types/value"
 	"github.com/rookie-xy/hubble/codec"
-	"github.com/rookie-xy/modules/agents/file/id"
 )
 
 type Collector struct {
@@ -190,7 +189,7 @@ func (c *Collector) Stop() {
 func (c *Collector) getState() file.State {
     state := c.state
 	// refreshes the values in State with the values from the collector itself
-	state.ID = id.New(c.state.Fileinfo)
+	state.ID = file.Id(c.state.Fileinfo)
 	return state
 }
 

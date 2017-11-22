@@ -1,5 +1,8 @@
 package id
 
+//import "os"
+
+/*
 import (
     "fmt"
     "os"
@@ -32,3 +35,4 @@ func (id ID) Same(inode, device uint64) bool {
 func (id ID) String() string {
     return fmt.Sprintf("%d-%d", id.Inode, id.Device)
 }
+*/
