@@ -63,7 +63,6 @@ func New(log log.Log) module.Template {
 
     register.Subject(Name, new)
     register.Observer(Name, new)
-
     return new
 }
 
@@ -80,6 +79,7 @@ func (r *Configure) Attach(o observer.Observer) {
 func (r *Configure) Notify(o types.Object) {
 
     if obslen := len(r.observers); o != nil && obslen > 0 {
+    	fmt.Println("configure modulesssssssssssssssssssssssssss", obslen)
 
         var mains []func()
 
@@ -168,17 +168,11 @@ func (r *Configure) Main() {
 
     for ;; {
         select {
-
         case e := <- r.event:
             // 先通知在reload
             r.Notify(e)
-
-        default:
-
         }
     }
-
-    return
 }
 
 func (r *Configure) Exit(code int) {

@@ -126,11 +126,16 @@ func (f *forward) Main() {
 }
 
 func (f *forward) Exit(code int) {
+	/*
     if length := f.jobs.Len(); length > 0 {
         f.jobs.Stop()
     }
+	*/
 
-    f.pipeline.Close()
+    fmt.Println("start forward pipeline close................")
+    //f.pipeline.Close()
+    fmt.Println("end forward pipeline close................")
+
 }
 
 func init() {

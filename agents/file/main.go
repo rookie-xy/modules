@@ -216,7 +216,6 @@ func (f *file) Init() {
 func (f *file) Main() {
     fmt.Println("Start agent file module ...")
     // 编写主要业务逻辑
-
     run := func(finder *finder.Finder) error {
         defer func() {
             //close(f.done)

@@ -137,7 +137,7 @@ func (r *Proxy) Main() {
 
 func (r *Proxy) Exit(code int) {
     defer close(r.done)
-
+/*
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
             if child != nil {
@@ -145,6 +145,7 @@ func (r *Proxy) Exit(code int) {
             }
         }
     }
+*/
 }
 
 func (r *Proxy) Update(o types.Object) error {

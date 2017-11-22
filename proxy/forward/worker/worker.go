@@ -62,6 +62,12 @@ func (w *Worker) ID() uuid.UUID {
 
 func (w *Worker) Run() error {
 	fmt.Println("WOZAIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+
+	defer func() {
+	    w.sinceDB.Close()
+        w.client.Close()
+	}()
+
 	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output) error {
 
 		keep := true
@@ -98,15 +104,12 @@ func (w *Worker) Run() error {
 			}
 		}
 
-		w.Stop()
-		return nil
+	    return nil
 	}
 
 	return handle(w.Q, w.client, w.sinceDB)
 }
 
 func (w *Worker) Stop() {
-	w.sinceDB.Close()
-	w.client.Close()
-	return
+//    w.Q.Close()
 }

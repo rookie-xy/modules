@@ -121,6 +121,7 @@ func (r *local) Main() {
 
         case event := <-r.watcher.Events:
             if event.Op & fsnotify.Write == fsnotify.Write {
+                fmt.Println("OKKKKKKKKKKKKKKKKMENGSHIIIIIIIIIIIIIIIIIII updateeeeeeeeeeeeeeee")
                 //r.Notify(char)
                 r.Reload(char)
             }
