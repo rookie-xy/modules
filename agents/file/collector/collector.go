@@ -149,8 +149,6 @@ func (c *Collector) Run() error {
                 fmt.Printf("Read line error: %s; File: %s\n", c.scanner.Err(), c.state.Source)
             }
 
-            c.output.Close()
-
             return nil
 	    }
 
@@ -183,7 +181,7 @@ func (c *Collector) Run() error {
 }
 
 func (c *Collector) Stop() {
-
+    c.output.Close()
 }
 
 func (c *Collector) getState() file.State {
@@ -221,4 +219,3 @@ func (c *Collector) clean() {
 		fmt.Printf("Stopping collector, NOT closing file as file info not available: %s\n", c.state.Source)
 	}
 }
-

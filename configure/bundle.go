@@ -17,6 +17,7 @@ import (
   _ "github.com/rookie-xy/modules/configure/remote"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/codec"
+    "time"
 )
 
 const Name  = module.Configure
@@ -90,18 +91,29 @@ func (r *Configure) Notify(o types.Object) {
 
             if r.reload {
                 if module := adapter.ToModuleObserver(configure); module != nil {
+                    //fmt.Println("Start exit all the module ... ...")
+                   	//time.Sleep(10 * time.Second)
                    	module.Exit(0)
+
+                   	time.Sleep(10 * time.Second)
+                   	fmt.Println("All the module is exit, Start init all the module ... ...")
+                   	time.Sleep(2 * time.Second)
+
                     module.Init()
 
-                    mains = append(mains, module.Main)
+                    //mains = append(mains, module.Main)
                 }
             }
         }
 
         if length := len(mains); length > 0 {
+        	fmt.Println("All the module init is finish, Start running all the module ... ...")
+        	time.Sleep(7 * time.Second)
         	for _, main := range mains {
                 go main()
 			}
+
+			r.reload = false
         }
     }
 
@@ -170,6 +182,7 @@ func (r *Configure) Main() {
         select {
         case e := <- r.event:
             // 先通知在reload
+            fmt.Println("configure notifyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
             r.Notify(e)
         }
     }

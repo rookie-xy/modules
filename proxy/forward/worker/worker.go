@@ -111,5 +111,5 @@ func (w *Worker) Run() error {
 }
 
 func (w *Worker) Stop() {
-//    w.Q.Close()
+    w.Q.Close()
 }

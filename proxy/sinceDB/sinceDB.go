@@ -89,8 +89,6 @@ func (s *sincedb) Init() {
             s.batch = batch
         }
     }
-
-    return
 }
 
 func (s *sincedb) Main() {
@@ -124,9 +122,9 @@ func (s *sincedb) Main() {
 }
 
 func (s *sincedb) Exit(code int) {
-    //s.pipeline.Close()
-    fmt.Println("sinceDB pipeline close.......")
-	//s.client.Close()
+    s.pipeline.Close()
+	s.client.Close()
+    fmt.Println("SinceDB proxy exit ... ...")
 }
 
 func init() {

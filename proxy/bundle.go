@@ -52,6 +52,7 @@ func New(log log.Log) module.Template {
 func (r *Proxy) Init() {
     <-r.event
     fmt.Println("proxy init")
+    r.done = make(chan struct{})
 
     build := func(scope string, i types.Iterator, load module.Load) error {
         for iterator := i; iterator.Has(); iterator.Next() {
@@ -103,7 +104,7 @@ func (r *Proxy) Init() {
         }
     }
 
-    return
+    fmt.Println("Proxy bundle finish ... ...")
 }
 
 func (r *Proxy) Main() {
@@ -114,7 +115,7 @@ func (r *Proxy) Main() {
             if child != nil {
                 go child.Main()
             } else {
-                fmt.Println("error")
+                fmt.Println("proxy child is nil")
                 if i > 0 {
                     r.Exit(0)
                 }
@@ -122,7 +123,7 @@ func (r *Proxy) Main() {
             }
         }
     } else {
-        fmt.Println("ERROR")
+        fmt.Println("Not found proxy children")
         return
     }
 
@@ -136,8 +137,8 @@ func (r *Proxy) Main() {
 }
 
 func (r *Proxy) Exit(code int) {
-    defer close(r.done)
-/*
+	defer close(r.done)
+
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
             if child != nil {
@@ -145,7 +146,8 @@ func (r *Proxy) Exit(code int) {
             }
         }
     }
-*/
+
+    fmt.Println("Proxy module exit ... ...")
 }
 
 func (r *Proxy) Update(o types.Object) error {

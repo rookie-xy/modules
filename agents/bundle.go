@@ -46,11 +46,11 @@ func New(log log.Log) module.Template {
     }
 
     register.Observer(Name, new)
-
     return new
 }
 
 func (r *Agent) Update(o types.Object) error {
+	fmt.Println("ZHANGYUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
     v := value.New(o)
     if v.GetType() != types.MAP {
         return fmt.Errorf("type is no equeal map")
@@ -61,6 +61,8 @@ func (r *Agent) Update(o types.Object) error {
         if !exist {
             return fmt.Errorf("Not found agents configure")
         }
+
+        fmt.Println(val)
 
         agents.SetValue(val)
     }
@@ -73,6 +75,7 @@ func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
     fmt.Println("agents init")
+    r.done = make(chan struct{})
 
     if agents := agents.GetValue(); agents != nil {
 
@@ -99,7 +102,7 @@ func (r *Agent) Init() {
         }
     }
 
-    return
+    fmt.Println("Agents bundle finish ... ...")
 }
 
 func (r *Agent) Main() {
@@ -110,7 +113,7 @@ func (r *Agent) Main() {
             if child != nil {
                 go child.Main()
             } else {
-                fmt.Println("error")
+                fmt.Println("agent child is nil")
                 if i > 0 {
                     r.Exit(0)
                 }
@@ -118,7 +121,7 @@ func (r *Agent) Main() {
             }
         }
     } else {
-        fmt.Println("ERROR")
+        fmt.Println("Not found agent children")
         return
     }
 
@@ -139,6 +142,7 @@ func (r *Agent) Exit(code int) {
             child.Exit(code)
         }
     }
+    fmt.Println("Agent module exit ... ...")
 }
 
 func (r *Agent) Load(m module.Template) {

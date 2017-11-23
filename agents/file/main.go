@@ -30,6 +30,7 @@ type file struct {
 func New(log log.Log) module.Template {
     return &file{
         log: log,
+        done: make(chan struct{}),
     }
 }
 
@@ -152,6 +153,8 @@ func (f *file) Init() {
         return
     }
 
+    fmt.Println(paths.GetValue())
+
     configure := configure.Configure{
     	Group:    group.GetString(),
     	Type:     Type.GetString(),
@@ -209,7 +212,6 @@ func (f *file) Init() {
     }
 
     f.finder = finder
-
     return
 }
 
@@ -218,7 +220,7 @@ func (f *file) Main() {
     // 编写主要业务逻辑
     run := func(finder *finder.Finder) error {
         defer func() {
-            //close(f.done)
+            finder.Stop()
         }()
 
         finder.Find()
@@ -227,12 +229,12 @@ func (f *file) Main() {
             select {
 
             case <-f.done:
-                finder.Stop()
+                fmt.Println("Finder ticker stopped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 //r.Print("Finder ticker stopped")
                 return nil
-            case <-time.After(f.frequency):
+            //case <-time.After(f.frequency):
                 //r.Debug("finder", "Run finder")
-                finder.Find()
+            //    finder.Find()
             }
         }
 
@@ -245,7 +247,8 @@ func (f *file) Main() {
 }
 
 func (f *file) Exit(code int) {
-	close(f.done)
+    close(f.done)
+    fmt.Println("File agent exit ... ...")
 }
 
 func init() {

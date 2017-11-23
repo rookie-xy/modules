@@ -35,6 +35,7 @@ func New(log log.Log) *Finder {
     return &Finder{
         log:  log,
         jobs: job.New(log),
+        done: make(chan struct{}),
     }
 }
 
@@ -216,7 +217,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 }
 
 func (f *Finder) Stop() {
-	defer close(f.done)
+	close(f.done)
 
 	if length := f.jobs.Len(); length > 0 {
 		f.jobs.Stop()
