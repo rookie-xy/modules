@@ -12,6 +12,7 @@ import (
     "github.com/rookie-xy/hubble/configure"
 
   _ "github.com/rookie-xy/modules/agents/file"
+    "sync"
 )
 
 const Name = module.Agents
@@ -34,6 +35,7 @@ var commands = []command.Item{
 type Agent struct {
     log.Log
 
+    wg        sync.WaitGroup
     event     chan int
     children  []module.Template
     done      chan struct{}
@@ -50,7 +52,6 @@ func New(log log.Log) module.Template {
 }
 
 func (r *Agent) Update(o types.Object) error {
-	fmt.Println("ZHANGYUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
     v := value.New(o)
     if v.GetType() != types.MAP {
         return fmt.Errorf("type is no equeal map")
@@ -62,8 +63,6 @@ func (r *Agent) Update(o types.Object) error {
             return fmt.Errorf("Not found agents configure")
         }
 
-        fmt.Println(val)
-
         agents.SetValue(val)
     }
 
@@ -74,8 +73,9 @@ func (r *Agent) Update(o types.Object) error {
 func (r *Agent) Init() {
     // 等待配置更新完成的信号
     <-r.event
-    fmt.Println("agents init")
+    fmt.Println("Initialization components for agent")
     r.done = make(chan struct{})
+    r.children = []module.Template{}
 
     if agents := agents.GetValue(); agents != nil {
 
@@ -102,47 +102,47 @@ func (r *Agent) Init() {
         }
     }
 
-    fmt.Println("Agents bundle finish ... ...")
+    // debug
+    fmt.Println("Agent all component initialization completed")
 }
 
 func (r *Agent) Main() {
-    fmt.Println("Start agent modules ...")
+    fmt.Println("Run components for agent")
 
-    if len(r.children) > 0 {
-        for i, child := range r.children {
-            if child != nil {
-                go child.Main()
-            } else {
-                fmt.Println("agent child is nil")
-                if i > 0 {
-                    r.Exit(0)
-                }
-                return
-            }
-        }
-    } else {
-        fmt.Println("Not found agent children")
-        return
-    }
+    r.wg.Add(len(r.children))
 
-    for {
-        select {
-        case <-r.done:
-            fmt.Println("agent module exit")
-            return
+    for _, child := range r.children {
+        if child != nil {
+        	go func(main func()) {
+        	    defer r.wg.Done()
+
+        	    main()
+
+            }(child.Main)
         }
     }
+
+    //debug
+    fmt.Println("Agent all components have started running")
+    r.wg.Wait()
+
+    close(r.done)
 }
 
 func (r *Agent) Exit(code int) {
-    defer close(r.done)
+    defer func() {
+        <-r.done
+        fmt.Println("Agent all components have exit")
+    }()
+
+    // debug
+    fmt.Println("Exit components for agent")
 
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
             child.Exit(code)
         }
     }
-    fmt.Println("Agent module exit ... ...")
 }
 
 func (r *Agent) Load(m module.Template) {

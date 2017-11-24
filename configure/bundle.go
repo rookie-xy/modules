@@ -17,7 +17,6 @@ import (
   _ "github.com/rookie-xy/modules/configure/remote"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/codec"
-    "time"
 )
 
 const Name  = module.Configure
@@ -80,9 +79,8 @@ func (r *Configure) Attach(o observer.Observer) {
 func (r *Configure) Notify(o types.Object) {
 
     if obslen := len(r.observers); o != nil && obslen > 0 {
-    	fmt.Println("configure modulesssssssssssssssssssssssssss", obslen)
 
-        var mains []func()
+    	var inits, mains []func()
 
         for _, configure := range r.observers {
             if configure.Update(o) != nil {
@@ -91,33 +89,30 @@ func (r *Configure) Notify(o types.Object) {
 
             if r.reload {
                 if module := adapter.ToModuleObserver(configure); module != nil {
-                    //fmt.Println("Start exit all the module ... ...")
-                   	//time.Sleep(10 * time.Second)
-                   	module.Exit(0)
+                    module.Exit(0)
 
-                   	time.Sleep(10 * time.Second)
-                   	fmt.Println("All the module is exit, Start init all the module ... ...")
-                   	time.Sleep(2 * time.Second)
-
-                    module.Init()
-
-                    //mains = append(mains, module.Main)
+                    inits = append(inits, module.Init)
+                    mains = append(mains, module.Main)
                 }
             }
         }
 
+        r.reload = false
+
+        if length := len(inits); length > 0 {
+        	fmt.Println("Initialization all core components")
+        	for _, init := range inits {
+        	    init()
+			}
+        }
+
         if length := len(mains); length > 0 {
-        	fmt.Println("All the module init is finish, Start running all the module ... ...")
-        	time.Sleep(7 * time.Second)
+        	fmt.Println("Run all core components")
         	for _, main := range mains {
                 go main()
 			}
-
-			r.reload = false
         }
     }
-
-    return
 }
 
 func (r *Configure) Update(o types.Object) error {
@@ -164,8 +159,6 @@ func (r *Configure) Init() {
     } else {
         r.ValueCodec = adapter.ToValueCodec(codec)
     }
-
-    return
 }
 
 // 两件事情：
@@ -182,7 +175,6 @@ func (r *Configure) Main() {
         select {
         case e := <- r.event:
             // 先通知在reload
-            fmt.Println("configure notifyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
             r.Notify(e)
         }
     }

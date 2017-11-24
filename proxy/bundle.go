@@ -13,6 +13,7 @@ import (
 
   _ "github.com/rookie-xy/modules/proxy/forward"
   _ "github.com/rookie-xy/modules/proxy/sinceDB"
+    "sync"
 )
 
 const Name = module.Proxy
@@ -34,6 +35,8 @@ var commands = []command.Item{
 
 type Proxy struct {
     log.Log
+
+    wg        sync.WaitGroup
     event     chan int
     children  []module.Template
     done      chan struct{}
@@ -51,8 +54,9 @@ func New(log log.Log) module.Template {
 
 func (r *Proxy) Init() {
     <-r.event
-    fmt.Println("proxy init")
+    fmt.Println("Initialization components for proxy")
     r.done = make(chan struct{})
+    r.children = []module.Template{}
 
     build := func(scope string, i types.Iterator, load module.Load) error {
         for iterator := i; iterator.Has(); iterator.Next() {
@@ -104,50 +108,49 @@ func (r *Proxy) Init() {
         }
     }
 
-    fmt.Println("Proxy bundle finish ... ...")
+    // debug
+    fmt.Println("Proxy all component initialization completed")
 }
 
 func (r *Proxy) Main() {
-    fmt.Println("Start proxy modules ...")
+    fmt.Println("Run components for proxy")
 
-    if len(r.children) > 0 {
-        for i, child := range r.children {
-            if child != nil {
-                go child.Main()
-            } else {
-                fmt.Println("proxy child is nil")
-                if i > 0 {
-                    r.Exit(0)
-                }
-                return
-            }
-        }
-    } else {
-        fmt.Println("Not found proxy children")
-        return
-    }
+    r.wg.Add(len(r.children))
 
-    for {
-        select {
-        case <-r.done:
-            fmt.Println("proxy module exit")
-            return
+    for _, child := range r.children {
+        if child != nil {
+        	go func(main func()) {
+        	    defer r.wg.Done()
+
+        	    main()
+
+            }(child.Main)
         }
     }
+
+    //debug
+    fmt.Println("Proxy all components have started running")
+    r.wg.Wait()
+
+    close(r.done)
 }
 
 func (r *Proxy) Exit(code int) {
-	defer close(r.done)
+    defer func() {
+        <-r.done
+        fmt.Println("Proxy all components have exit")
+    }()
+
+    // debug
+    fmt.Println("Exit components for proxy")
 
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
-            if child != nil {
-                child.Exit(code)
-            }
+            child.Exit(code)
         }
+    } else {
+        fmt.Println("Proxy child is ", n)
     }
-
-    fmt.Println("Proxy module exit ... ...")
 }
 
 func (r *Proxy) Update(o types.Object) error {

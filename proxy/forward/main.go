@@ -68,6 +68,7 @@ func New(log log.Log) module.Template {
 }
 
 func (f *forward) Init() {
+    fmt.Println("Initialization forward component for proxy")
     key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
     pipeline, err := factory.Pipeline(key, f.log, Pipeline.GetValue())
     if err != nil {
@@ -94,8 +95,6 @@ func (f *forward) Init() {
         sinceDB.GetKey(),
        nil,
        "")
-
-    return
 }
 
 func (f *forward) Main() {
@@ -112,8 +111,11 @@ func (f *forward) Main() {
         case pipeline.ErrEmpty:
 
         default:
+            fmt.Println("Unknown error")
 
         }
+
+        fmt.Println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
 
         worker := worker.New(f.log)
         if err := worker.Init(f.client, f.sinceDB, event); err != nil {
@@ -127,10 +129,11 @@ func (f *forward) Main() {
 
 func (f *forward) Exit(code int) {
 	defer f.pipeline.Close()
-
+/*
     if length := f.jobs.Len(); length > 0 {
         f.jobs.Stop()
     }
+*/
 
     fmt.Println("Forward proxy exit ... ...")
 }

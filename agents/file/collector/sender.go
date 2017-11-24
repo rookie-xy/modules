@@ -2,6 +2,7 @@ package collector
 
 import (
 	"github.com/rookie-xy/modules/agents/file/event"
+	"fmt"
 )
 
 func (c *Collector) Publish(event *event.Event) bool {
@@ -18,7 +19,9 @@ func (c *Collector) Publish(event *event.Event) bool {
 
     if err := c.output.Sender(event); err != nil {
         return false
-    }
+    } else {
+    	fmt.Println("SENDERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRROKKKKKKKKKKKKK")
+	}
 
     return true
 }

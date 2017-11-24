@@ -21,6 +21,7 @@ import (
 const Name  = "file"
 
 type file struct {
+    configure  *configure.Configure
     finder     *finder.Finder
     frequency   time.Duration
     log         log.Log
@@ -35,7 +36,7 @@ func New(log log.Log) module.Template {
 }
 
 var (
-    frequency = command.New( module.Flag, "frequency",  3 * time.Second,  "scan frequency method" )
+    frequency = command.New( module.Flag, "frequency",  15 * time.Second,  "scan frequency method" )
     group     = command.New( module.Flag, "group",     "nginx",     "This option use to group" )
     Type      = command.New( module.Flag, "type",      "log",       "source type, this is use to find some question" )
     paths     = command.New( module.Flag, "paths",     nil,         "File path, its is manny option" )
@@ -129,6 +130,7 @@ var commands = []command.Item{
 }
 
 func (f *file) Init() {
+    fmt.Printf("Initialization %s file component for agent\n", group.GetValue().GetString())
     group, Type := group.GetValue(), Type.GetValue()
     if group == nil || Type == nil {
         return
@@ -152,8 +154,6 @@ func (f *file) Init() {
     	fmt.Println("agent source input: ", err)
         return
     }
-
-    fmt.Println(paths.GetValue())
 
     configure := configure.Configure{
     	Group:    group.GetString(),
@@ -212,11 +212,13 @@ func (f *file) Init() {
     }
 
     f.finder = finder
-    return
+    f.configure = &configure
+     // debug
+    fmt.Printf("Agent %s file component initialization completed\n", configure.Group)
 }
 
 func (f *file) Main() {
-    fmt.Println("Start agent file module ...")
+    fmt.Printf("Run %s file component for agent\n", f.configure.Group)
     // 编写主要业务逻辑
     run := func(finder *finder.Finder) error {
         defer func() {
@@ -224,17 +226,19 @@ func (f *file) Main() {
         }()
 
         finder.Find()
+        //debug
+        fmt.Printf("Agent %s file component have started running\n", f.configure.Group)
 
         for {
             select {
 
             case <-f.done:
-                fmt.Println("Finder ticker stopped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                fmt.Println("Finder ticker stopped")
                 //r.Print("Finder ticker stopped")
                 return nil
-            //case <-time.After(f.frequency):
+            case <-time.After(f.frequency):
                 //r.Debug("finder", "Run finder")
-            //    finder.Find()
+                finder.Find()
             }
         }
 
@@ -247,8 +251,9 @@ func (f *file) Main() {
 }
 
 func (f *file) Exit(code int) {
+    // debug
+    fmt.Printf("Exit %s file component for agent\n", f.configure.Group)
     close(f.done)
-    fmt.Println("File agent exit ... ...")
 }
 
 func init() {

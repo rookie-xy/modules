@@ -23,6 +23,7 @@ import (
 	"github.com/rookie-xy/modules/agents/file/source"
 	"github.com/rookie-xy/hubble/types/value"
 	"github.com/rookie-xy/hubble/codec"
+	"sync"
 )
 
 type Collector struct {
@@ -42,6 +43,9 @@ type Collector struct {
     sinceDB   proxy.Forward
     log       log.Log
 
+    once      sync.Once
+
+    done     chan struct{}
     client    bool
 }
 
@@ -50,6 +54,7 @@ func New(log log.Log) *Collector {
         log: log,
         id:  uuid.NewV4(),
         client: true,
+        done: make(chan struct{}),
     }
 }
 
@@ -114,6 +119,12 @@ func (c *Collector) Run() error {
 	}()
 
     for {
+        select {
+        case <-c.done:
+            return nil
+        default:
+		}
+
         message, keep := c.scanner.Scan()
         if !keep {
             switch c.scanner.Err() {
@@ -182,6 +193,9 @@ func (c *Collector) Run() error {
 
 func (c *Collector) Stop() {
     c.output.Close()
+    c.once.Do(func() {
+        close(c.done)
+    })
 }
 
 func (c *Collector) getState() file.State {

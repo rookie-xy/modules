@@ -16,6 +16,7 @@ import (
 	"github.com/rookie-xy/modules/agents/file/finder/utils"
 	"github.com/rookie-xy/hubble/codec"
 	"github.com/rookie-xy/hubble/prototype"
+	"sync"
 )
 
 type Finder struct {
@@ -24,6 +25,7 @@ type Finder struct {
     states  *file.States
     jobs    *job.Jobs
     done     chan struct{}
+    once     sync.Once
 
     codec    codec.Codec
     input    input.Input
@@ -122,6 +124,7 @@ func (f *Finder) Find() {
 
         }
 
+        //fmt.Println(i, info.Name())
         new, err := utils.GetState(path, info)
         if err != nil {
             fmt.Printf("Skipping source %s due to error %s\n", path, err)
@@ -217,7 +220,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 }
 
 func (f *Finder) Stop() {
-	close(f.done)
+    close(f.done)
 
 	if length := f.jobs.Len(); length > 0 {
 		f.jobs.Stop()
@@ -225,20 +228,5 @@ func (f *Finder) Stop() {
 }
 
 func (f *Finder) isExcluded(file string) bool {
-	/*
-    patterns := r.excludes.GetArray()
-    if len(patterns) > 0 {
-        for _, pattern := range patterns {
-            if matched, err := regexp.MatchString(pattern.(string), source); err != nil {
-                fmt.Println(err)
-            } else {
-                if matched {
-                    return matched
-                }
-            }
-        }
-    }
-	*/
-
     return false
 }
