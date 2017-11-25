@@ -22,6 +22,7 @@ type sincedb struct {
 
     pipeline  pipeline.Queue
     client    adapter.SinceDB
+    done      chan struct{}
 
     batch     int
 }
@@ -59,7 +60,8 @@ var commands = []command.Item{
 
 func New(l log.Log) module.Template {
     return &sincedb{
-        log: l,
+        log:  l,
+        done: make(chan struct{}),
     }
 }
 
@@ -95,13 +97,13 @@ func (s *sincedb) Main() {
     if s.client == nil || s.pipeline == nil {
         return
     }
+    defer close(s.done)
 
     fmt.Println("Start proxy sinceDB module ...")
 
     for {
         events, err := s.pipeline.Dequeues(s.batch)
         switch err {
-
         case pipeline.ErrClosed:
             fmt.Println("sinceDB proxy close ...")
             return
@@ -111,6 +113,7 @@ func (s *sincedb) Main() {
         }
 
         if events != nil {
+            // why? event is nil?
             if err := s.client.Senders(events); err != nil {
                 if err := utils.Recall(events, s.pipeline); err != nil {
                     fmt.Println("recall error ", err)
@@ -122,23 +125,15 @@ func (s *sincedb) Main() {
 }
 
 func (s *sincedb) Exit(code int) {
+    defer func() {
+        <-s.done
+        fmt.Println("SinceDB proxy component have exit")
+    }()
+
     s.pipeline.Close()
 	s.client.Close()
-    fmt.Println("SinceDB proxy exit ... ...")
 }
 
 func init() {
     register.Module(module.Proxy, Name, commands, New)
 }
-
-        /*
-        if events != nil {
-            for _, event := range events {
-            	// why? event is nil?
-                if event != nil {
-                    fileEvent := adapter.ToFileEvent(event)
-                    fmt.Println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD ", fileEvent.GetFooter().Offset)
-                }
-            }
-        }
-        */

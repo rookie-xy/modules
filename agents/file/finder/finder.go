@@ -107,6 +107,10 @@ func (f *Finder) match(file string) bool {
     return false
 }
 
+func (f *Finder) Wait() {
+	f.jobs.WaitForCompletion()
+}
+
 func (f *Finder) Find() {
     files := utils.GetFiles(f.conf.Paths)
     paths := utils.GetPaths(files)

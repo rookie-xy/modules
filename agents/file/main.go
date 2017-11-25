@@ -26,17 +26,19 @@ type file struct {
     frequency   time.Duration
     log         log.Log
     done        chan struct{}
+    quit        chan struct{}
 }
 
 func New(log log.Log) module.Template {
     return &file{
         log: log,
         done: make(chan struct{}),
+        quit: make(chan struct{}),
     }
 }
 
 var (
-    frequency = command.New( module.Flag, "frequency",  15 * time.Second,  "scan frequency method" )
+    frequency = command.New( module.Flag, "frequency",  3 * time.Second,  "scan frequency method" )
     group     = command.New( module.Flag, "group",     "nginx",     "This option use to group" )
     Type      = command.New( module.Flag, "type",      "log",       "source type, this is use to find some question" )
     paths     = command.New( module.Flag, "paths",     nil,         "File path, its is manny option" )
@@ -219,6 +221,11 @@ func (f *file) Init() {
 
 func (f *file) Main() {
     fmt.Printf("Run %s file component for agent\n", f.configure.Group)
+    defer func(finder *finder.Finder) {
+        finder.Wait()
+        close(f.done)
+    }(f.finder)
+
     // 编写主要业务逻辑
     run := func(finder *finder.Finder) error {
         defer func() {
@@ -232,7 +239,7 @@ func (f *file) Main() {
         for {
             select {
 
-            case <-f.done:
+            case <-f.quit:
                 fmt.Println("Finder ticker stopped")
                 //r.Print("Finder ticker stopped")
                 return nil
@@ -251,9 +258,14 @@ func (f *file) Main() {
 }
 
 func (f *file) Exit(code int) {
+    defer func() {
+        <-f.done
+        fmt.Println("Agent file component have exit")
+    }()
+
     // debug
     fmt.Printf("Exit %s file component for agent\n", f.configure.Group)
-    close(f.done)
+    close(f.quit)
 }
 
 func init() {

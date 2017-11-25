@@ -109,6 +109,11 @@ func (r *Agent) Init() {
 func (r *Agent) Main() {
     fmt.Println("Run components for agent")
 
+    defer func() {
+        r.wg.Wait()
+        close(r.done)
+    }()
+
     r.wg.Add(len(r.children))
 
     for _, child := range r.children {
@@ -124,9 +129,6 @@ func (r *Agent) Main() {
 
     //debug
     fmt.Println("Agent all components have started running")
-    r.wg.Wait()
-
-    close(r.done)
 }
 
 func (r *Agent) Exit(code int) {
