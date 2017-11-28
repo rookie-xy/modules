@@ -78,7 +78,7 @@ func (r *Configure) Attach(o observer.Observer) {
 
 func (r *Configure) Notify(o types.Object) {
 
-    if obslen := len(r.observers); o != nil && obslen > 0 {
+    if l := len(r.observers); o != nil && l > 0 {
 
     	var inits, mains []func()
 
@@ -99,14 +99,14 @@ func (r *Configure) Notify(o types.Object) {
 
         r.reload = false
 
-        if length := len(inits); length > 0 {
+        if l := len(inits); l > 0 {
         	fmt.Println("Initialization all core components")
         	for _, init := range inits {
         	    init()
 			}
         }
 
-        if length := len(mains); length > 0 {
+        if l := len(mains); l > 0 {
         	fmt.Println("Run all core components")
         	for _, main := range mains {
                 go main()
@@ -197,27 +197,3 @@ func (r *Configure) Load(m module.Template) {
 func init() {
     register.Module(module.Worker, Name, commands, New)
 }
-
-
-/*
-func (r *Configure) Notify(o types.Object) {
-    if o != nil {
-        r.update(o)
-    }
-
-    if r.reload {
-
-        //reload()
-    }
-    return
-}
-
-func (r *Configure) update(o types.Object) {
-    for _, observer := range r.observers {
-        if observer.Update(o) != nil {
-            break
-        }
-    }
-}
-*/
-
