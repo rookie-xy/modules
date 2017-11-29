@@ -16,7 +16,7 @@ import (
     "sync"
 )
 
-const Name = module.Proxy
+const Name = module.Proxys
 
 var (
     proxy = command.New("", Name, nil, "outputs may be many")

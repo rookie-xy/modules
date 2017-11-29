@@ -1,25 +1,24 @@
 package agents
 
 import (
-    "fmt"
+    "sync"
 
-    "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
-    "github.com/rookie-xy/hubble/log"
+    "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/types"
-    "github.com/rookie-xy/hubble/types/value"
     "github.com/rookie-xy/hubble/configure"
 
+    "github.com/rookie-xy/hubble/types"
+    "github.com/rookie-xy/hubble/types/value"
+
+    "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
+
   _ "github.com/rookie-xy/modules/agents/file"
-    "sync"
+  //  "github.com/rookie-xy/hubble/adapter"
 )
 
-const Name = module.Agents
-
-var (
-    agents = command.New(module.Flag, Name, nil, "agents may be many")
-)
+var agents = command.New(module.Flag, Name, nil, "agents may be many")
 
 var commands = []command.Item{
 
@@ -34,6 +33,7 @@ var commands = []command.Item{
 
 type Agent struct {
     log.Log
+    level     Level
 
     wg        sync.WaitGroup
     event     chan int
@@ -44,6 +44,7 @@ type Agent struct {
 func New(log log.Log) module.Template {
     new := &Agent{
         Log: log,
+        //level: adapter.ToLevelLog(log).Level(),
         event: make(chan int, 1),
     }
 
@@ -54,26 +55,30 @@ func New(log log.Log) module.Template {
 func (r *Agent) Update(o types.Object) error {
     v := value.New(o)
     if v.GetType() != types.MAP {
-        return fmt.Errorf("type is no equeal map")
+        return ErrType
     }
 
     if value := v.GetMap(); value != nil {
         val, exist := value[Name]
         if !exist {
-            return fmt.Errorf("Not found agents configure")
+            return ErrConfigure
         }
 
         agents.SetValue(val)
     }
 
+    r.log(DEBUG,"Update agents configure successful")
     r.event <- 1
+
     return nil
 }
 
 func (r *Agent) Init() {
-    // 等待配置更新完成的信号
+    r.log(DEBUG, "Waiting for a signal to configure the update")
+
     <-r.event
-    fmt.Println("Initialization components for agent")
+    r.log(DEBUG,"Initialization components for agent")
+
     r.done = make(chan struct{})
     r.children = []module.Template{}
 
@@ -84,30 +89,29 @@ func (r *Agent) Init() {
             for {
                 if build := configure.Build; build != nil {
                     if err := build(Name, iterator, r.Load); err != nil {
-                        fmt.Println("agents init error: ", err)
+                        r.log(ERROR,"Agents init error: %s\n", err)
                         r.Exit(0)
+
                         return
+
                     } else {
-                        // debug
-                        //fmt.Println("agents init not error")
+                        r.log(INFO,"Agents configure builder finish")
                         break
                     }
 
                 } else {
-                    // Debug
-                    // fmt.Println("proxy hava not init finish")
+                    r.log(WARN,"Proxy have not init finish")
                     continue
                 }
            }
         }
     }
 
-    // debug
-    fmt.Println("Agent all component initialization completed")
+    r.log(DEBUG,"Agent all component initialization completed")
 }
 
 func (r *Agent) Main() {
-    fmt.Println("Run components for agent")
+    r.log(DEBUG,"Run components for agent")
 
     defer func() {
         r.wg.Wait()
@@ -124,25 +128,32 @@ func (r *Agent) Main() {
         	    main()
 
             }(child.Main)
+
+            continue
         }
+
+        r.log(WARN, "Agent child component is nil [main stage]")
     }
 
-    //debug
-    fmt.Println("Agent all components have started running")
+    r.log(DEBUG, "Agent all components have started running")
 }
 
 func (r *Agent) Exit(code int) {
     defer func() {
         <-r.done
-        fmt.Println("Agent all components have exit")
+        r.log(DEBUG,"Agent all components have exit")
     }()
 
-    // debug
-    fmt.Println("Exit components for agent")
+    r.log(DEBUG,"Exit components for agent")
 
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
-            child.Exit(code)
+        	if child != nil {
+                child.Exit(code)
+                continue
+            }
+
+            r.log(WARN, "Agent child component is nil [exit stage]")
         }
     }
 }
@@ -151,6 +162,10 @@ func (r *Agent) Load(m module.Template) {
     if m != nil {
         r.children = append(r.children, m)
     }
+}
+
+func (r *Agent) log(l Level, f string, args ...interface{}) {
+    log.Print(r.Log, r.level, l, f, args...)
 }
 
 func init() {
