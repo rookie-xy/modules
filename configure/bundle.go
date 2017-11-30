@@ -98,11 +98,15 @@ func New(lg l.Log) module.Template {
 
     value, err := l.Parse(level.GetString(), verbose.GetBool())
     if err != nil {
+        this.Print(ERROR, err.Error())
         return nil
 	} else {
         this.Set(value)
     }
-	lg = this
+
+    adapter.ToLevelLog(lg).Copy(this)
+    lg.Output(3, "heiheiehihhhhhhhhhhhhhhhhhhhhhhhh")
+    this.Output(3, "aaaaaaaaaaaaaaa")
 
     new := &Configure{
         Log: lg,

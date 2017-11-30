@@ -2,10 +2,13 @@ package proxy
 
 import (
     "fmt"
+    "sync"
 
+    "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/configure"
@@ -13,14 +16,10 @@ import (
 
   _ "github.com/rookie-xy/modules/proxy/forward"
   _ "github.com/rookie-xy/modules/proxy/sinceDB"
-    "sync"
+    "github.com/rookie-xy/hubble/errors"
 )
 
-const Name = module.Proxys
-
-var (
-    proxy = command.New("", Name, nil, "outputs may be many")
-)
+var proxy = command.New("", Name, nil, "outputs may be many")
 
 var commands = []command.Item{
 
@@ -35,6 +34,7 @@ var commands = []command.Item{
 
 type Proxy struct {
     log.Log
+    level     Level
 
     wg        sync.WaitGroup
     event     chan int
@@ -44,7 +44,8 @@ type Proxy struct {
 
 func New(log log.Log) module.Template {
     new := &Proxy{
-        Log: log,
+        Log:   log,
+        level: adapter.ToLevelLog(log).Get(),
         event: make(chan int, 1),
     }
 
@@ -53,8 +54,11 @@ func New(log log.Log) module.Template {
 }
 
 func (r *Proxy) Init() {
+    r.log(DEBUG, "Proxy, waiting for a signal to configure the update")
+
     <-r.event
-    fmt.Println("Initialization components for proxy")
+    r.log(DEBUG,"Initialization components for proxy")
+
     r.done = make(chan struct{})
     r.children = []module.Template{}
 
@@ -75,7 +79,7 @@ func (r *Proxy) Init() {
                     if iterm := iterator.Iterm(); iterm != nil {
                         key := iterm.Key.GetString()
                         if err := command.File(scope, name, key, iterm.Value); err != nil {
-                            return fmt.Errorf("command file error ", err)
+                            return err
                         }
                     }
                 }
@@ -100,7 +104,8 @@ func (r *Proxy) Init() {
         iterator := proxy.GetIterator(nil)
         if iterator != nil {
             if err := build(Name, iterator, r.Load); err != nil {
-                fmt.Println("proxy build error ", err)
+            	r.log(ERROR,"Initialization components for proxy, " +
+            	      "proxy build error %s", err)
                 return
             }
 
@@ -108,12 +113,16 @@ func (r *Proxy) Init() {
         }
     }
 
-    // debug
-    fmt.Println("Proxy all component initialization completed")
+    r.log(DEBUG,"Proxy all component initialization completed")
 }
 
 func (r *Proxy) Main() {
-    fmt.Println("Run components for proxy")
+    r.log(DEBUG,"Run components for proxy")
+
+    defer func() {
+        r.wg.Wait()
+        close(r.done)
+    }()
 
     r.wg.Add(len(r.children))
 
@@ -125,55 +134,63 @@ func (r *Proxy) Main() {
         	    main()
 
             }(child.Main)
+
+            continue
         }
+
+        r.log(WARN, "Proxy child component is nil [main stage]")
     }
 
-    //debug
-    fmt.Println("Proxy all components have started running")
-    r.wg.Wait()
-
-    close(r.done)
+    r.log(DEBUG, "Proxy all components have started running")
 }
 
 func (r *Proxy) Exit(code int) {
     defer func() {
         <-r.done
-        fmt.Println("Proxy all components have exit")
+        r.log(DEBUG,"Proxy all components have exit")
     }()
 
-    // debug
-    fmt.Println("Exit components for proxy")
+    r.log(DEBUG,"Exit components for proxy")
 
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
-            child.Exit(code)
+        	if child != nil {
+                child.Exit(code)
+                continue
+            }
+
+            r.log(WARN, "Proxy child component is nil [exit stage]")
         }
-    } else {
-        fmt.Println("Proxy child is ", n)
     }
 }
 
 func (r *Proxy) Update(o types.Object) error {
     v := value.New(o)
     if v.GetType() != types.MAP {
-        return fmt.Errorf("TYPE is not equal map")
+        return errors.ErrType
     }
 
     if value := v.GetMap(); value != nil {
         val, exist := value[Name]
         if !exist {
-            return fmt.Errorf("Not found proxy configure")
+            return errors.ErrConfigure
         }
 
         proxy.SetValue(val)
     }
 
+    r.log(DEBUG,"Update proxys configure successful")
     r.event <- 1
+
     return nil
 }
 
 func (r *Proxy) Load(m module.Template) {
     r.children = append(r.children, m)
+}
+
+func (r *Proxy) log(l Level, f string, args ...interface{}) {
+    log.Print(r.Log, r.level, l, f, args...)
 }
 
 func init() {

@@ -1,8 +1,9 @@
 package agents
 
 import (
-    "sync"
+	"sync"
 
+    "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/register"
@@ -15,8 +16,7 @@ import (
   . "github.com/rookie-xy/hubble/log/level"
 
   _ "github.com/rookie-xy/modules/agents/file"
-  //  "github.com/rookie-xy/hubble/adapter"
-    "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/errors"
 )
 
 var agents = command.New(module.Flag, Name, nil, "agents may be many")
@@ -33,7 +33,6 @@ var commands = []command.Item{
 }
 
 type Agent struct {
-    sync.Mutex
     log.Log
     level     Level
 
@@ -57,13 +56,13 @@ func New(log log.Log) module.Template {
 func (r *Agent) Update(o types.Object) error {
     v := value.New(o)
     if v.GetType() != types.MAP {
-        return ErrType
+        return errors.ErrType
     }
 
     if value := v.GetMap(); value != nil {
         val, exist := value[Name]
         if !exist {
-            return ErrConfigure
+            return errors.ErrConfigure
         }
 
         agents.SetValue(val)
