@@ -37,21 +37,21 @@ var commands = []command.Item{
 
     { Pipeline,
       command.FILE,
-      module.Proxy,
+      module.Proxys,
       Name,
       command.SetObject,
       nil },
 
     { batch,
       command.FILE,
-      module.Proxy,
+      module.Proxys,
       Name,
       command.SetObject,
       nil },
 
     { client,
       command.FILE,
-      module.Proxy,
+      module.Proxys,
       Name,
       command.SetObject,
       nil },
@@ -135,5 +135,5 @@ func (s *sincedb) Exit(code int) {
 }
 
 func init() {
-    register.Module(module.Proxy, Name, commands, New)
+    register.Module(module.Proxys, Name, commands, New)
 }

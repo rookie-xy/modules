@@ -2,13 +2,16 @@ package configure
 
 import (
     "fmt"
+    "log"
+
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/observer"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/types"
-    "github.com/rookie-xy/hubble/log"
+  l "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
 //    "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/memento"
@@ -17,13 +20,17 @@ import (
   _ "github.com/rookie-xy/modules/configure/remote"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/codec"
+    "os"
 )
 
 const Name  = module.Configure
 
 var (
-    mode  = command.New( "-m", "mode",  "local", "Specifies how to obtain the configuration source" )
-    style = command.New( "-s", "style", "yaml", "Specifies the format of the configuration source" )
+    mode  = command.New("-m", "mode",  "local", "Specifies how to obtain the configuration source" )
+    style = command.New("-s", "style", "yaml", "Specifies the format of the configuration source" )
+    debug = command.New("-d", "debug", false,       "output detail info")
+    level = command.New("-l", "level",   "info",     "output detail info")
+    title = command.New("-t", "title",  "[hubble]", "output detail info")
 )
 
 var commands = []command.Item{
@@ -42,10 +49,31 @@ var commands = []command.Item{
       command.SetObject,
       nil },
 
+    { debug,
+      command.LINE,
+      module.Worker,
+      Name,
+      command.SetObject,
+      nil },
+
+    { level,
+      command.LINE,
+      module.Worker,
+      Name,
+      command.SetObject,
+      nil },
+
+    { title,
+      command.LINE,
+      module.Worker,
+      Name,
+      command.SetObject,
+      nil },
+
 }
 
 type Configure struct {
-    log.Log
+    l.Log
     adapter.ValueCodec
 
     reload     bool
@@ -54,15 +82,37 @@ type Configure struct {
     children   []module.Template
 }
 
-func New(log log.Log) module.Template {
+func New(lg l.Log) module.Template {
+	prefix  := title.GetValue()
+	verbose := debug.GetValue()
+	level   := level.GetValue()
+
+	this := &l.Logger{
+		Logger: log.New(
+	        os.Stderr,
+	        prefix.GetString(),
+            log.LstdFlags | log.Lmicroseconds,
+        ),
+    }
+    this.Set(INFO)
+
+    value, err := l.Parse(level.GetString(), verbose.GetBool())
+    if err != nil {
+        return nil
+	} else {
+        this.Set(value)
+    }
+	lg = this
+
     new := &Configure{
-        Log: log,
+        Log: lg,
         event: make(chan types.Object, 1),
         reload: false,
     }
 
     register.Subject(Name, new)
     register.Observer(Name, new)
+
     return new
 }
 

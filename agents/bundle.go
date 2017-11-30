@@ -16,6 +16,7 @@ import (
 
   _ "github.com/rookie-xy/modules/agents/file"
   //  "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/adapter"
 )
 
 var agents = command.New(module.Flag, Name, nil, "agents may be many")
@@ -32,6 +33,7 @@ var commands = []command.Item{
 }
 
 type Agent struct {
+    sync.Mutex
     log.Log
     level     Level
 
@@ -44,7 +46,7 @@ type Agent struct {
 func New(log log.Log) module.Template {
     new := &Agent{
         Log: log,
-        //level: adapter.ToLevelLog(log).Level(),
+        level: adapter.ToLevelLog(log).Get(),
         event: make(chan int, 1),
     }
 
