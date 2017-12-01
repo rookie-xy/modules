@@ -1,36 +1,34 @@
 package configure
 
 import (
-    "fmt"
     "log"
+    "os"
 
-    "github.com/rookie-xy/hubble/command"
-    "github.com/rookie-xy/hubble/module"
-    "github.com/rookie-xy/hubble/observer"
-    "github.com/rookie-xy/hubble/register"
-    "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/types"
-  l "github.com/rookie-xy/hubble/log"
-  . "github.com/rookie-xy/hubble/log/level"
-//    "github.com/rookie-xy/hubble/codec"
+    "github.com/rookie-xy/hubble/codec"
+    "github.com/rookie-xy/hubble/module"
+    "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/memento"
+    "github.com/rookie-xy/hubble/command"
+    "github.com/rookie-xy/hubble/factory"
+    "github.com/rookie-xy/hubble/observer"
+    "github.com/rookie-xy/hubble/register"
+
+  l "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
 
   _ "github.com/rookie-xy/modules/configure/local"
   _ "github.com/rookie-xy/modules/configure/remote"
-    "github.com/rookie-xy/hubble/plugin"
-    "github.com/rookie-xy/hubble/codec"
-    "os"
+    "sync"
 )
-
-const Name  = module.Configure
 
 var (
     mode  = command.New("-m", "mode",  "local", "Specifies how to obtain the configuration source" )
     style = command.New("-s", "style", "yaml", "Specifies the format of the configuration source" )
     debug = command.New("-d", "debug", false,       "output detail info")
     level = command.New("-l", "level",   "info",     "output detail info")
-    title = command.New("-t", "title",  "[hubble]", "output detail info")
+    title = command.New("-t", "title",  "[hubble] ", "output detail info")
 )
 
 var commands = []command.Item{
@@ -74,8 +72,11 @@ var commands = []command.Item{
 
 type Configure struct {
     l.Log
+    level  Level
     adapter.ValueCodec
 
+    done      chan struct{}
+    wg         sync.WaitGroup
     reload     bool
     observers  []observer.Observer
     event      chan types.Object
@@ -90,7 +91,7 @@ func New(lg l.Log) module.Template {
 	this := &l.Logger{
 		Logger: log.New(
 	        os.Stderr,
-	        prefix.GetString(),
+	        "[" + prefix.GetString() + "] ",
             log.LstdFlags | log.Lmicroseconds,
         ),
     }
@@ -105,11 +106,10 @@ func New(lg l.Log) module.Template {
     }
 
     adapter.ToLevelLog(lg).Copy(this)
-    lg.Output(3, "heiheiehihhhhhhhhhhhhhhhhhhhhhhhh")
-    this.Output(3, "aaaaaaaaaaaaaaa")
 
     new := &Configure{
         Log: lg,
+        level: value,
         event: make(chan types.Object, 1),
         reload: false,
     }
@@ -126,18 +126,17 @@ func (r *Configure) Attach(o observer.Observer) {
         return
     }
 
-    fmt.Println("attach error")
-    return
+    r.log(ERROR,"configure attach error")
 }
 
 func (r *Configure) Notify(o types.Object) {
 
-    if l := len(r.observers); o != nil && l > 0 {
+    if n := len(r.observers); o != nil && n > 0 {
 
     	var inits, mains []func()
-
         for _, configure := range r.observers {
-            if configure.Update(o) != nil {
+            if err := configure.Update(o); err != nil {
+                r.log(WARN, err.Error())
                 break
             }
 
@@ -150,18 +149,23 @@ func (r *Configure) Notify(o types.Object) {
                 }
             }
         }
+        if r.reload {
+            r.log(DEBUG, "Reload, All core components should be shut down")
+        }
 
         r.reload = false
 
         if l := len(inits); l > 0 {
-        	fmt.Println("Initialization all core components")
+        	r.log(DEBUG,"Reload, Initialization all core components")
+
         	for _, init := range inits {
         	    init()
 			}
         }
 
         if l := len(mains); l > 0 {
-        	fmt.Println("Run all core components")
+        	r.log(DEBUG,"Reload, Run all core components")
+
         	for _, main := range mains {
                 go main()
 			}
@@ -172,21 +176,23 @@ func (r *Configure) Notify(o types.Object) {
 func (r *Configure) Update(o types.Object) error {
     _, data, err := r.ValueDecode(o.([]byte), true)
     if err != nil {
-        return fmt.Errorf("error", data)
+        return err
     }
 
     r.event <- data
+    r.log(INFO,"Configure update, ready to load all components")
     return nil
 }
 
 func (r *Configure) Reload(o types.Object) error {
     _, data, err := r.ValueDecode(o.([]byte), true)
     if err != nil {
-        return fmt.Errorf("error", data)
+        return err
     }
 
     r.reload = true
     r.event <- data
+    r.log(INFO,"Configure reload, ready to exit and load all components")
     return nil
 }
 
@@ -198,16 +204,10 @@ func (r *Configure) Init() {
         }
     }
 
-    value := style.GetValue()
-    if value == nil {
-    	fmt.Println("style get value error")
-        return
-    }
-
+    value      := style.GetValue()
     pluginName := plugin.Flag + "." + codec.Name + "." + value.GetString()
-
     if codec, err := factory.Codec(pluginName, r.Log, nil); err != nil {
-        fmt.Println(err)
+        r.log(ERROR, err.Error())
         return
 
     } else {
@@ -215,37 +215,77 @@ func (r *Configure) Init() {
     }
 }
 
-// 两件事情：
-// 1. 解析配置，
-// 2. 加载配置，如果是第一次启动则加载配置，如果是跟新配置，则reload所有组件
+// two things:
+// 1. parsing configuration
+// 2. load configuration, if it is the first time to start loading
+//    the configuration, if it is with the new configuration, then all
+//    the components of reload
 func (r *Configure) Main() {
-    // 启动各个子模块组件
+    r.log(DEBUG,"Run components for configure")
+
+    defer func() {
+        r.wg.Wait()
+    }()
+
+    r.wg.Add(len(r.children))
     for _, child := range r.children {
-        child.Init()
-        go child.Main()
+    	if child != nil {
+    	    child.Init()
+            go func(main func()) {
+        	    defer r.wg.Done()
+        	    main()
+
+            }(child.Main)
+
+            continue
+        }
+
+        r.log(WARN, "Configure child component is nil [main stage]")
     }
 
-    for ;; {
+    r.log(DEBUG, "Configure all components have started running")
+
+    for {
         select {
         case e := <- r.event:
-            // 先通知在reload
             r.Notify(e)
+        case <- r.done:
+            r.log(INFO, "Configure main process is exit")
+            return
         }
     }
 }
 
 func (r *Configure) Exit(code int) {
-	if num := len(r.children); num > 0 {
-        for _, module := range r.children {
-            module.Exit(code)
+    defer func(children []module.Template, exit bool, code int) {
+        if exit {
+            for _, child := range children {
+                if child != nil {
+                    child.Exit(code)
+                    continue
+                }
+
+                r.log(WARN, "Configure child component is nil [exit stage]")
+            }
+
+            r.log(DEBUG, "Configure all components have exit")
         }
-    }
+
+        r.log(WARN, "Configure no components need to quit")
+    } (r.children, len(r.children) > 0, code)
+
+    r.log(INFO,"Exit components for configure")
+    close(r.done)
 }
 
 func (r *Configure) Load(m module.Template) {
     if m != nil {
         r.children = append(r.children, m)
     }
+}
+
+func (r *Configure) log(ll Level, f string, args ...interface{}) {
+    l.Print(r.Log, r.level, ll, f, args...)
 }
 
 func init() {
