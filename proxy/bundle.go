@@ -147,10 +147,10 @@ func (r *Proxy) Main() {
 func (r *Proxy) Exit(code int) {
     defer func() {
         <-r.done
-        r.log(DEBUG,"Proxy all components have exit")
+        r.log(DEBUG,"%s all components have exit", Name)
     }()
 
-    r.log(DEBUG,"Exit components for proxy")
+    r.log(INFO,"Exit components for %s", Name)
 
     if n := len(r.children); n > 0 {
         for _, child := range r.children {
@@ -159,7 +159,7 @@ func (r *Proxy) Exit(code int) {
                 continue
             }
 
-            r.log(WARN, "Proxy child component is nil [exit stage]")
+            r.log(WARN, "%s child component is nil [exit stage]", Name)
         }
     }
 }

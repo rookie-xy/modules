@@ -2,7 +2,7 @@ package collector
 
 import (
 	"github.com/rookie-xy/modules/agents/file/event"
-	"fmt"
+	"github.com/rookie-xy/hubble/log/level"
 )
 
 func (c *Collector) Publish(event *event.Event) bool {
@@ -20,7 +20,7 @@ func (c *Collector) Publish(event *event.Event) bool {
     if err := c.output.Sender(event); err != nil {
         return false
     } else {
-    	fmt.Println("SENDERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRROKKKKKKKKKKKKK")
+        c.log(level.DEBUG, "Publish ok")
 	}
 
     return true

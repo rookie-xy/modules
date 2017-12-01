@@ -1,12 +1,12 @@
 package forward
 
 import (
-    "fmt"
     "strings"
 
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
     "github.com/rookie-xy/hubble/register"
     "github.com/rookie-xy/hubble/factory"
     "github.com/rookie-xy/hubble/plugin"
@@ -14,12 +14,14 @@ import (
     "github.com/rookie-xy/hubble/job"
 
     "github.com/rookie-xy/modules/proxy/forward/worker"
+    "github.com/rookie-xy/hubble/adapter"
 )
 
 const Name  = "forward"
 
 type forward struct {
-    log        log.Log
+    log.Log
+    level      Level
 
     pipeline   pipeline.Queue
     jobs      *job.Jobs
@@ -63,18 +65,20 @@ var commands = []command.Item{
 
 func New(log log.Log) module.Template {
     return &forward{
-        log:  log,
+        Log:  log,
+        level: adapter.ToLevelLog(log).Get(),
         jobs: job.New(log),
         done: make(chan struct{}),
     }
 }
 
 func (f *forward) Init() {
-    fmt.Println("Initialization forward component for proxy")
+    f.log(DEBUG, Name +"; init component for proxy")
+
     key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, f.log, Pipeline.GetValue())
+    pipeline, err := factory.Pipeline(key, f.Log, Pipeline.GetValue())
     if err != nil {
-        fmt.Println("pipeline error ", err)
+        f.log(ERROR, Name +"; pipeline error ", err)
         return
     } else {
         f.pipeline = pipeline
@@ -100,7 +104,8 @@ func (f *forward) Init() {
 }
 
 func (f *forward) Main() {
-    fmt.Println("Start proxy forward module ... ", f.name, f.client.GetKey())
+    f.log(INFO, Name +"; run component for %s", f.name)
+
     defer func(jobs *job.Jobs) {
         jobs.WaitForCompletion()
         close(f.done)
@@ -110,17 +115,18 @@ func (f *forward) Main() {
         event, err := f.pipeline.Dequeue()
         switch err {
         case pipeline.ErrClosed:
-        	fmt.Println("forwarder close ...")
+        	f.log(INFO, Name +"; close for %s, %s", f.name, pipeline.ErrClosed)
         	return
 
         case pipeline.ErrEmpty:
+            f.log(INFO, Name +"; empty for %s, %s", f.name, pipeline.ErrEmpty)
         default:
-            fmt.Println("Unknown error")
+            f.log(WARN, Name +"; unknown queue event")
         }
 
-        worker := worker.New(f.log)
-        if err := worker.Init(f.client, f.sinceDB, event); err != nil {
-            fmt.Println(err)
+        worker := worker.New(f.Log)
+        if err := worker.Init(f.client, f.sinceDB, event, f.log); err != nil {
+            f.log(WARN, Name + "; %s", err.Error())
             return
         }
 
@@ -131,15 +137,20 @@ func (f *forward) Main() {
 func (f *forward) Exit(code int) {
     defer func() {
         <-f.done
-        fmt.Println("Forward proxy component have exit")
+        f.log(DEBUG,"%s component have exit", Name)
     }()
 
+    f.log(INFO,"Exit component for %s", Name)
     f.pipeline.Close()
 /*
     if length := f.jobs.Len(); length > 0 {
         f.jobs.Stop()
     }
 */
+}
+
+func (f *forward) log(l Level, fmt string, args ...interface{}) {
+    log.Print(f.Log, f.level, l, fmt, args...)
 }
 
 func init() {

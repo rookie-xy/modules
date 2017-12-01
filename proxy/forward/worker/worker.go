@@ -8,23 +8,25 @@ import (
     "github.com/rookie-xy/hubble/log"
 	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/hubble/output"
-	"fmt"
 	"github.com/rookie-xy/hubble/pipeline"
 	"github.com/rookie-xy/hubble/adapter"
 	"github.com/rookie-xy/hubble/command"
 	"github.com/rookie-xy/hubble/event"
 	"github.com/rookie-xy/hubble/types/value"
+  . "github.com/rookie-xy/hubble/log/level"
 )
 
 type Worker struct {
     sync.Mutex
     id        uuid.UUID
+    name      string
 
     Q         pipeline.Queue
     client    proxy.Forward
     sinceDB   output.Output
 
     log  log.Log
+    logf  log.Factory
 }
 
 func New(log log.Log) *Worker {
@@ -34,7 +36,8 @@ func New(log log.Log) *Worker {
 	}
 }
 
-func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) error {
+func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event, logf log.Factory) error {
+	w.name = pclient.GetKey()
     key := pclient.GetFlag() + "." + pclient.GetKey()
     client, err := factory.Client(key, w.log, pclient.GetValue())
     if err != nil {
@@ -49,6 +52,7 @@ func (w *Worker) Init(pclient, psinceDB *command.Command, event event.Event) err
         sinceDB.Sender(nil)
     }
 
+    w.logf = logf
 	w.client = client
     w.sinceDB = sinceDB
 	w.Q = adapter.ToPipelineEvent(event)
@@ -61,28 +65,28 @@ func (w *Worker) ID() uuid.UUID {
 }
 
 func (w *Worker) Run() error {
-	fmt.Println("WOZAIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+    w.logf(DEBUG,"worker running for %s", w.name)
 
 	defer func() {
 	    w.sinceDB.Close()
         w.client.Close()
 	}()
 
-	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output) error {
+	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output, log log.Factory) error {
 
 		keep := true
-
 		for {
 			event, err := Q.Dequeue()
 			switch err {
 
 			case pipeline.ErrClosed:
-				fmt.Println("CHANNELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL CLOSE")
 				keep = false
+				log(INFO, "forward worker; close %s", pipeline.ErrClosed)
 
 			case pipeline.ErrEmpty:
-
+				log(INFO, "forward worker; empty %s", pipeline.ErrEmpty)
 			default:
+				log(WARN, "forward worker; unknown queue event")
 			}
 
 			if !keep {
@@ -91,15 +95,14 @@ func (w *Worker) Run() error {
 
 			if err := client.Sender(event); err != nil {
 				if err = Q.Requeue(event); err != nil {
-                    //w.log.Print("aaa")
-					fmt.Println("recall error ", err)
+					log(ERROR,"worker; recall error: %s", err)
 					return err
 				}
 				continue
 			}
 
 			if err := sinceDB.Sender(event); err != nil {
-				fmt.Println("sinceDB sender error ", err)
+                log(ERROR, "worker; sinceDB sender error: %s", err)
 				return err
 			}
 		}
@@ -107,9 +110,10 @@ func (w *Worker) Run() error {
 	    return nil
 	}
 
-	return handle(w.Q, w.client, w.sinceDB)
+	return handle(w.Q, w.client, w.sinceDB, w.logf)
 }
 
 func (w *Worker) Stop() {
+	w.logf(DEBUG, "worker stop for %v", w.id)
     w.Q.Close()
 }

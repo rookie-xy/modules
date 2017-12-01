@@ -7,16 +7,18 @@ import (
 
 	"github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/models/file"
+    "github.com/rookie-xy/hubble/log"
+  . "github.com/rookie-xy/hubble/log/level"
 )
 
-func GetFiles(v types.Value) map[string]os.FileInfo {
+func GetFiles(v types.Value, log log.Factory) map[string]os.FileInfo {
     files := map[string]os.FileInfo{}
     paths := v.GetArray()
 
     for _, path := range paths {
         matches, err := filepath.Glob(path.(string))
         if err != nil {
-            fmt.Printf("glob(%s) failed: %v\n", path, err)
+            log(ERROR,"glob(%s) failed: %v", path, err)
             continue
         }
 
@@ -34,18 +36,18 @@ func GetFiles(v types.Value) map[string]os.FileInfo {
             // Fetch Lstat File info to detected also symlinks
             fileInfo, err := os.Lstat(file)
             if err != nil {
-                fmt.Printf("Finder lstat(%s) failed: %s\n", file, err)
+                log(ERROR,"Finder lstat(%s) failed: %s", file, err)
                 continue
             }
 
             if fileInfo.IsDir() {
-                fmt.Printf("Finder Skipping directory: %s\n", file)
+                log(WARN,"Finder Skipping directory: %s", file)
                 continue
             }
 
             isSymlink := fileInfo.Mode() & os.ModeSymlink > 0
             if isSymlink {
-                fmt.Printf("Finder ile %s skipped as it is a symlink.\n", file)
+                log(WARN,"Finder ile %s skipped as it is a symlink", file)
                 continue
             }
 
@@ -53,7 +55,7 @@ func GetFiles(v types.Value) map[string]os.FileInfo {
 								    // In case of a symlink, the original inode is fetched
             fileInfo, err = os.Stat(file)
             if err != nil {
-                fmt.Printf("Finder stat(%s) failed: %s\n", file, err)
+                log(ERROR,"Finder stat(%s) failed: %s", file, err)
                 continue
             }
 
@@ -84,7 +86,7 @@ func GetPaths(files map[string]os.FileInfo) []string {
     return keys
 }
 
-func GetState(path string, fi os.FileInfo) (file.State, error) {
+func GetState(path string, fi os.FileInfo, log log.Factory) (file.State, error) {
     var err error
     var absolutePath string
 
@@ -93,7 +95,7 @@ func GetState(path string, fi os.FileInfo) (file.State, error) {
         return file.State{}, fmt.Errorf("could not fetch abs path for source %s: %s", absolutePath, err)
     }
 
-    fmt.Printf("Finder check source for collecting: %s\n", absolutePath)
+    log(DEBUG,"Finder check source for collecting: %s", absolutePath)
 
     state := file.New()
     if err := state.Init(absolutePath, fi); err != nil {
@@ -102,18 +104,3 @@ func GetState(path string, fi os.FileInfo) (file.State, error) {
 
     return state, nil
 }
-
-//import "github.com/rookie-xy/modules/agents/log/match"
-
-// MatchAny checks if the text matches any of the regular expressions
-/*
-func MatchAny(matchers []match.Matcher, source string) bool {
-    for _, m := range matchers {
-        if m.MatchString(source) {
-            return true
-        }
-    }
-
-    return false
-}
-*/

@@ -1,7 +1,6 @@
 package file
 
 import (
-    "fmt"
     "time"
 
     "github.com/rookie-xy/hubble/command"
@@ -16,6 +15,7 @@ import (
     "github.com/rookie-xy/hubble/adapter"
     Output "github.com/rookie-xy/hubble/output"
     "github.com/rookie-xy/hubble/types/value"
+  .  "github.com/rookie-xy/hubble/log/level"
 )
 
 const Name  = "file"
@@ -24,14 +24,16 @@ type file struct {
     configure  *configure.Configure
     finder     *finder.Finder
     frequency   time.Duration
-    log         log.Log
+    log.Log
+    level       Level
     done        chan struct{}
     quit        chan struct{}
 }
 
 func New(log log.Log) module.Template {
     return &file{
-        log: log,
+        Log: log,
+        level: adapter.ToLevelLog(log).Get(),
         done: make(chan struct{}),
         quit: make(chan struct{}),
     }
@@ -132,7 +134,8 @@ var commands = []command.Item{
 }
 
 func (f *file) Init() {
-    fmt.Printf("Initialization %s file component for agent\n", group.GetValue().GetString())
+    f.log(DEBUG,"Initialization %s file component for agent\n", group.GetValue().GetString())
+
     group, Type := group.GetValue(), Type.GetValue()
     if group == nil || Type == nil {
         return
@@ -144,16 +147,16 @@ func (f *file) Init() {
     }
 
     key := codec.GetFlag() + "." + codec.GetKey()
-    codec, err := factory.Codec(key, f.log, codec.GetValue())
+    codec, err := factory.Codec(key, f.Log, codec.GetValue())
     if err != nil {
-    	fmt.Println("agent source codec: ", err)
+        f.log(ERROR, Name +"; codec: %s", err)
         return
     }
 
     pluginName := input.GetFlag() + "." + input.GetKey()
-    input, err := factory.Input(pluginName, f.log, input.GetValue())
+    input, err := factory.Input(pluginName, f.Log, input.GetValue())
     if err != nil {
-    	fmt.Println("agent source input: ", err)
+    	f.log(ERROR, Name +"; input: %s", err)
         return
     }
 
@@ -165,7 +168,7 @@ func (f *file) Init() {
     }
 
     if limit, err := limit.GetUint64(); err != nil {
-        fmt.Println(err)
+        f.log(ERROR, Name +"; limit: %s", err)
         return
     } else {
         configure.Limit = limit
@@ -193,7 +196,7 @@ func (f *file) Init() {
 
     if value := frequency.GetValue(); value != nil {
         if duration, err := value.GetDuration(); err != nil {
-        	fmt.Println(err)
+        	f.log(ERROR, Name +"; duration: %s", err)
         	return
         } else {
             f.frequency = duration
@@ -201,50 +204,48 @@ func (f *file) Init() {
     }
 
  	key = sinceDB.GetFlag() + "." + Output.Name + "." + "sinceDB"
-    sinceDB, err := factory.Output(key, f.log, value.New(sinceDB.GetKey()))
+    sinceDB, err := factory.Output(key, f.Log, value.New(sinceDB.GetKey()))
     if err != nil {
-        fmt.Println("agent file sinceDB: ", err)
+        f.log(ERROR, Name +"; sinceDB: %s", err)
         return
     }
 
-    finder := finder.New(f.log)
-    if err := finder.Init(input, codec, &configure, adapter.FileSinceDB(sinceDB)); err != nil {
-        fmt.Println("agent file finder init: ", err)
+    finder := finder.New(f.Log)
+    if err := finder.Init(input, codec, &configure, adapter.FileSinceDB(sinceDB), f.log); err != nil {
+        f.log(ERROR, Name +"; finder init: %s", err)
         return
     }
 
     f.finder = finder
     f.configure = &configure
-     // debug
-    fmt.Printf("Agent %s file component initialization completed\n", configure.Group)
+
+    f.log(DEBUG, Name +"; Agent %s file component initialization completed", configure.Group)
 }
 
 func (f *file) Main() {
-    fmt.Printf("Run %s file component for agent\n", f.configure.Group)
+    f.log(DEBUG, Name +"; Run %s file component for agent\n", f.configure.Group)
+
     defer func(finder *finder.Finder) {
         finder.Wait()
         close(f.done)
     }(f.finder)
 
-    // 编写主要业务逻辑
     run := func(finder *finder.Finder) error {
         defer func() {
             finder.Stop()
         }()
 
         finder.Find()
-        //debug
-        fmt.Printf("Agent %s file component have started running\n", f.configure.Group)
 
+        f.log(DEBUG, Name +"; Agent %s file component have started running\n", f.configure.Group)
         for {
             select {
 
             case <-f.quit:
-                fmt.Println("Finder ticker stopped")
-                //r.Print("Finder ticker stopped")
+                f.log(INFO, Name +"; Finder ticker stopped")
                 return nil
             case <-time.After(f.frequency):
-                //r.Debug("finder", "Run finder")
+                f.log(DEBUG, Name +"; Run finder")
                 finder.Find()
             }
         }
@@ -253,19 +254,23 @@ func (f *file) Main() {
     }
 
     if err := run(f.finder); err != nil {
-        fmt.Println(err)
+        f.log(ERROR, Name +"; finder: %s", err)
+        return
     }
 }
 
 func (f *file) Exit(code int) {
     defer func() {
         <-f.done
-        fmt.Println("Agent file component have exit")
+        f.log(DEBUG, Name +"; Agent file component have exit")
     }()
 
-    // debug
-    fmt.Printf("Exit %s file component for agent\n", f.configure.Group)
+    f.log(INFO, Name +"; Exit %s file component for agent", f.configure.Group)
     close(f.quit)
+}
+
+func (f *file) log(l Level, fmt string, args ...interface{}) {
+    log.Print(f.Log, f.level, l, fmt, args...)
 }
 
 func init() {

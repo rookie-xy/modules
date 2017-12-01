@@ -1,8 +1,6 @@
 package sinceDB
 
 import (
-//    "fmt"
-
     "github.com/rookie-xy/hubble/command"
     "github.com/rookie-xy/hubble/module"
     "github.com/rookie-xy/hubble/log"
@@ -11,14 +9,17 @@ import (
     "github.com/rookie-xy/hubble/pipeline"
     "github.com/rookie-xy/hubble/plugin"
     "github.com/rookie-xy/hubble/adapter"
-    "fmt"
     "github.com/rookie-xy/modules/proxy/sinceDB/utils"
+  . "github.com/rookie-xy/hubble/log/level"
 )
 
 const Name  = "sinceDB"
 
 type sincedb struct {
-    log       log.Log
+    log.Log
+    level     Level
+
+    name      string
 
     pipeline  pipeline.Queue
     client    adapter.SinceDB
@@ -58,28 +59,30 @@ var commands = []command.Item{
 
 }
 
-func New(l log.Log) module.Template {
+func New(log log.Log) module.Template {
     return &sincedb{
-        log:  l,
+        Log:  log,
+        level: adapter.ToLevelLog(log).Get(),
         done: make(chan struct{}),
     }
 }
 
 func (s *sincedb) Init() {
     key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, s.log, Pipeline.GetValue())
+    pipeline, err := factory.Pipeline(key, s.Log, Pipeline.GetValue())
     if err != nil {
-        fmt.Println("pipeline error ", err)
+        s.log(ERROR, Name +"; pipeline error %s", err)
         return
     } else {
         s.pipeline = pipeline
     }
+    s.name = client.GetKey()
 
     register.Queue(client.GetKey(), pipeline)
 
     key = client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, s.log, client.GetValue()); err != nil {
-        fmt.Println("client error ", err)
+    if client, err := factory.Client(key, s.Log, client.GetValue()); err != nil {
+        s.log(ERROR, Name +"; client error ", err)
         return
     } else {
         s.client = adapter.FileSinceDB(client)
@@ -94,29 +97,28 @@ func (s *sincedb) Init() {
 }
 
 func (s *sincedb) Main() {
-    if s.client == nil || s.pipeline == nil {
-        return
-    }
-    defer close(s.done)
+	s.log(INFO, Name +"; run component for %s", s.name)
 
-    fmt.Println("Start proxy sinceDB module ...")
+    defer close(s.done)
 
     for {
         events, err := s.pipeline.Dequeues(s.batch)
         switch err {
         case pipeline.ErrClosed:
-            fmt.Println("sinceDB proxy close ...")
+        	s.log(INFO, Name +"; close for %s, %s", s.name, pipeline.ErrClosed)
             return
 
         case pipeline.ErrEmpty:
+            s.log(INFO, Name +"; empty for %s, %s", s.name, pipeline.ErrEmpty)
         default:
+            s.log(WARN, Name +"; unknown queue event")
         }
 
         if events != nil {
             // why? event is nil?
             if err := s.client.Senders(events); err != nil {
                 if err := utils.Recall(events, s.pipeline); err != nil {
-                    fmt.Println("recall error ", err)
+                    s.log(ERROR, Name +"; recall error: %s", err)
                     return
                 }
             }
@@ -127,11 +129,16 @@ func (s *sincedb) Main() {
 func (s *sincedb) Exit(code int) {
     defer func() {
         <-s.done
-        fmt.Println("SinceDB proxy component have exit")
+        s.log(DEBUG,"%s component have exit", Name)
     }()
 
+    s.log(INFO,"Exit component for %s", Name)
     s.pipeline.Close()
 	s.client.Close()
+}
+
+func (s *sincedb) log(l Level, fmt string, args ...interface{}) {
+    log.Print(s.Log, s.level, l, fmt, args...)
 }
 
 func init() {
