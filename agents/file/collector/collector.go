@@ -64,7 +64,7 @@ func New(log log.Log) *Collector {
 func (c *Collector) Init(input input.Input, codec codec.Codec, state file.State,
 	                     states *file.States, conf *configure.Configure) error {
 	var err error
-    source, err := source.New(state)
+    source, err := source.New(state, c.log)
     if err != nil {
         return err
     }

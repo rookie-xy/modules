@@ -4,17 +4,23 @@ import (
     "fmt"
     "os"
     "errors"
+
+  . "github.com/rookie-xy/hubble/log/level"
+
+    "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/models/file"
 )
 
 type Source struct {
 	*os.File
-    state file.State
+
+    state  file.State
+    log    log.Factory
 }
 
 func (Source) Continuable() bool { return true }
 
-func New(state file.State) (*Source, error) {
+func New(state file.State, log log.Factory) (*Source, error) {
 	f, err := Open(state.Source)
 	if err != nil {
 		return nil, fmt.Errorf("Failed opening %s: %s", state.Source, err)
@@ -22,18 +28,18 @@ func New(state file.State) (*Source, error) {
 
     source := &Source{
     	state: state,
+    	log:   log,
     }
 
-    if err := source.Validate(f); err != nil {
+    if err := source.validate(f); err != nil {
     	return nil, err
 	}
-
 	source.File = f
 
     return source, nil
 }
 
-func (s *Source) Validate(f *os.File) error {
+func (s *Source) validate(f *os.File) error {
 	info, err := f.Stat()
 	if err != nil {
 		return fmt.Errorf("Failed getting stats for source %s: %s", s.state.Source, err)
@@ -53,8 +59,8 @@ func (s *Source) Validate(f *os.File) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Collector setting offset for source: %s. offset: %d\n", s.state.Source, offset)
+    fmt.Println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+	s.log(DEBUG, "Collector setting offset for source: %s. offset: %d", s.state.Source, offset)
 	s.state.Offset = offset
 
 	return nil
@@ -63,12 +69,11 @@ func (s *Source) Validate(f *os.File) error {
 func (s *Source) offset(file *os.File) (int64, error) {
 	// continue from last known offset
 	if s.state.Offset > 0 {
-		fmt.Printf("Collector set previous offset for source: %s. Offset: %d\n", s.state.Source, s.state.Offset)
+        s.log(DEBUG,"Collector set previous offset for source: %s. Offset: %d", s.state.Source, s.state.Offset)
 		return file.Seek(s.state.Offset, os.SEEK_SET)
 	}
 
 	// get offset from source in case of encoding factory was required to read some data.
-	fmt.Printf("Collector setting offset for source based on seek: %s\n", s.state.Source)
-
+	s.log(DEBUG,"Collector setting offset for source based on seek: %s\n", s.state.Source)
 	return file.Seek(0, os.SEEK_CUR)
 }
