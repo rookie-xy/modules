@@ -59,7 +59,7 @@ func (s *Source) validate(f *os.File) error {
 	if err != nil {
 		return err
 	}
-    fmt.Println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+
 	s.log(DEBUG, "Collector setting offset for source: %s. offset: %d", s.state.Source, offset)
 	s.state.Offset = offset
 

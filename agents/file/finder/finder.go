@@ -29,7 +29,7 @@ type Finder struct {
     done     chan struct{}
     once     sync.Once
 
-    codec    codec.Codec
+    decoder  codec.Decoder
     input    input.Input
     level    Level
     log      log.Log
@@ -45,14 +45,14 @@ func New(log log.Log) *Finder {
     }
 }
 
-func (f *Finder) Init(input input.Input, codec codec.Codec,
+func (f *Finder) Init(input input.Input, decoder codec.Decoder,
 	                  conf *configure.Configure, sinceDB adapter.SinceDB, logf log.Factory) error {
 	f.logf = logf
 	f.conf = conf
-    f.states = file.News()
+    f.states = file.News(f.logf)
 
-    f.codec = codec
-    f.input = input
+    f.decoder = decoder
+    f.input   = input
 
     if states := sinceDB.Load(); states != nil {
         if err := f.load(states); err != nil {
@@ -158,11 +158,11 @@ func (f *Finder) startCollector(state file.State, offset int64) error {
     state.Finished = false
     state.Offset = offset
 
-    input := prototype.Input(f.input)
-    codec := prototype.Codec(f.codec)
+    input   := prototype.Input(f.input)
+    decoder := prototype.Decoder(f.decoder)
 
     collector := collector.New(f.log)
-    if err := collector.Init(input, codec, state, f.states, f.conf); err != nil {
+    if err := collector.Init(input, decoder, state, f.states, f.conf); err != nil {
         return err
     }
 

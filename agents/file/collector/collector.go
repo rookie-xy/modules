@@ -61,7 +61,7 @@ func New(log log.Log) *Collector {
     }
 }
 
-func (c *Collector) Init(input input.Input, codec codec.Codec, state file.State,
+func (c *Collector) Init(input input.Input, decoder codec.Decoder, state file.State,
 	                     states *file.States, conf *configure.Configure) error {
 	var err error
     source, err := source.New(state, c.log)
@@ -74,7 +74,7 @@ func (c *Collector) Init(input input.Input, codec codec.Codec, state file.State,
 	}
 
     scanner := scanner.New(input)
-    if err := scanner.Init(codec, state); err != nil {
+    if err := scanner.Init(decoder, state); err != nil {
     	return err
 	}
 

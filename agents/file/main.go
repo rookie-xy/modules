@@ -147,7 +147,7 @@ func (f *file) Init() {
     }
 
     key := codec.GetFlag() + "." + codec.GetKey()
-    codec, err := factory.Codec(key, f.Log, codec.GetValue())
+    decoder, err := factory.Decoder(key, f.Log, codec.GetValue())
     if err != nil {
         f.log(ERROR, Name +"; codec: %s", err)
         return
@@ -211,11 +211,10 @@ func (f *file) Init() {
     }
 
     finder := finder.New(f.Log)
-    if err := finder.Init(input, codec, &configure, adapter.FileSinceDB(sinceDB), f.log); err != nil {
+    if err := finder.Init(input, decoder, &configure, adapter.FileSinceDB(sinceDB), f.log); err != nil {
         f.log(ERROR, Name +"; finder init: %s", err)
         return
     }
-
     f.finder = finder
     f.configure = &configure
 

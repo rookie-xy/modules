@@ -73,9 +73,10 @@ var commands = []command.Item{
 type Configure struct {
     l.Log
     level  Level
-    adapter.ValueCodec
+//    adapter.ValueCodec
 
-    done      chan struct{}
+    codec      codec.Codec
+    done       chan struct{}
     wg         sync.WaitGroup
     reload     bool
     observers  []observer.Observer
@@ -174,7 +175,7 @@ func (r *Configure) Notify(o types.Object) {
 }
 
 func (r *Configure) Update(o types.Object) error {
-    _, data, err := r.ValueDecode(o.([]byte), true)
+    data, err := r.codec.Decode(o.([]byte))
     if err != nil {
         return err
     }
@@ -185,7 +186,7 @@ func (r *Configure) Update(o types.Object) error {
 }
 
 func (r *Configure) Reload(o types.Object) error {
-    _, data, err := r.ValueDecode(o.([]byte), true)
+	data, err := r.codec.Decode(o.([]byte))
     if err != nil {
         return err
     }
@@ -204,14 +205,14 @@ func (r *Configure) Init() {
         }
     }
 
-    value      := style.GetValue()
-    pluginName := plugin.Flag + "." + codec.Name + "." + value.GetString()
-    if codec, err := factory.Codec(pluginName, r.Log, nil); err != nil {
-        r.log(ERROR, err.Error())
-        return
-
+    value := style.GetValue()
+    if domain, ok := plugin.Domain(codec.Name, value.GetString()); ok {
+        var err error
+        if r.codec, err = factory.Codec(domain, r.Log, nil); err != nil {
+            r.log(ERROR, err.Error())
+        }
     } else {
-        r.ValueCodec = adapter.ToValueCodec(codec)
+        r.log(ERROR, "plugin domain failure")
     }
 }
 

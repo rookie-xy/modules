@@ -8,6 +8,7 @@ import (
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
     "github.com/rookie-xy/modules/agents/file/message"
+    "github.com/rookie-xy/hubble/adapter"
 )
 
 type Scanner struct {
@@ -24,14 +25,13 @@ func New(s input.Input) *Scanner {
     return scanner
 }
 
-func (s *Scanner) Init(codec codec.Codec, state file.State) error {
-    if codec == nil || state.IsEmpty() {
-        return errors.New("state is empty or codec is nil")
+func (s *Scanner) Init(decoder codec.Decoder, state file.State) error {
+    if decoder == nil || state.IsEmpty() {
+        return errors.New("state is empty or decoder is nil")
     }
 
     s.id = state.Lno
-    s.Split(codec.Decode)
-
+    s.Split(adapter.ToLogDecoder(decoder).LogDecode)
     return nil
 }
 
