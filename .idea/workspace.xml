@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="38c81af8-45c7-4658-8dcb-0ac123f5abb4" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/agents/file/collector/collector.go" afterPath="$PROJECT_DIR$/agents/file/collector/collector.go" />
-      <change beforePath="$PROJECT_DIR$/agents/file/collector/sender.go" afterPath="$PROJECT_DIR$/agents/file/collector/sender.go" />
-      <change beforePath="$PROJECT_DIR$/agents/file/finder/finder.go" afterPath="$PROJECT_DIR$/agents/file/finder/finder.go" />
-      <change beforePath="$PROJECT_DIR$/agents/file/main.go" afterPath="$PROJECT_DIR$/agents/file/main.go" />
-      <change beforePath="$PROJECT_DIR$/agents/file/scanner/scanner.go" afterPath="$PROJECT_DIR$/agents/file/scanner/scanner.go" />
-      <change beforePath="$PROJECT_DIR$/agents/file/source/source.go" afterPath="$PROJECT_DIR$/agents/file/source/source.go" />
-      <change beforePath="$PROJECT_DIR$/configure/bundle.go" afterPath="$PROJECT_DIR$/configure/bundle.go" />
-    </list>
+    <list default="true" id="38c81af8-45c7-4658-8dcb-0ac123f5abb4" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -200,8 +191,8 @@
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="65" />
     <option name="y" value="24" />
-    <option name="width" value="1280" />
-    <option name="height" value="714" />
+    <option name="width" value="1301" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
