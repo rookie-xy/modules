@@ -174,24 +174,23 @@ func (f *file) Init() {
         configure.Limit = limit
     }
 
-    if value := client.GetValue(); value != nil {
-   	    configure.Client = command.New(
-            client.GetFlag(),
-            client.GetKey(),
-            client.GetObject(),
-           "")
+    if key, ok := plugin.Name(output.GetKey()); ok {
+        configure.Output, err = factory.Output(key, f.Log, output.GetValue())
+        if err != nil {
+            f.log(ERROR, Name+"; output: %s", err)
+            return
+        }
+    }
 
-        configure.SinceDB = command.New(
-            sinceDB.GetFlag(),
-            sinceDB.GetKey(),
-            sinceDB.GetObject(),
-           "")
-    } else {
-   	    configure.Output = command.New(
-            output.GetFlag(),
-            output.GetKey(),
-            output.GetObject(),
-           "")
+    if value := client.GetValue(); value != nil {
+        if key, ok := plugin.Name(client.GetKey()); ok {
+            configure.Client, err = factory.Client(key, f.Log, client.GetValue())
+            if err != nil {
+                f.log(ERROR, Name+"; client: %s", err)
+                return
+            }
+        }
+        configure.client = false
     }
 
     if value := frequency.GetValue(); value != nil {
@@ -273,5 +272,5 @@ func (f *file) log(l Level, fmt string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Agents, Name, commands, New)
+    register.Component(module.Agents, Name, commands, New)
 }

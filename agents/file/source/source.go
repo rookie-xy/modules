@@ -9,6 +9,7 @@ import (
 
     "github.com/rookie-xy/hubble/log"
     "github.com/rookie-xy/hubble/models/file"
+	"github.com/rookie-xy/modules/agents/file/utils"
 )
 
 type Source struct {
@@ -21,7 +22,7 @@ type Source struct {
 func (Source) Continuable() bool { return true }
 
 func New(state file.State, log log.Factory) (*Source, error) {
-	f, err := Open(state.Source)
+	f, err := utils.Open(state.Source)
 	if err != nil {
 		return nil, fmt.Errorf("Failed opening %s: %s", state.Source, err)
 	}

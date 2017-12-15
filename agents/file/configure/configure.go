@@ -4,6 +4,8 @@ import (
     "github.com/rookie-xy/hubble/types"
     "github.com/rookie-xy/hubble/command"
     "time"
+    "github.com/rookie-xy/hubble/output"
+    "github.com/rookie-xy/hubble/proxy"
 )
 
 type Configure struct {
@@ -14,7 +16,7 @@ type Configure struct {
     Limit     uint64
     Expire    time.Duration
 
-    Client    *command.Command
-    Output    *command.Command
-    SinceDB   *command.Command
+    Client    proxy.Forward
+    Output    output.Output
+    SinceDB   output.Output
 }

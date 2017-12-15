@@ -73,7 +73,6 @@ var commands = []command.Item{
 type Configure struct {
     l.Log
     level  Level
-//    adapter.ValueCodec
 
     codec      codec.Codec
     done       chan struct{}
@@ -117,7 +116,6 @@ func New(lg l.Log) module.Template {
 
     register.Subject(Name, new)
     register.Observer(Name, new)
-
     return new
 }
 
@@ -290,5 +288,5 @@ func (r *Configure) log(ll Level, f string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Worker, Name, commands, New)
+    register.Component(module.Worker, Name, commands, New)
 }

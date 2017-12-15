@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"os"
+ 	"os"
 	"path/filepath"
 	"fmt"
 
@@ -10,6 +10,12 @@ import (
     "github.com/rookie-xy/hubble/log"
   . "github.com/rookie-xy/hubble/log/level"
 )
+
+func GetState(state file.State) file.State {
+	// refreshes the values in State with the values from the collector itself
+    state.ID = file.Id(state.Fileinfo)
+    return state
+}
 
 func GetFiles(v types.Value, log log.Factory) map[string]os.FileInfo {
     files := map[string]os.FileInfo{}
@@ -86,7 +92,7 @@ func GetPaths(files map[string]os.FileInfo) []string {
     return keys
 }
 
-func GetState(path string, fi os.FileInfo, log log.Factory) (file.State, error) {
+func CreateState(path string, fi os.FileInfo, log log.Factory) (file.State, error) {
     var err error
     var absolutePath string
 
@@ -104,3 +110,47 @@ func GetState(path string, fi os.FileInfo, log log.Factory) (file.State, error) 
 
     return state, nil
 }
+
+func Match(file string, paths types.Value, logf log.Factory) bool {
+    file = filepath.Clean(file)
+    for _, path := range paths.GetArray() {
+        path := filepath.Clean(path.(string))
+
+        match, err := filepath.Match(path, file)
+        if err != nil {
+            logf(ERROR, "Finder error matching glob: %s", err)
+            continue
+        }
+
+        if match {
+            return true
+        }
+    }
+
+    return false
+}
+
+func Excluded(file string) bool {
+    return false
+}
+
+func Open(path string) (*os.File, error) {
+    flag := os.O_RDONLY
+    perm := os.FileMode(0)
+    return os.OpenFile(path, flag, perm)
+}
+
+/*
+old := f.states.FindPrevious(new)
+        if old.IsEmpty() {
+            //err := f.startCollector(new, 0)
+            err := collector.Start(new, 0, f.input, f.decoder, f.jobs, f.states, f.log, f.conf)
+            if err != nil {
+                f.logf(ERROR,"Collector could not be started on new source: %s, Err: %s", new.Source, err)
+            }
+        } else {
+            //f.keepCollector(new, old)
+            collector.Keep(new, old, f.logf)
+        }
+*/
+

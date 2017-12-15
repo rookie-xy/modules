@@ -6,14 +6,14 @@ import (
 
     "github.com/rookie-xy/hubble/codec"
     "github.com/rookie-xy/hubble/input"
+    "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/hubble/models/file"
     "github.com/rookie-xy/modules/agents/file/message"
-    "github.com/rookie-xy/hubble/adapter"
 )
 
 type Scanner struct {
     *bufio.Scanner
-    id      uint64
+    id  uint64
 }
 
 func New(s input.Input) *Scanner {
@@ -21,7 +21,6 @@ func New(s input.Input) *Scanner {
         Scanner: bufio.NewScanner(s),
         id: 0,
     }
-
     return scanner
 }
 

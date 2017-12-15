@@ -25,6 +25,7 @@ import (
 	"sync"
   . "github.com/rookie-xy/hubble/log/level"
 	"github.com/rookie-xy/hubble/adapter"
+	"github.com/rookie-xy/modules/agents/file/utils"
 )
 
 type Collector struct {
@@ -47,7 +48,7 @@ type Collector struct {
 
     once      sync.Once
 
-    done     chan struct{}
+    done      chan struct{}
     client    bool
 }
 
@@ -78,7 +79,7 @@ func (c *Collector) Init(input input.Input, decoder codec.Decoder, state file.St
     	return err
 	}
 
-	c.conf    = conf
+    c.conf    = conf
 	c.state   = state
 	c.states  = states
 	c.source  = source
@@ -160,7 +161,6 @@ func (c *Collector) Run() error {
 			default:
                 c.log(ERROR,"Read line error: %s; File: %s", c.scanner.Err(), c.state.Source)
             }
-
             return nil
 	    }
 
@@ -168,8 +168,8 @@ func (c *Collector) Run() error {
             message.Content = bytes.Trim(message.Content, "\xef\xbb\xbf")
         }
 
-        state := c.getState()
-        state.Offset += int64(message.Bytes) + 1 // add one because \n
+        state := utils.GetState(c.state)
+        state.Offset += int64(message.Bytes) + 1 // add one because "\n"
         state.Lno = message.ID()
 
         event := &event.Event{
@@ -184,10 +184,9 @@ func (c *Collector) Run() error {
 			event.Body = message
 		}
 
-        if !c.Publish(event) {
+        if !c.publish(event) {
 		    return nil
 		}
-
 		c.state = state
     }
 }
@@ -199,35 +198,36 @@ func (c *Collector) Stop() {
     })
 }
 
-func (c *Collector) getState() file.State {
-    state := c.state
-	// refreshes the values in State with the values from the collector itself
-	state.ID = file.Id(c.state.Fileinfo)
-	return state
-}
-
 func (c *Collector) Update(fs file.State) {
     c.log(DEBUG,"collector update state: %s, offset: %v", c.state.Source, c.state.Offset)
     c.states.Update(fs)
 }
 
+func (c *Collector) publish(e *event.Event) bool {
+	c.states.Update(e.Footer)
+
+	if err := c.output.Sender(e); err != nil {
+    	c.log(ERROR, "send event failure: %s", err)
+        return false
+    }
+
+    c.log(DEBUG, "send event successful")
+
+    if !c.client {
+    	return true
+	}
+    return c.sinceDB.Sender(e) == nil
+}
+
 func (c *Collector) clean() {
-	// Mark collector as finished
 	c.state.Finished = true
 
 	c.log(DEBUG,"collector stopping collector for file: %s", c.state.Source)
 	defer c.log(DEBUG,"collector collector cleanup finished for file: %s\n", c.state.Source)
 
-	// Make sure file is closed as soon as collector exits
-	// If file was never opened, it can't be closed
 	if c.source != nil {
-
-		// close file handler
 		c.source.Close()
         c.log(DEBUG,"collector Closing file: %s\n", c.state.Source)
-
-		// On completion, push offset so we can continue where we left off if we relaunch on the same file
-		// Only send offset if file object was created successfully
 		c.Update(c.state)
 	} else {
 		c.log(DEBUG,"Stopping collector, NOT closing file as file info not available: %s\n",

@@ -2,8 +2,6 @@ package finder
 
 import (
     "fmt"
-    "path/filepath"
-
 
     "github.com/rookie-xy/hubble/job"
     "github.com/rookie-xy/hubble/log"
@@ -13,7 +11,7 @@ import (
     "github.com/rookie-xy/modules/agents/file/configure"
     "github.com/rookie-xy/hubble/input"
     "github.com/rookie-xy/hubble/models/file"
-	"github.com/rookie-xy/modules/agents/file/finder/utils"
+	"github.com/rookie-xy/modules/agents/file/utils"
 	"github.com/rookie-xy/hubble/codec"
 	"github.com/rookie-xy/hubble/prototype"
 	"sync"
@@ -65,12 +63,12 @@ func (f *Finder) Init(input input.Input, decoder codec.Decoder,
 
 func (f *Finder) load(states []file.State) error {
     for _, state := range states {
-        if f.match(state.Source) {
-        	state.TTL = -1
+        if utils.Match(state.Source, f.conf.Paths, f.logf) {
+            state.TTL = -1
 
-        	if !state.Finished {
-        	    return fmt.Errorf("can only start a finder when all related " +
-        	                             "states are finished: %+v", state)
+            if !state.Finished {
+                return fmt.Errorf("can only start a finder when all related "+
+					                     "states are finished: %+v", state)
             }
 
             if err := f.update(state); err != nil {
@@ -78,7 +76,6 @@ func (f *Finder) load(states []file.State) error {
             }
         }
     }
-
     return nil
 }
 
@@ -89,31 +86,6 @@ func (f *Finder) update(state file.State) error {
 
 	f.states.Update(state)
     return nil
-}
-
-func (f *Finder) match(file string) bool {
-    file = filepath.Clean(file)
-    paths := f.conf.Paths.GetArray()
-
-    for _, path := range paths {
-        path := filepath.Clean(path.(string))
-
-        match, err := filepath.Match(path, file)
-        if err != nil {
-            f.logf(ERROR, "Finder error matching glob: %s\n", err)
-            continue
-        }
-
-        if match {
-            return true
-        }
-    }
-
-    return false
-}
-
-func (f *Finder) Wait() {
-	f.jobs.WaitForCompletion()
 }
 
 func (f *Finder) Find() {
@@ -132,7 +104,7 @@ func (f *Finder) Find() {
         default:
         }
 
-        new, err := utils.GetState(path, info, f.logf)
+        new, err := utils.CreateState(path, info, f.logf)
         if err != nil {
             f.logf(ERROR,"Skipping source %s due to error %s", path, err)
             continue
@@ -175,13 +147,7 @@ func (f *Finder) keepCollector(new, old file.State) {
  	f.logf(DEBUG,"Finder Update existing file for collecting: %s, offset: %v, finish:%v, newFileSize:%d\n",
  		            new.Source, old.Offset, old.Finished, new.Fileinfo.Size())
 
-	// No collector is running for the file, start a new collector
-	// It is important here that only the size is checked and not modification time, as modification time could be incorrect on windows
-	// https://blogs.technet.microsoft.com/asiasupp/2010/12/14/file-date-modified-property-are-not-updating-while-modifying-a-file-without-closing-it/
 	if old.Finished && new.Fileinfo.Size() > old.Offset {
-		// Resume harvesting of an old file we've stopped harvesting from
-		// This could also be an issue with force_close_older that a new collector is started after each scan but not needed?
-		// One problem with comparing modTime is that it is in seconds, and scans can happen more then once a second
 		f.logf(DEBUG,"Finder Resuming collecting of file: %s, offset: %d, new size: %d\n",
 			            new.Source, old.Offset, new.Fileinfo.Size())
 		err := f.startCollector(new, old.Offset)
@@ -192,7 +158,6 @@ func (f *Finder) keepCollector(new, old file.State) {
 		return
 	}
 
-	// File size was reduced -> truncated file
 	if old.Finished && new.Fileinfo.Size() < old.Offset {
 		f.logf(DEBUG,"Finder old file was truncated. Starting from the beginning: %s, offset: %d, new size: %d\n",
 			            new.Source, new.Fileinfo.Size())
@@ -205,10 +170,7 @@ func (f *Finder) keepCollector(new, old file.State) {
 		return
 	}
 
-	// Check if file was renamed
 	if old.Source != "" && old.Source != new.Source {
-		// This does not start a new collector as it is assume that the older collector is still running
-		// or no new lines were detected. It sends only an event status update to make sure the new name is persisted.
 		f.logf(DEBUG,"Finder file rename was detected: %s -> %s, Current offset: %v\n",
 			            old.Source, new.Source, old.Offset)
 
@@ -216,7 +178,6 @@ func (f *Finder) keepCollector(new, old file.State) {
 			f.logf(DEBUG,"Finder updating state for renamed file: %s -> %s, Current offset: %v\n",
 				            old.Source, new.Source, old.Offset)
 
-			// Update state because of file rotation
 			old.Source = new.Source
 			err := f.update(old)
 			if err != nil {
@@ -229,11 +190,14 @@ func (f *Finder) keepCollector(new, old file.State) {
 	}
 
 	if !old.Finished {
-		// Nothing to do. Collector is still running and file was not renamed
 		f.logf(DEBUG,"Finder collector for file is still running: %s\n", new.Source)
 	} else {
 		f.logf(DEBUG,"Finder file didn't change: %s\n", new.Source)
     }
+}
+
+func (f *Finder) Wait() {
+	f.jobs.WaitForCompletion()
 }
 
 func (f *Finder) Stop() {
@@ -242,8 +206,4 @@ func (f *Finder) Stop() {
 	if length := f.jobs.Len(); length > 0 {
 		f.jobs.Stop()
 	}
-}
-
-func (f *Finder) isExcluded(file string) bool {
-    return false
 }

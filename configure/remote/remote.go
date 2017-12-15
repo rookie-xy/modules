@@ -67,5 +67,5 @@ func (r *remote) Exit(code int) {
 }
 
 func init() {
-    register.Module(module.Configure, Name, commands, New)
+    register.Component(module.Configure, Name, commands, New)
 }

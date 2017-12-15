@@ -15,6 +15,10 @@ import (
 
     "github.com/rookie-xy/modules/proxy/forward/worker"
     "github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/types/value"
+    "github.com/rookie-xy/hubble/proxy"
+    "github.com/rookie-xy/hubble/output"
+    "fmt"
 )
 
 const Name  = "forward"
@@ -27,16 +31,16 @@ type forward struct {
     jobs      *job.Jobs
     done       chan struct{}
 
-    client    *command.Command
-    sinceDB   *command.Command
+    client     proxy.Forward
+    sinceDB    output.Output
 
     name       string
 }
 
 var (
     client    = command.New( plugin.Flag, "client.kafka",    nil, "This option use to group" )
-    sinceDB   = command.New( plugin.Flag, "client.sinceDB",    nil, "This option use to group" )
-    Pipeline  = command.New( plugin.Flag, "pipeline.stream",  nil, "This option use to group" )
+    sinceDB   = command.New( plugin.Flag, "client.sinceDB",  nil, "This option use to group" )
+    Pipeline  = command.New( plugin.Flag, "pipeline.stream", nil, "This option use to group" )
 )
 
 var commands = []command.Item{
@@ -75,32 +79,39 @@ func New(log log.Log) module.Template {
 func (f *forward) Init() {
     f.log(DEBUG, Name +"; init component for proxy")
 
-    key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, f.Log, Pipeline.GetValue())
-    if err != nil {
-        f.log(ERROR, Name +"; pipeline error ", err)
-        return
-    } else {
-        f.pipeline = pipeline
+    if key, ok := plugin.Name(Pipeline.GetKey()); ok {
+        pipeline, err := factory.Pipeline(key, f.Log, Pipeline.GetValue())
+        if err != nil {
+            f.log(ERROR, Name + "; pipeline error ", err)
+            return
+        } else {
+            f.pipeline = pipeline
+        }
     }
 
     name := client.GetKey()
     name = name[strings.LastIndex(name, ".") + 1:]
 
-    register.Queue(name, pipeline)
-
+    register.Queue(name, f.pipeline)
     f.name = name
-    f.client = command.New(
-        client.GetFlag(),
-        client.GetKey(),
-       nil,
-       "")
 
-    f.sinceDB = command.New(
-        sinceDB.GetFlag(),
-        sinceDB.GetKey(),
-       nil,
-       "")
+    if key, ok := plugin.Name(client.GetKey()); ok {
+        var err error
+        f.client, err = factory.Client(key, f.Log, client.GetValue())
+        if err != nil {
+        	f.log(ERROR, Name + "; client error ", err)
+            return
+        }
+    }
+
+    if key, ok := plugin.Domain(output.Name, "sinceDB"); ok {
+        var err error
+        f.sinceDB, err = factory.Output(key, f.Log, value.New(sinceDB.GetKey()))
+        if err != nil {
+         	f.log(ERROR, Name + "; sinceDB error: %s", err)
+            return
+        }
+    }
 }
 
 func (f *forward) Main() {
@@ -125,7 +136,7 @@ func (f *forward) Main() {
         }
 
         worker := worker.New(f.Log)
-        if err := worker.Init(f.client, f.sinceDB, event, f.log); err != nil {
+        if err := worker.Init(f.client, f.sinceDB, event); err != nil {
             f.log(WARN, Name + "; %s", err.Error())
             return
         }
@@ -154,5 +165,5 @@ func (f *forward) log(l Level, fmt string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Proxys, Name, commands, New)
+    register.Component(module.Proxys, Name, commands, New)
 }

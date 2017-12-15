@@ -170,5 +170,5 @@ func (r *Agent) log(l Level, f string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Worker, Name, commands, New)
+    register.Component(module.Worker, Name, commands, New)
 }

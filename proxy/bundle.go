@@ -14,8 +14,9 @@ import (
     "github.com/rookie-xy/hubble/configure"
     "github.com/rookie-xy/hubble/types/value"
 
-  _ "github.com/rookie-xy/modules/proxy/forward"
   _ "github.com/rookie-xy/modules/proxy/sinceDB"
+  _ "github.com/rookie-xy/modules/proxy/forward"
+
     "github.com/rookie-xy/hubble/errors"
 )
 
@@ -194,5 +195,5 @@ func (r *Proxy) log(l Level, f string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Worker, Name, commands, New)
+    register.Component(module.Worker, Name, commands, New)
 }

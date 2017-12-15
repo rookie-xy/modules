@@ -11,6 +11,7 @@ import (
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/modules/proxy/sinceDB/utils"
   . "github.com/rookie-xy/hubble/log/level"
+    "fmt"
 )
 
 const Name  = "sinceDB"
@@ -68,25 +69,27 @@ func New(log log.Log) module.Template {
 }
 
 func (s *sincedb) Init() {
-    key := Pipeline.GetFlag() + "." + Pipeline.GetKey()
-    pipeline, err := factory.Pipeline(key, s.Log, Pipeline.GetValue())
-    if err != nil {
-        s.log(ERROR, Name +"; pipeline error %s", err)
-        return
-    } else {
-        s.pipeline = pipeline
+    if key, ok := plugin.Name(Pipeline.GetKey()); ok {
+        pipeline, err := factory.Pipeline(key, s.Log, Pipeline.GetValue())
+        if err != nil {
+            s.log(ERROR, Name+"; pipeline error %s", err)
+            return
+        } else {
+            s.pipeline = pipeline
+        }
     }
     s.name = client.GetKey()
 
-    register.Queue(client.GetKey(), pipeline)
+    register.Queue(client.GetKey(), s.pipeline)
 
-    key = client.GetFlag() + "." + client.GetKey()
-    if client, err := factory.Client(key, s.Log, client.GetValue()); err != nil {
-        s.log(ERROR, Name +"; client error ", err)
-        return
-    } else {
-        s.client = adapter.FileSinceDB(client)
-        register.Forword(key, client)
+    if key, ok := plugin.Name(client.GetKey()); ok {
+        if client, err := factory.Client(key, s.Log, client.GetValue()); err != nil {
+            s.log(ERROR, Name + "; client error ", err)
+            return
+        } else {
+            s.client = adapter.FileSinceDB(client)
+            register.Forword(key, client)
+        }
     }
 
     if value := batch.GetValue(); value != nil {
@@ -142,5 +145,5 @@ func (s *sincedb) log(l Level, fmt string, args ...interface{}) {
 }
 
 func init() {
-    register.Module(module.Proxys, Name, commands, New)
+    register.Component(module.Proxys, Name, commands, New)
 }
