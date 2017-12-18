@@ -18,7 +18,6 @@ import (
     "github.com/rookie-xy/hubble/types/value"
     "github.com/rookie-xy/hubble/proxy"
     "github.com/rookie-xy/hubble/output"
-    "fmt"
 )
 
 const Name  = "forward"

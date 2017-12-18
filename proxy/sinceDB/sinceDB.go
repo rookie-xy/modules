@@ -11,7 +11,6 @@ import (
     "github.com/rookie-xy/hubble/adapter"
     "github.com/rookie-xy/modules/proxy/sinceDB/utils"
   . "github.com/rookie-xy/hubble/log/level"
-    "fmt"
 )
 
 const Name  = "sinceDB"

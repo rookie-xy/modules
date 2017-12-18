@@ -177,20 +177,20 @@ func (f *file) Init() {
     if key, ok := plugin.Name(output.GetKey()); ok {
         configure.Output, err = factory.Output(key, f.Log, output.GetValue())
         if err != nil {
-            f.log(ERROR, Name+"; output: %s", err)
+            f.log(ERROR, Name + "; output: %s", err)
             return
         }
     }
 
     if value := client.GetValue(); value != nil {
         if key, ok := plugin.Name(client.GetKey()); ok {
-            configure.Client, err = factory.Client(key, f.Log, client.GetValue())
+            configure.Output, err = factory.Client(key, f.Log, client.GetValue())
             if err != nil {
                 f.log(ERROR, Name+"; client: %s", err)
                 return
             }
         }
-        configure.client = false
+        configure.Client = false
     }
 
     if value := frequency.GetValue(); value != nil {

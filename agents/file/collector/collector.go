@@ -11,21 +11,19 @@ import (
 	"github.com/rookie-xy/hubble/types"
 	"github.com/rookie-xy/hubble/input"
   . "github.com/rookie-xy/hubble/source"
-	"github.com/rookie-xy/hubble/output"
 	"github.com/rookie-xy/hubble/models/file"
 
 	"github.com/rookie-xy/modules/agents/file/scanner"
 	"github.com/rookie-xy/modules/agents/file/event"
     "github.com/rookie-xy/modules/agents/file/configure"
 	"github.com/rookie-xy/hubble/proxy"
-	"github.com/rookie-xy/hubble/factory"
 	"github.com/rookie-xy/modules/agents/file/source"
-	"github.com/rookie-xy/hubble/types/value"
 	"github.com/rookie-xy/hubble/codec"
 	"sync"
   . "github.com/rookie-xy/hubble/log/level"
 	"github.com/rookie-xy/hubble/adapter"
 	"github.com/rookie-xy/modules/agents/file/utils"
+	"github.com/rookie-xy/hubble/prototype"
 )
 
 type Collector struct {
@@ -85,7 +83,10 @@ func (c *Collector) Init(input input.Input, decoder codec.Decoder, state file.St
 	c.source  = source
 	c.input   = input
     c.scanner = scanner
+    c.output  = prototype.Output(conf.Output)
+    c.sinceDB = prototype.Output(conf.SinceDB)
 
+    /*
     if c.conf.Output != nil {
 		pluginName := c.conf.Output.GetFlag() + "." + c.conf.Output.GetKey()
 		c.output, err = factory.Output(pluginName, c.Log, c.conf.Output.GetValue())
@@ -108,6 +109,7 @@ func (c *Collector) Init(input input.Input, decoder codec.Decoder, state file.St
             return err
         }
 	}
+    */
 
     return nil
 }
