@@ -3,6 +3,7 @@ package collector
 import (
     "io"
     "bytes"
+    "sync"
 
     "github.com/satori/go.uuid"
 
@@ -12,18 +13,16 @@ import (
 	"github.com/rookie-xy/hubble/input"
   . "github.com/rookie-xy/hubble/source"
 	"github.com/rookie-xy/hubble/models/file"
+  . "github.com/rookie-xy/hubble/log/level"
+	"github.com/rookie-xy/hubble/adapter"
+    "github.com/rookie-xy/hubble/proxy"
+   	"github.com/rookie-xy/hubble/codec"
 
 	"github.com/rookie-xy/modules/agents/file/scanner"
 	"github.com/rookie-xy/modules/agents/file/event"
     "github.com/rookie-xy/modules/agents/file/configure"
-	"github.com/rookie-xy/hubble/proxy"
 	"github.com/rookie-xy/modules/agents/file/source"
-	"github.com/rookie-xy/hubble/codec"
-	"sync"
-  . "github.com/rookie-xy/hubble/log/level"
-	"github.com/rookie-xy/hubble/adapter"
 	"github.com/rookie-xy/modules/agents/file/utils"
-	"github.com/rookie-xy/hubble/prototype"
 )
 
 type Collector struct {
@@ -83,33 +82,19 @@ func (c *Collector) Init(input input.Input, decoder codec.Decoder, state file.St
 	c.source  = source
 	c.input   = input
     c.scanner = scanner
-    c.output  = prototype.Output(conf.Output)
-    c.sinceDB = prototype.Output(conf.SinceDB)
+    c.output  = conf.Client
 
-    /*
-    if c.conf.Output != nil {
-		pluginName := c.conf.Output.GetFlag() + "." + c.conf.Output.GetKey()
-		c.output, err = factory.Output(pluginName, c.Log, c.conf.Output.GetValue())
-		if err != nil {
+    if conf.Output {
+    	c.client = !conf.Output
+
+    	var err error
+		if c.output, err = adapter.ToOutput(conf.Client); err != nil {
 			return err
 		}
-
-		c.client = false
-
-	} else {
-	    key := c.conf.Client.GetFlag() + "." + c.conf.Client.GetKey()
-        c.output, err = factory.Client(key, c.Log, c.conf.Client.GetValue())
-        if err != nil {
-            return err
-        }
-
-        key = c.conf.SinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
-        c.sinceDB, err = factory.Output(key, c.Log, value.New(c.conf.SinceDB.GetKey()))
-        if err != nil {
-            return err
-        }
 	}
-    */
+    if c.sinceDB, err = conf.SinceDB.New(); err != nil {
+    	return err
+	}
 
     return nil
 }
@@ -240,3 +225,30 @@ func (c *Collector) clean() {
 func (c *Collector) log(l Level, fmt string, args ...interface{}) {
     log.Print(c.Log, c.level, l, fmt, args...)
 }
+
+
+    /*
+    if c.conf.Output != nil {
+		pluginName := c.conf.Output.GetFlag() + "." + c.conf.Output.GetKey()
+		c.output, err = factory.Output(pluginName, c.Log, c.conf.Output.GetValue())
+		if err != nil {
+			return err
+		}
+
+		c.client = false
+
+	} else {
+	    key := c.conf.Client.GetFlag() + "." + c.conf.Client.GetKey()
+        c.output, err = factory.Client(key, c.Log, c.conf.Client.GetValue())
+        if err != nil {
+            return err
+        }
+
+        key = c.conf.SinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
+        c.sinceDB, err = factory.Output(key, c.Log, value.New(c.conf.SinceDB.GetKey()))
+        if err != nil {
+            return err
+        }
+	}
+    */
+

@@ -21,7 +21,7 @@ type Worker struct {
 
     Q         pipeline.Queue
     client    proxy.Forward
-    sinceDB   output.Output
+    sinceDB   proxy.Forward
 
     level     Level
     log.Log
@@ -36,25 +36,14 @@ func New(log log.Log) *Worker {
 }
 
 func (w *Worker) Init(client proxy.Forward, sinceDB output.Output, event event.Event) error {
-	/*
-	w.name = pclient.GetKey()
-    key := pclient.GetFlag() + "." + pclient.GetKey()
-    client, err := factory.Client(key, w.Log, pclient.GetValue())
-    if err != nil {
-        return err
-    }
+    if sinceDB, err := sinceDB.New(); err != nil {
+    	return err
+	} else {
+		w.sinceDB = sinceDB
+	}
 
-    key = psinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
-    sinceDB, err := factory.Output(key, w.Log, value.New(psinceDB.GetKey()))
-    if err != nil {
-        return err
-    } else {
-        sinceDB.Sender(nil)
-    }
-	*/
-	w.client = prototype.Forward(client)
-    w.sinceDB = prototype.Output(sinceDB)
-	w.Q = adapter.ToPipelineEvent(event)
+    w.client  = prototype.Forward(client)
+	w.Q       = adapter.ToPipelineEvent(event)
 	return nil
 }
 
@@ -70,7 +59,7 @@ func (w *Worker) Run() error {
         w.client.Close()
 	}()
 
-	handle := func(Q pipeline.Queue, client proxy.Forward, sinceDB output.Output) error {
+	handle := func(Q pipeline.Queue, client, sinceDB proxy.Forward) error {
 
 		keep := true
 		for {
@@ -119,3 +108,20 @@ func (w *Worker) Stop() {
 func (w *Worker) log(l Level, fmt string, args ...interface{}) {
     log.Print(w.Log, w.level, l, fmt, args...)
 }
+
+	/*
+	w.name = pclient.GetKey()
+    key := pclient.GetFlag() + "." + pclient.GetKey()
+    client, err := factory.Client(key, w.Log, pclient.GetValue())
+    if err != nil {
+        return err
+    }
+
+    key = psinceDB.GetFlag() + "." + output.Name + "." + "sinceDB"
+    sinceDB, err := factory.Output(key, w.Log, value.New(psinceDB.GetKey()))
+    if err != nil {
+        return err
+    } else {
+        sinceDB.Sender(nil)
+    }
+	*/

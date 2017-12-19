@@ -165,6 +165,7 @@ func (f *file) Init() {
     	Type:     Type.GetString(),
         Paths:    paths.GetValue(),
         Excludes: excludes.GetValue(),
+        Output:   true,
     }
 
     if limit, err := limit.GetUint64(); err != nil {
@@ -175,7 +176,7 @@ func (f *file) Init() {
     }
 
     if key, ok := plugin.Name(output.GetKey()); ok {
-        configure.Output, err = factory.Output(key, f.Log, output.GetValue())
+        configure.Client, err = factory.Output(key, f.Log, output.GetValue())
         if err != nil {
             f.log(ERROR, Name + "; output: %s", err)
             return
@@ -184,13 +185,13 @@ func (f *file) Init() {
 
     if value := client.GetValue(); value != nil {
         if key, ok := plugin.Name(client.GetKey()); ok {
-            configure.Output, err = factory.Client(key, f.Log, client.GetValue())
+            configure.Client, err = factory.Client(key, f.Log, client.GetValue())
             if err != nil {
                 f.log(ERROR, Name+"; client: %s", err)
                 return
             }
         }
-        configure.Client = false
+        configure.Output = false
     }
 
     if value := frequency.GetValue(); value != nil {
@@ -208,6 +209,8 @@ func (f *file) Init() {
         f.log(ERROR, Name +"; sinceDB: %s", err)
         return
     }
+
+    configure.SinceDB = sinceDB
 
     finder := finder.New(f.Log)
     if err := finder.Init(input, decoder, &configure, adapter.FileSinceDB(sinceDB), f.log); err != nil {
